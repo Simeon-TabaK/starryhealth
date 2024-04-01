@@ -35,15 +35,17 @@ const Hero = ({
         >
           <div className=" flex flex-col justify-center items-start row-start-2 sm:row-start-1">
             <h1 className="text-3xl lg:text-4xl xl:text-4xl font-medium text-black-600 leading-normal">
-              Digitalisez vos activités avec <strong>StarryBoxx</strong> 
+              Digitalisez vos activités avec <strong>StarryBoxx</strong>
             </h1>
             <p className="text-black-500 mt-4 mb-6">
               Offrez vous la chance de numeriser vos activités pour ainsi
-              accroitre votre notorieté sur le marché... <br/> Des services de
+              accroitre votre notorieté sur le marché... <br /> Des services de
               qualités à votre disposition dans une seule boite pour
               briller sur le reseaux.
             </p>
-            <ButtonPrimary>Commencez maintenant</ButtonPrimary>
+            <a href="https://wa.me/+243850117287">
+              <ButtonPrimary>Commencez maintenant</ButtonPrimary>
+            </a>
           </div>
           <div className="flex w-full">
             <motion.div className="h-full w-full" variants={scrollAnimation}>
