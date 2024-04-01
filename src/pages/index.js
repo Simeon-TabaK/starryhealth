@@ -7,7 +7,7 @@ import SeoHead from "../components/SeoHead";
 export default function Home() {
   return (
     <>
-      <SeoHead title="Starry Box" />
+      <SeoHead title="Starry Boxx" />
       <Layout>
         <Hero />
         <Feature />
