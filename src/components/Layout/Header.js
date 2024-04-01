@@ -112,7 +112,7 @@ const Header = () => {
             >
               <ChevronUpIcon />
             </div>
-            <div style={{ height: "fit-content;" }}>
+            <div>
               <div>
                 {links.map((item) => (
                   <a
