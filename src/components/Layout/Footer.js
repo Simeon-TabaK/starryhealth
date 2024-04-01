@@ -42,7 +42,7 @@ const Footer = () => {
             </Link>
           </div>
           <p className="text-gray-400">
-            ©{new Date().getFullYear()} - StarryBox
+            ©{new Date().getFullYear()} - StarryBoxx
           </p>
         </div>
         <div className=" row-span-2 sm:col-span-2 sm:col-start-7 sm:col-end-9 flex flex-col">
@@ -74,7 +74,7 @@ const Footer = () => {
           </p>
           <ul className="text-black-500">
             <li className="my-2 hover:text-orange-500 cursor-pointer transition-all">
-              StarryBox ?{" "}
+              StarryBoxx ?{" "}
             </li>
             <li className="my-2 hover:text-orange-500 cursor-pointer transition-all">
               Starry Digital{" "}

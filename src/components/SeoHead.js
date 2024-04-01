@@ -4,10 +4,10 @@ import { useRouter } from "next/router";
 
 // Default value for some meta data
 const defaultMeta = {
-  title: 'Starry Box',
+  title: 'Starry Boxx',
   siteName: 'SB',
   description:
-    'Starry Box, Tout en un',
+    'StarryBoxx, Tout en un',
   // change base url of your web (without '/' at the end)
   url: 'https://starry-box.vercel.app',
   type: 'website',
