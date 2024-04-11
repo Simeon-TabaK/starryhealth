@@ -128,7 +128,7 @@ const Pricing = () => {
                   />
                 </div>
                 <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">
-                  StarryFuntel{" "}
+                  StarryFunnel{" "}
                 </p>
                 <p>
                   Un tunnel professionnel de generation de prospects,
