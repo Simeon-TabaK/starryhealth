@@ -7,16 +7,16 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <div className="bg-orange-100 pt-44 pb-24">
-      <div className="max-w-screen-xl w-full mx-auto px-6 sm:px-8 lg:px-16 grid grid-rows-6 sm:grid-rows-1 grid-flow-row sm:grid-flow-col grid-cols-3 sm:grid-cols-12 gap-4">
+    <div className="bg-blue-300 pt-44">
+      <div className="w-full mx-auto px-6 sm:px-8 lg:px-16 grid grid-rows-6 sm:grid-rows-1 grid-flow-row sm:grid-flow-col grid-cols-3 sm:grid-cols-12 ">
         <div className="row-span-2 sm:col-span-4 col-start-1 col-end-4 sm:col-end-5 flex flex-col items-start ">
           <Image
             src="/assets/logoStarry.png"
             width={80}
             height={60}
-            alt="Free Plan"
+            alt=""
           />
-          <p className="mb-4">
+          <p className="mb-4 text-white-300">
             <strong className="font-medium">Starry Digital</strong> développe
             des solutions numériques de qualité pour la croissance de votre
             entreprise dans le but de vous assurer une sécurité de travail .
@@ -46,8 +46,8 @@ const Footer = () => {
           </p>
         </div>
         <div className=" row-span-2 sm:col-span-2 sm:col-start-7 sm:col-end-9 flex flex-col">
-          <p className="text-black-600 mb-4 font-medium text-lg">Produit</p>
-          <ul className="text-black-500 ">
+          <p className="text-yellow-100 mb-4 font-medium text-lg">Produit</p>
+          <ul className="text-white-300 ">
             <li className="my-2 hover:text-orange-500 cursor-pointer transition-all">
               Télécharger{" "}
             </li>
@@ -69,10 +69,10 @@ const Footer = () => {
           </ul>
         </div>
         <div className="row-span-2 sm:col-span-2 sm:col-start-9 sm:col-end-11 flex flex-col">
-          <p className="text-black-600 mb-4 font-medium text-lg">
+          <p className="text-yellow-100 mb-4 font-medium text-lg">
             <span className="uppercase">à</span> propos
           </p>
-          <ul className="text-black-500">
+          <ul className="text-white-300">
             <li className="my-2 hover:text-orange-500 cursor-pointer transition-all">
               StarryBoxx ?{" "}
             </li>
@@ -88,16 +88,16 @@ const Footer = () => {
           </ul>
         </div>
         <div className="row-span-2 sm:col-span-2 sm:col-start-11 sm:col-end-13 flex flex-col">
-          <p className="text-black-600 mb-4 font-medium text-lg">Contacts</p>
-          <ul className="text-black-500">
+          <p className="text-yellow-100 mb-4 font-medium text-lg">Contacts</p>
+          <ul className="text-white-300">
             <li className="my-2 hover:text-orange-500 cursor-pointer transition-all">
-              +243 999 999 999
+              <a href="tel:+243819954239">+243 819 954 239</a>
             </li>
             <li className="my-2 hover:text-orange-500 cursor-pointer transition-all">
-              adresse-mail
+              <a href="mailto:starrydigital.sd@gmail.com">starrydigital.sd@gmail.com</a>
             </li>
             <li className="my-2 hover:text-orange-500 cursor-pointer transition-all">
-              Web
+              <a href="https://www.starrybox.vercel.app">starrybox.vercel.app</a>
             </li>
           </ul>
         </div>

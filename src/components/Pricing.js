@@ -66,7 +66,7 @@ const Pricing = () => {
                   {/* <p className="text-2xl text-black-600 text-center mb-4 ">
                     Free
                   </p> */}
-                  <a href="https://wa.me/+243850117287">
+                  <a href="https://wa.me/+243819954239">
                     <ButtonPrimary>Sélectionnez</ButtonPrimary>
                   </a>
                 </div>
@@ -102,7 +102,7 @@ const Pricing = () => {
                   vous reste qu'à preparer votre livreur pour son boulot🤷🏻‍♂
                 </p>
                 <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                  <a href="https://wa.me/+243850117287">
+                  <a href="https://wa.me/+243819954239">
                     <ButtonPrimary>Sélectionnez</ButtonPrimary>
                   </a>
                 </div>
@@ -137,7 +137,7 @@ const Pricing = () => {
                   prospection et vous generer des leads
                 </p>
                 <div className="flex flex-col w-full justify-center mb-8 flex-none mt-12">
-                  <a href="https://wa.me/+243850117287">
+                  <a href="https://wa.me/+243819954239">
                     <ButtonPrimary>Sélectionnez</ButtonPrimary>
                   </a>
                 </div>
@@ -215,7 +215,7 @@ const Pricing = () => {
                   </h5>
                   <p>Abonnez-vous avec nous et trouvez le plaisir.</p>
                 </div>
-                <a href="https://wa.me/+243850117287">
+                <a href="https://wa.me/+243819954239">
                   <ButtonPrimary>Commencez maintenant</ButtonPrimary>
                 </a>
               </div>

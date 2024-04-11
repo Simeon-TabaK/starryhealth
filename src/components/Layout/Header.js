@@ -223,9 +223,9 @@ const Header = () => {
               Testimonial
             </LinkScroll> */}
           </ul>
-          <div className="col-start-10 col-end-12 font-medium flex justify-end items-center">
+          {/* <div className="col-start-10 col-end-12 font-medium flex justify-end items-center">
             <ButtonOutline>S'enregistrer</ButtonOutline>
-          </div>
+          </div> */}
         </nav>
       </header>
     </>

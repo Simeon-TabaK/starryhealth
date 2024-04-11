@@ -23,12 +23,17 @@ module.exports = {
       translucide: "#F5385555",
       transwhite: "#ffffffaa",
       blue: {
-        200:"#0d4566",
-        300:"#002255",
+        200:"#8ca7df",
+        300:"#02173c",
+        400:"#002255",
+        500:"#002255",
       },
       black: {
         500: "#4F5665",
         600: "#0B132A",
+      },
+      yellow: {
+        100: "#f4ffb2",
       },
       orange: {
         100: "#FFECEC",
