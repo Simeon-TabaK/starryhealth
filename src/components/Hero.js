@@ -44,7 +44,7 @@ const Hero = ({
               briller sur le reseaux.
             </p>
             <div className="flex flex-row justify-center sm:items-end row-start-2 sm:row-start-1">
-              <a href="https://wa.me/+243819954239">
+              <a href="https://wa.me/+243893926051">
                 <ButtonPrimary className="">Commencez maintenant</ButtonPrimary>
               </a>
             </div>
