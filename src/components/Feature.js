@@ -25,7 +25,7 @@ const Feature = () => {
             <Image
               className="rounded-3xl"
               src="/assets/illustration.jpg"
-              alt="VPN Illustrasi"
+              alt=""
               layout="responsive"
               quality={100}
               height={414}
