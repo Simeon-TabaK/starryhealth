@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <div className="bg-blue-300 pt-44">
+    <div className="bg-blue-300 pt-32">
       <div className="w-full mx-auto px-6 sm:px-8 lg:px-16 grid grid-rows-6 sm:grid-rows-1 grid-flow-row sm:grid-flow-col grid-cols-3 sm:grid-cols-12 ">
         <div className="row-span-2 sm:col-span-4 col-start-1 col-end-4 sm:col-end-5 flex flex-col items-start ">
           <Image
@@ -19,7 +19,7 @@ const Footer = () => {
           <p className="mb-4 text-white-300">
             <strong className="font-medium">Starry Digital</strong> développe
             des solutions numériques de qualité pour la croissance de votre
-            entreprise dans le but de vous assurer une sécurité de travail .
+            entreprise dans le but de vous assurer une sécurité de travail.
           </p>
           <div className="flex w-full mt-2 mb-8 -mx-2">
             <Link
