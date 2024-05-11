@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
-  "name": "StarryBoxx",
+  "name": "StarryHealth",
   "short_name": "Starry",
   "start_url": "/",
   "display": "standalone",
