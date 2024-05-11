@@ -1,143 +1,57 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 // Import react scroll
-import { Link as LinkScroll } from "react-scroll";
+// import { Link } from "react-scroll";
 import ButtonOutline from "../misc/ButtonOutline.";
 import Image from "next/image";
-import {
-  ArrowUpIcon,
-  ChevronDownIcon,
-  ChevronUpDownIcon,
-  ChevronUpIcon,
-  PhoneIcon,
-  PlayCircleIcon,
-} from "@heroicons/react/24/solid";
-import {
-  ArrowPathIcon,
-  HomeIcon,
-  CursorArrowRaysIcon,
-  FingerPrintIcon,
-  SquaresPlusIcon,
-} from "@heroicons/react/24/outline";
-
-const links = [
-  {
-    name: "Analytics",
-    description: "Get a better understanding of your traffic",
-    href: "#home",
-    icon: HomeIcon,
-  },
-  {
-    name: "Engagement",
-    description: "Speak directly to your customers",
-    href: "#home",
-    icon: CursorArrowRaysIcon,
-  },
-  {
-    name: "Security",
-    description: "Your customers' data will be safe and secure",
-    href: "#feature",
-    icon: FingerPrintIcon,
-  },
-  {
-    name: "Integrations",
-    description: "Connect with third-party tools",
-    href: "#pricing",
-    icon: SquaresPlusIcon,
-  },
-  {
-    name: "Automations",
-    description: "Build strategic funnels that will convert",
-    href: "#testimoni",
-    icon: ArrowPathIcon,
-  },
-];
-const callsToAction = [
-  { name: "Watch demo", href: "#", icon: PlayCircleIcon },
-  { name: "Contact sales", href: "#", icon: PhoneIcon },
-];
+import { Router, useRouter } from "next/router";
+import { usePathname } from "next/navigation";
+// import LogoVPN from "../../../public/assets/Logo.svg";
 
 const Header = () => {
-  const [activeLink, setActiveLink] = useState(null);
+  // const [activeLink, setActiveLink] = useState(null);
   const [scrollActive, setScrollActive] = useState(false);
 
-  const [displayUp, setDisplayUp] = useState("block");
-  const [displayDown, setDisplayDown] = useState("none");
-
-  const [count, setCount] = useState(0);
-
-  function handleClick() {
-    setCount(count + 1);
-  }
-
-  function handleClickDisplay() {
-    setDisplayDown("block");
-    setDisplayUp("none");
-  }
-
-  function handleClickUndisplay() {
-    setDisplayDown("none");
-    setDisplayUp("block");
-  }
-
+  const activeLink = usePathname();
+  
   useEffect(() => {
     window.addEventListener("scroll", () => {
       setScrollActive(window.scrollY > 20);
     });
   }, []);
+  const links = [
+    {
+      name: "Accueil",
+      description: "Page d'accueil",
+      href: "/",
+    },
+    {
+      name: "Produit",
+      description: "Page de Produit",
+      href: "/product",
+    },
+    {
+      name: "Témoignage",
+      description: "Page de témoignage",
+      href: "/testmony",
+    },
+    {
+      name: "A propos",
+      description: "Page d'a propos",
+      href: "/about",
+    },
+    {
+      name: "Contact",
+      description: "Page de contact",
+      href: "/contact",
+    },
+  ];
   return (
     <>
-      <div className="flex fixed top-0 h-full w-50  z-50 bg-transparent transition-all flex-row justify-center ">
-        <nav className="content-center">
-          <div
-            // onClick={setDisplayDown("block")}
-            style={{ display: displayUp }}
-            className="bg-translucide py-1 cursor-pointer duration-300 text-white  border border-transparent hover:border-main-color rounded-full  transition-300"
-          >
-            <button onMouseEnter={handleClickDisplay}>
-              <ChevronUpIcon
-                className="h-10 w-10 text-gray-600 text-blue-500 group-hover:text-indigo-600"
-                aria-hidden="true"
-                fill="solid"
-              />
-            </button>
-          </div>
-          <div
-            style={{ display: displayDown }}
-            className="bg-translucide py-1 min-h-[245px] duration-300 text-white  border border-transparent hover:border-main-color rounded-full  transition-300"
-          >
-            <div
-              onClick={handleClickUndisplay}
-              className="cursor-pointer border-b-2 "
-            >
-              <ChevronUpIcon />
-            </div>
-            <div>
-              <div>
-                {links.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="group relative flex gap-x-6 rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon
-                        className="h-6 w-6 text-gray-600 text-blue-500 group-hover:text-indigo-600"
-                        aria-hidden="true"
-                        // fill="solid"
-                      />
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        </nav>
-      </div>
       <header
         className={
-          "fixed top-0 w-full  z-30 bg-transwhite transition-all " +
-          (scrollActive ? " shadow-sm pt-0 bg-trans" : " pt-4")
+          "fixed top-0 w-full  z-30 bg-white-500 transition-all " +
+          (scrollActive ? " shadow-md pt-0" : " pt-4")
         }
       >
         <nav className="max-w-screen-xl px-6 sm:px-8 lg:px-16 mx-auto grid grid-flow-col py-3 sm:py-4">
@@ -150,9 +64,60 @@ const Header = () => {
             />
           </div>
           <ul className="hidden lg:flex col-start-4 col-end-8 text-black-500  items-center">
-            {/* <LinkScroll
+            {links.map((item) => (
+              <Link
+                activeClass="active"
+                href={item.href}
+                spy={true}
+                smooth={true}
+                duration={1000}
+                className={
+                  "px-4 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
+                  (activeLink === item.href
+                    ? " text-orange-500 animation-active "
+                    : " text-black-500 hover:text-orange-500 a")
+                }
+              >
+                {item.name}
+              </Link>
+            ))}
+          </ul>
+          <div className="col-start-10 col-end-12 font-medium flex justify-end items-center">
+            <Link
+              href="/"
+              className="text-black-600 mx-2 sm:mx-4 capitalize tracking-wide hover:text-orange-500 transition-all"
+            >
+                Sign In
+            </Link>
+            <ButtonOutline>Sign Up</ButtonOutline>
+          </div>
+        </nav>
+      </header>
+      {/* Mobile Navigation */}
+
+      <nav className="fixed lg:hidden bottom-0 left-0 right-0 z-20 px-4 sm:px-8 shadow-t ">
+        <div className="bg-white-500 sm:px-3">
+          <ul className="flex w-full justify-between items-center text-black-500">
+            {links.map((item) => (
+              <Link
+                activeClass="active"
+                href={item.href}
+                spy={true}
+                smooth={true}
+                duration={1000}
+                className={
+                  "mx-1 sm:mx-2 px-3 sm:px-4 py-2 flex flex-col items-center text-xs border-t-2 transition-all" +
+                  (activeLink === item.href
+                    ? "  border-orange-500 text-orange-500"
+                    : " border-transparent")
+                }
+              >
+                {item.name}
+              </Link>
+            ))}
+            {/* <Link
               activeClass="active"
-              href="about"
+              to="about"
               spy={true}
               smooth={true}
               duration={1000}
@@ -160,74 +125,32 @@ const Header = () => {
                 setActiveLink("about");
               }}
               className={
-                "px-4 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
+                "mx-1 sm:mx-2 px-3 sm:px-4 py-2 flex flex-col items-center text-xs border-t-2 transition-all " +
                 (activeLink === "about"
-                  ? " text-orange-500 animation-active "
-                  : " text-black-500 hover:text-orange-500 a")
+                  ? "  border-orange-500 text-orange-500"
+                  : " border-transparent")
               }
             >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
               About
-            </LinkScroll> */}
-            {/* <LinkScroll
-              activeClass="active"
-              href="feature"
-              spy={true}
-              smooth={true}
-              duration={1000}
-              onSetActive={() => {
-                setActiveLink("feature");
-              }}
-              className={
-                "px-4 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
-                (activeLink === "feature"
-                  ? " text-orange-500 animation-active "
-                  : " text-black-500 hover:text-orange-500 ")
-              }
-            >
-              Feature
-            </LinkScroll> */}
-            {/* <LinkScroll
-              activeClass="active"
-              href="pricing"
-              spy={true}
-              smooth={true}
-              duration={1000}
-              onSetActive={() => {
-                setActiveLink("pricing");
-              }}
-              className={
-                "px-4 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
-                (activeLink === "pricing"
-                  ? " text-orange-500 animation-active "
-                  : " text-black-500 hover:text-orange-500 ")
-              }
-            >
-              Pricing
-            </LinkScroll> */}
-            {/* <LinkScroll
-              activeClass="active"
-              to="testimoni"
-              spy={true}
-              smooth={true}
-              duration={1000}
-              onSetActive={() => {
-                setActiveLink("testimoni");
-              }}
-              className={
-                "px-4 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
-                (activeLink === "testimoni"
-                  ? " text-orange-500 animation-active "
-                  : " text-black-500 hover:text-orange-500 ")
-              }
-            >
-              Testimonial
-            </LinkScroll> */}
+            </Link> */}
           </ul>
-          {/* <div className="col-start-10 col-end-12 font-medium flex justify-end items-center">
-            <ButtonOutline>S'enregistrer</ButtonOutline>
-          </div> */}
-        </nav>
-      </header>
+        </div>
+      </nav>
+      {/* End Mobile Navigation */}
     </>
   );
 };
