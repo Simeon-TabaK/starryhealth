@@ -7,12 +7,9 @@ import SeoHead from "../components/SeoHead";
 export default function Home() {
   return (
     <>
-      <SeoHead title="SuperLife" />
-      <Layout>
         <Hero />
         <Feature />
         <Pricing />
-      </Layout>
     </>
   );
 }
