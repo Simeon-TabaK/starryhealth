@@ -26,7 +26,7 @@ const Header = () => {
       href: "/",
     },
     {
-      name: "Produit",
+      name: "Produits",
       description: "Page de Produit",
       href: "/product",
     },
@@ -41,7 +41,7 @@ const Header = () => {
       href: "/about",
     },
     {
-      name: "Contact",
+      name: "Contacts",
       description: "Page de contact",
       href: "/contact",
     },
@@ -54,10 +54,10 @@ const Header = () => {
           (scrollActive ? " shadow-md pt-0" : " pt-2")
         }
       >
-        <nav className="max-w-screen-xl px-6 sm:px-8 lg:px-16 mx-auto grid grid-flow-col py-3 sm:py-4">
+        <nav className="max-w-screen-xl px-6 sm:px-8 lg:px-16 mx-auto flex justify-between py-2 ">
           <div className="col-start-1 col-end-2 flex items-center">
             <Image
-              src="/assets/logoStarry.png"
+              src="/assets/logo.png"
               width={80}
               height={60}
               alt="Free Plan"
@@ -82,7 +82,7 @@ const Header = () => {
               </Link>
             ))}
           </ul>
-          <div className="col-start-10 col-end-12 font-medium flex justify-end items-center">
+          {/* <div className="col-start-10 col-end-12 font-medium flex justify-end items-center">
             <Link
               href="/"
               className="text-black-600 mx-2 sm:mx-4 capitalize tracking-wide hover:text-orange-500 transition-all"
@@ -90,7 +90,7 @@ const Header = () => {
                 Sign In
             </Link>
             <ButtonOutline>Sign Up</ButtonOutline>
-          </div>
+          </div> */}
         </nav>
       </header>
       {/* Mobile Navigation */}

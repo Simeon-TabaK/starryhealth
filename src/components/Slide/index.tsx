@@ -1,66 +1,72 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { EmblaOptionsType } from 'embla-carousel'
-import { DotButton, useDotButton } from './EmblaCarouselDotButton'
+import React from "react";
+import { EmblaOptionsType } from "embla-carousel";
+import { DotButton, useDotButton } from "./EmblaCarouselDotButton";
 import {
   PrevButton,
   NextButton,
-  usePrevNextButtons
-} from './EmblaCarouselArrowButtons'
-import useEmblaCarousel from 'embla-carousel-react'
+  usePrevNextButtons,
+} from "./EmblaCarouselArrowButtons";
+import {
+  ArrowRightCircleIcon,
+  ArrowLeftCircleIcon,
+} from "@heroicons/react/24/solid";
+import useEmblaCarousel from "embla-carousel-react";
 
 type PropType = {
-  slides: number[]
-  options?: EmblaOptionsType
-}
+  slides: number[];
+  options?: EmblaOptionsType;
+};
 
 const EmblaCarousel: React.FC<PropType> = (props) => {
-  const { slides, options } = props
-  const [emblaRef, emblaApi] = useEmblaCarousel(options)
+  const { slides, options } = props;
+  const [emblaRef, emblaApi] = useEmblaCarousel(options);
 
   const { selectedIndex, scrollSnaps, onDotButtonClick } =
-    useDotButton(emblaApi)
+    useDotButton(emblaApi);
 
   const {
     prevBtnDisabled,
     nextBtnDisabled,
     onPrevButtonClick,
-    onNextButtonClick
-  } = usePrevNextButtons(emblaApi)
+    onNextButtonClick,
+  } = usePrevNextButtons(emblaApi);
 
   return (
-    <section className="embla">
+    <section className="embla mx-2">
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
           {slides.map((index) => (
-            <div className="embla__slide" key={index}>
-              <div className="embla__slide__number">{index + 1}</div>
+            <div className="embla__slide w-full" key={index}>
+              <img src={[index]} style={{ width: "100%", height: "65vh" }} />
             </div>
           ))}
         </div>
       </div>
-
+      
       <div className="embla__controls">
-        <div className="embla__buttons">
+        {/* <div className="embla__buttons">
           <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
           <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
-        </div>
+        </div> */}
 
         <div className="embla__dots">
           {scrollSnaps.map((_, index) => (
             <DotButton
               key={index}
               onClick={() => onDotButtonClick(index)}
-              className={'embla__dot'.concat(
-                index === selectedIndex ? ' embla__dot--selected' : ''
+              className={"embla__dot".concat(
+                index === selectedIndex ? " embla__dot--selected" : ""
               )}
+              
+              children = <button>o</button>
             />
           ))}
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default EmblaCarousel
+export default EmblaCarousel;

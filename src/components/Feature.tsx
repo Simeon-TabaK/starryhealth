@@ -16,13 +16,13 @@ const Feature = () => {
 
   return (
     <div
-      className="max-w-screen-xl mt-8 mb-6 sm:mt-14 sm:mb-14 px-2 sm:px-2 lg:px-8 mx-auto"
+      className="mt-8 mb-6 sm:mt-14 sm:mb-14 px-2 sm:px-2 lg:px-8 mx-auto"
     >
       <div className="grid grid-flow-row sm:grid-flow-col grid-cols-1 sm:grid-cols-2 gap-8 p  y-8 my-12">
         <ScrollAnimationWrapper className="flex w-full justify-end">
           <motion.div className="h-full w-full p-1" variants={scrollAnimation}>
             <Image
-              className="rounded-3xl"
+              className="rounded-lg"
               src="/assets/illustration.jpg"
               alt=""
               layout="responsive"

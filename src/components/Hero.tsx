@@ -4,6 +4,8 @@ import ButtonPrimary from "./misc/ButtonPrimary";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
+import EmblaCarousel from "./Slide";
+import { EmblaOptionsType } from 'embla-carousel'
 
 const Hero = ({
   listUser = [
@@ -25,42 +27,25 @@ const Hero = ({
   ],
 }) => {
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);
+  const OPTIONS: EmblaOptionsType = {};
+  // const SLIDE_COUNT = 5;
+  // const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
+
+  let SLIDES = [
+    // "/assets/logo.png",
+    "https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_0rWvumyST3jwTlWdO88YL4CT1OuovQcHLwhymlmfurLCqekh5l7XHZV-A8O_aUBeLzE&usqp=CAU",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeatZ3nkxayRGgpV5CTjM5SIkkuUdInheBkc3n30Eo4Q&s",
+  ];
 
   return (
-    <div className="max-w-screen-xl mt-24 px-8 xl:px-16 mx-auto">
-      <ScrollAnimationWrapper>
+    <div className="mt-20 ">
+      <ScrollAnimationWrapper children={undefined} className={undefined}>
         <motion.div
-          className="grid grid-flow-row sm:grid-flow-col grid-rows-2 md:grid-rows-1 sm:grid-cols-2 gap-8 py-6 sm:py-16"
-          variants={scrollAnimation}
+          className="gap-8 py-2 sm:py-12"
+          // variants={scrollAnimation}
         >
-          <div className=" flex flex-col justify-center items-start sm:items-center row-start-2 sm:row-start-1">
-            <h1 className="text-3xl lg:text-4xl xl:text-4xl font-medium text-black-600 leading-normal">
-              Digitalisez vos activités avec <strong>StarryBoxx</strong>
-            </h1>
-            <p className="text-black-500 mt-4 mb-6">
-              Offrez vous la chance de numeriser vos activités pour ainsi
-              accroitre votre notorieté sur le marché... <br /> Des services de
-              qualités à votre disposition dans une seule boite pour
-              briller sur le reseaux.
-            </p>
-            <div className="flex flex-row justify-center sm:items-end row-start-2 sm:row-start-1">
-              <a href="https://wa.me/+243893926051">
-                <ButtonPrimary className="">Commencez maintenant</ButtonPrimary>
-              </a>
-            </div>
-          </div>
-          <div className="flex w-full">
-            <motion.div className="h-full w-full" variants={scrollAnimation}>
-              <Image
-                src="/assets/illustration.gif"
-                alt="Illustration"
-                quality={100}
-                width={612}
-                height={383}
-                layout="responsive"
-              />
-            </motion.div>
-          </div>
+          <EmblaCarousel slides={SLIDES} options={OPTIONS} />
         </motion.div>
       </ScrollAnimationWrapper>
       <div className="relative w-full flex">
