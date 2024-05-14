@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import Image from "next/image";
-import Testimoni from "./Testimoni";
 import ButtonPrimary from "./misc/ButtonPrimary";
 import ButtonOutline from "./misc/ButtonOutline.";
 import Maps from "../../public/assets/HugeGlobal.svg";
@@ -49,7 +48,7 @@ const Pricing = () => {
                     src="/assets/Free.png"
                     width={100}
                     height={120}
-                    alt="Free Plan"
+                    alt=""
                   />
                 </div>
                 <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">

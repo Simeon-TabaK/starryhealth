@@ -8,10 +8,6 @@ import {
   NextButton,
   usePrevNextButtons,
 } from "./EmblaCarouselArrowButtons";
-import {
-  ArrowRightCircleIcon,
-  ArrowLeftCircleIcon,
-} from "@heroicons/react/24/solid";
 import useEmblaCarousel from "embla-carousel-react";
 
 type PropType = {

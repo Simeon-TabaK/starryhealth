@@ -3,9 +3,9 @@ import React, { useState } from "react";
 
 // import react slick
 import Slider from "react-slick";
-import Stars from "../../public/assets/Icon/stars.svg";
-import ArrowBack from "../../public/assets/Icon/eva_arrow-back-fill.svg";
-import ArrowNext from "../../public/assets/Icon/eva_arrow-next-fill.svg";
+// import Stars from "../../public/assets/Icon/stars.svg";
+// import ArrowBack from "../../public/assets/Icon/eva_arrow-back-fill.svg";
+// import ArrowNext from "../../public/assets/Icon/eva_arrow-next-fill.svg";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 const Testimoni = ({
@@ -117,7 +117,7 @@ const Testimoni = ({
                 <div className="flex flex-none items-center ml-auto order-1 xl:order-2">
                   <p className="text-sm">{listTestimonis.rating}</p>
                   <span className="flex ml-4">
-                    <Stars className="h-4 w-4" />
+                    {/* <Stars className="h-4 w-4" /> */}
                   </span>
                 </div>
               </div>
@@ -132,13 +132,13 @@ const Testimoni = ({
             className="mx-4 flex items-center justify-center h-14 w-14 rounded-full bg-white border-orange-500 border hover:bg-orange-500 hover:text-white-500 transition-all text-orange-500 cursor-pointer"
             onClick={sliderRef?.slickPrev}
           >
-            <ArrowBack className="h-6 w-6 " />
+            {/* <ArrowBack className="h-6 w-6 " /> */}
           </div>
           <div
             className="flex items-center justify-center h-14 w-14 rounded-full bg-white border-orange-500 border hover:bg-orange-500 hover:text-white-500 transition-all text-orange-500 cursor-pointer"
             onClick={sliderRef?.slickNext}
           >
-            <ArrowNext className="h-6 w-6" />
+            {/* <ArrowNext className="h-6 w-6" /> */}
           </div>
         </div>
       </div>

@@ -80,7 +80,7 @@
   .embla__dots {
     display: flex;
     width: 98vw;
-    align-items: end;
+    align-items: flex-end;
     justify-content: center;
     /* grid-template-columns: repeat(2, 1fr); */
     gap: 0.6rem;
