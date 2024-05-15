@@ -8,7 +8,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <SeoHead title="SuperLife" />
-      <Layout Children={<Component {...pageProps} />}></Layout>
+      <Layout children={<Component {...pageProps} />}></Layout>
     </>
   );
 }
