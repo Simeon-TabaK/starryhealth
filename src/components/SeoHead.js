@@ -4,17 +4,17 @@ import { useRouter } from "next/router";
 
 // Default value for some meta data
 const defaultMeta = {
-  title: 'SuperLife',
-  siteName: 'SB',
+  title: 'StarryHealth',
+  siteName: 'S',
   description:
     'StarryBoxx, Tout en un',
   // change base url of your web (without '/' at the end)
-  url: 'https://starry-box.vercel.app',
+  url: 'https://starry-health.vercel.app',
   type: 'website',
   robots: 'follow, index',
   // change with url of your image (recommended dimension = 1.91:1)
   // used in twitter, facebook, etc. card when link copied in tweet/status 
-  image: 'https://starry-box.vercel.app/assets/card-image.png',
+  image: 'https://starry-health.vercel.app/assets/logo.png',
   author: 'Simeon-TabaK'
 };
 

@@ -6,9 +6,6 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-// import Stars from "../../public/assets/Icon/stars.svg";
-// import ArrowBack from "../../public/assets/Icon/eva_arrow-back-fill.svg";
-// import ArrowNext from "../../public/assets/Icon/eva_arrow-next-fill.svg";
 import {
   UserCircleIcon,
   StarIcon as Stars,

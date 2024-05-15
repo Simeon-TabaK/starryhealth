@@ -1,16 +1,9 @@
 module.exports = {
   content: [
     "./src/pages/*.js",
-    "./src/pages/*.jsx",
-    "./src/pages/*.tsx",
-    "./src/pages/**/*.jsx",
-    "./src/pages/**/*.tsx",
-    "./src/components/*.jsx",
-    "./src/components/**/*.jsx",
-    "./src/components/**/*.jsx",
-    "./src/components/*.tsx",
-    "./src/components/**/*.tsx",
-    "./src/components/**/*.tsx",
+    "./src/pages/**/*.js",
+    "./src/components/*.js",
+    "./src/components/**/*.js",
   ],
   theme: {
     boxShadow: {
@@ -35,12 +28,8 @@ module.exports = {
         500:"#002255",
       },
       black: {
-        500: "#5d5457",
-        600: "#1c0202",
-      },
-      red: {
-        400: "#AFB5C0",
-        500: "#c82b27",
+        500: "#4F5665",
+        600: "#0B132A",
       },
       yellow: {
         100: "#f4ffb2",
