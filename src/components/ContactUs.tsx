@@ -13,7 +13,7 @@ const ContactUs = () => {
       <div className=" px-6 sm:px-8 lg:px-16 mx-auto flex flex-col w-full text-center justify-center">
         <div className="flex flex-col w-full"></div>
         <div className="flex flex-col w-full my-16">
-          <ScrollAnimationWrapper className="">
+          <ScrollAnimationWrapper className="contact-0">
             <motion.h3
               variants={scrollAnimation}
               className="text-2xl sm:text-3xl lg:text-4xl font-medium text-black-600 leading-normal w-9/12 sm: lg:w-4/12 mx-auto"

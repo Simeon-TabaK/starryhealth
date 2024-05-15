@@ -13,7 +13,7 @@ const Partenal = () => {
         <div className="flex flex-col w-full">
         </div>
         <div className="flex flex-col w-full my-16">
-          <ScrollAnimationWrapper>
+          <ScrollAnimationWrapper className='partenal'>
             <motion.h3
               variants={scrollAnimation}
               className="text-2xl sm:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed w-9/12 sm:w-6/12 lg:w-4/12 mx-auto"
@@ -28,7 +28,7 @@ const Partenal = () => {
             </motion.p>
           </ScrollAnimationWrapper>
 
-          <ScrollAnimationWrapper>
+          <ScrollAnimationWrapper className="partenal">
             <motion.div className="w-full flex justify-evenly items-center mt-4 flex-wrap lg:flex-nowrap" variants={scrollAnimation}>
               <img
                 src="/assets/logo.png"
@@ -58,7 +58,7 @@ const Partenal = () => {
             </motion.div>
           </ScrollAnimationWrapper>
 
-          <ScrollAnimationWrapper>
+          <ScrollAnimationWrapper className="partenal">
             <motion.div
               className="py-12 w-full px-8 mt-16"
               variants={scrollAnimation}

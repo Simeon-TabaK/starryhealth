@@ -20,7 +20,7 @@ const FeatureRight = () => {
     >
       <div className="grid grid-flow-row sm:grid-flow-col grid-cols-1 sm:grid-cols-2 gap-8 p  y-8 my-12">
 
-        <ScrollAnimationWrapper>
+        <ScrollAnimationWrapper className="feature-1">
           <motion.div
             className="flex flex-col items-end justify-center w-full lg:w-9/12"
             variants={scrollAnimation}

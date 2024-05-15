@@ -32,7 +32,7 @@ const Feature = () => {
             />
           </motion.div>
         </ScrollAnimationWrapper>
-        <ScrollAnimationWrapper>
+        <ScrollAnimationWrapper className="feature">
           <motion.div
             className="flex flex-col items-end justify-center w-full lg:w-9/12"
             variants={scrollAnimation}
