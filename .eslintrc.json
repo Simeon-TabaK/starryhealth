@@ -1,3 +1,3 @@
 {
-  "extends": ["prettier","@babel/core", "next/core-web-vitals"]
+  "extends": ["prettier","@babel/core", "next/babel", "next/core-web-vitals"]
 }
