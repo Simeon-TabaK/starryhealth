@@ -3,7 +3,7 @@ import Pricing from "../components/Pricing";
 // import Hero from "../components/Hero";
 import FeatureRight from "@/components/Feature1";
 
-export default function Home() {
+export default function Product() {
   return (
     <>
         {/* <Hero /> */}

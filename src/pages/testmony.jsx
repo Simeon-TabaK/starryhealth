@@ -1,4 +1,4 @@
-export default function About() {
+export default function Testmoni() {
     return (
       <>
         <div className="fex w-full h-full bg-translucide justify-center items-center">

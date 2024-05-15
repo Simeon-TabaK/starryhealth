@@ -13,7 +13,7 @@ import React, {
     onNextButtonClick: () => void
   }
   
-  export const usePrevNextButtons = (
+  export const UsePrevNextButtons = (
     emblaApi: EmblaCarouselType | undefined
   ): UsePrevNextButtonsType => {
     const [prevBtnDisabled, setPrevBtnDisabled] = useState(true)

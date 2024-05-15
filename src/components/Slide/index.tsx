@@ -2,13 +2,13 @@
 
 import React from "react";
 import { EmblaOptionsType } from "embla-carousel";
-import { DotButton, useDotButton } from "./EmblaCarouselDotButton";
+import { DotButton, UseDotButton } from "./EmblaCarouselDotButton";
 import {
   PrevButton,
   NextButton,
-  usePrevNextButtons,
+  UsePrevNextButtons,
 } from "./EmblaCarouselArrowButtons";
-import useEmblaCarousel from "embla-carousel-react";
+import UseEmblaCarousel from "embla-carousel-react";
 
 type PropType = {
   slides: number[];
@@ -17,17 +17,17 @@ type PropType = {
 
 const EmblaCarousel: React.FC<PropType> = (props) => {
   const { slides, options } = props;
-  const [emblaRef, emblaApi] = useEmblaCarousel(options);
+  const [emblaRef, emblaApi] = UseEmblaCarousel(options);
 
   const { selectedIndex, scrollSnaps, onDotButtonClick } =
-    useDotButton(emblaApi);
+    UseDotButton(emblaApi);
 
   const {
     prevBtnDisabled,
     nextBtnDisabled,
     onPrevButtonClick,
     onNextButtonClick,
-  } = usePrevNextButtons(emblaApi);
+  } = UsePrevNextButtons(emblaApi);
 
   return (
     <section className="embla mx-2">

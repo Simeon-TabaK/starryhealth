@@ -25,7 +25,7 @@ const Feature = () => {
               className="rounded-lg"
               src="/assets/illustration.jpg"
               alt=""
-              layout="responsive"
+              // layout="responsive"
               quality={100}
               height={414}
               width={508}

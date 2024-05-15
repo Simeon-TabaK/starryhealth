@@ -11,8 +11,8 @@ export default function Home() {
         <Hero />
         <Feature />
         <FeatureRight />
-        <Partenal />
-        <ContactUs />
+        {/* <Partenal />
+        <ContactUs /> */}
     </>
   );
 }

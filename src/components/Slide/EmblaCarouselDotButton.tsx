@@ -12,7 +12,7 @@ import React, {
     onDotButtonClick: (index: number) => void
   }
   
-  export const useDotButton = (
+  export const UseDotButton = (
     emblaApi: EmblaCarouselType | undefined
   ): UseDotButtonType => {
     const [selectedIndex, setSelectedIndex] = useState(0)
