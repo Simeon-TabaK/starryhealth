@@ -1,6 +1,13 @@
-import '@/styles/globals.css'
-import type { AppProps } from 'next/app'
+import "@/styles/globals.css";
+import type { AppProps } from "next/app";
+import Layout from "@/components/Layout";
+import SeoHead from "@/components/SeoHead"
 
 export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return (
+    <>
+      <SeoHead title="Starry Boxx" />
+      <Layout children={<Component {...pageProps} />}></Layout>
+    </>
+  );
 }
