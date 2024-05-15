@@ -9,8 +9,8 @@ import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 const Footer = () => {
   return (
     <div className="bg-blue-300 pt-32">
-      <div className="w-full mx-auto px-6 sm:px-8 lg:px-16 grid grid-rows-6 sm:grid-rows-1 grid-flow-row sm:grid-flow-col grid-cols-3 sm:grid-cols-12 ">
-        <div className="row-span-2 sm:col-span-4 col-start-1 col-end-4 sm:col-end-4 flex flex-col items-start ">
+      <div className="w-full mx-auto px-6 sm:px-8 lg:px-16 grid grid-rows-6 md:grid-rows-1 grid-flow-row md:grid-flow-col grid-cols-3 ">
+        <div className="row-span-2 md:col-span-4 col-start-1 col-end-4 md:col-end-4 flex flex-col items-start ">
           <Image src="/assets/logo1.png" width={80} height={60} alt="" />
           <p className="mb-4 text-white-300">
             <strong className="font-medium">SuperLife</strong> aide dans les
@@ -41,7 +41,7 @@ const Footer = () => {
             ©{new Date().getFullYear()} - StarryHealth
           </p>
         </div>
-        <div className=" row-span-2 sm:col-span-2 sm:col-start-5 sm:col-end-9 flex flex-col">
+        <div className=" row-span-2 md:col-span-2 md:col-start-5 md:col-end-9 flex flex-col">
           <p className="text-red-500 mb-4 font-medium text-lg">Nos produits</p>
           <ul className="text-white-300 ">
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
@@ -66,7 +66,7 @@ const Footer = () => {
             </li>
           </ul>
         </div>
-        <div className="row-span-2 sm:col-span-2 sm:col-start-9 sm:col-end-11 flex flex-col">
+        <div className="row-span-2 md:col-span-2 md:col-start-9 md:col-end-11 flex flex-col">
           <p className="text-red-500 mb-4 font-medium text-lg">
             <span className="uppercase">à</span> propos
           </p>
@@ -85,7 +85,7 @@ const Footer = () => {
             </li>
           </ul>
         </div>
-        <div className="row-span-2 sm:col-span-2 sm:col-start-11 sm:col-end-13 flex flex-col">
+        <div className="row-span-2 md:col-span-2 md:col-start-11 md:col-end-13 flex flex-col">
           <p className="text-red-500 mb-4 font-medium text-lg">Contacts</p>
           <ul className="text-white-300">
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">

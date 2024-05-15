@@ -7,7 +7,7 @@ const defaultMeta = {
   title: 'StarryHealth',
   siteName: 'S',
   description:
-    'StarryBoxx, Tout en un',
+    'StarryHealth, Tout en un',
   // change base url of your web (without '/' at the end)
   url: 'https://starry-health.vercel.app',
   type: 'website',

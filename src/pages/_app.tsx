@@ -6,7 +6,7 @@ import SeoHead from "@/components/SeoHead"
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
-      <SeoHead title="Starry Boxx" />
+      <SeoHead title="Starry Health" />
       <Layout children={<Component {...pageProps} />}></Layout>
     </>
   );
