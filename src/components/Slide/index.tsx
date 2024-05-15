@@ -11,7 +11,7 @@ import {
 import UseEmblaCarousel from "embla-carousel-react";
 
 type PropType = {
-  slides: [];
+  slides: [string, string, string];
   options?: EmblaOptionsType;
 };
 
