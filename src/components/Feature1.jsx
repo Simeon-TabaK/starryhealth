@@ -31,7 +31,7 @@ const FeatureRight = () => {
             <p className="my-2 text-black-500">
               vous pouvez gerer votre activité 100% sur le reseaux en un simple
               clic... <br /> Allumez cette boite magique dans vos activités
-              quotienne pour voir votre chiffre d'affairers grimper
+              quotienne pour voir votre chiffre d affairers grimper
               vers des millions 😀
 
             </p>
