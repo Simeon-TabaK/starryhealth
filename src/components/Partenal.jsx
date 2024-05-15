@@ -30,7 +30,6 @@ const Partenal = () => {
 
           <ScrollAnimationWrapper>
             <motion.div className="w-full flex justify-evenly items-center mt-4 flex-wrap lg:flex-nowrap" variants={scrollAnimation}>
-              {/* <Netflix className="h-18 w-auto" /> */}
               <img
                 src="/assets/logo.png"
                 className="h-14 w-auto mt-4 lg:mt-2"

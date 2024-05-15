@@ -6,9 +6,6 @@ import FeatureRight from "@/components/Feature1";
 export default function Product() {
   return (
     <>
-        {/* <Hero /> */}
-        <Feature />
-        <FeatureRight />
         <Pricing />
     </>
   );

@@ -5,14 +5,13 @@ import Partenal from "@/components/Partenal";
 import ContactUs from "@/components/ContactUs";
 
 export default function Home() {
-
   return (
     <>
-        <Hero />
-        <Feature />
-        <FeatureRight />
-        {/* <Partenal />
-        <ContactUs /> */}
+      <Hero />
+      <Feature />
+      <FeatureRight />
+      <Partenal />
+      <ContactUs />
     </>
   );
 }

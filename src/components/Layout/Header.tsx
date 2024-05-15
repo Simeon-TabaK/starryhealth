@@ -61,8 +61,8 @@ const Header = () => {
                 className={
                   "px-4 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
                   (activeLink === item.href
-                    ? " text-orange-500 animation-active "
-                    : " text-black-500 hover:text-orange-500 a")
+                    ? " text-red-500 animation-active "
+                    : " text-black-500 hover:text-red-500 a")
                 }
               >
                 {item.name}
@@ -72,7 +72,7 @@ const Header = () => {
           {/* <div className="col-start-10 col-end-12 font-medium flex justify-end items-center">
             <Link
               href="/"
-              className="text-black-600 mx-2 sm:mx-4 capitalize tracking-wide hover:text-orange-500 transition-all"
+              className="text-black-600 mx-2 sm:mx-4 capitalize tracking-wide hover:text-red-500 transition-all"
             >
                 Sign In
             </Link>
@@ -94,7 +94,7 @@ const Header = () => {
                 className={
                   "mx-1 sm:mx-2 px-3 sm:px-4 py-2 flex flex-col items-center text-xs border-t-2 transition-all" +
                   (activeLink === item.href
-                    ? "  border-orange-500 text-orange-500"
+                    ? "  border-red-500 text-red-500"
                     : " border-transparent")
                 }
               >

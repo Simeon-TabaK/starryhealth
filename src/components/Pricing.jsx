@@ -6,13 +6,61 @@ import Maps from "../../public/assets/HugeGlobal.svg";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
+import Testimoni from "./Testimoni";
 
 const Pricing = () => {
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);
 
+  const PRODUCTS = [
+    {
+      name: "SUPERLIFE TOTAL CARE 30",
+      image: "/assets/products/stc30.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/product",
+    },
+    {
+      name: "SUPERLIFE COLON CARE",
+      image: "/assets/products/scc.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/product",
+    },
+    {
+      name: "SUPERLIFE IMMUNE CARE",
+      image: "/assets/products/sic.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/product",
+    }
+  ];
+  const PRODUCTS1 = [
+    {
+      name: "SUPERLIFE NEURON CARE",
+      image: "/assets/products/snc.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/product",
+    },
+    {
+      name: "SUPER ROOT COFFEE",
+      image: "/assets/products/src.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/product",
+    },
+    {
+      name: "SUPER CELLTEC ESSENCE MIST",
+      image: "/assets/products/scem.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/product",
+    },
+  ];
+
   return (
     <div
-      className="bg-gradient-to-b from-white-300 to-white-500 w-full py-14"
+      className="bg-gradient-to-b from-white-300 to-white-500 w-full py-14 mt-20 "
       id="pricing"
     >
       <div className=" px-6 sm:px-8 lg:px-16 mx-auto flex flex-col w-full text-center justify-center">
@@ -22,16 +70,18 @@ const Pricing = () => {
               variants={scrollAnimation}
               className="text-2xl sm:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed"
             >
-              Choisir ton plan
+              Nos produits
             </motion.h3>
             <motion.p
               variants={scrollAnimation}
               className="leading-normal w-10/12 sm:w-7/12 lg:w-6/12 mx-auto my-2 text-center"
             >
-              Faites briller votre business avec StarryBoxx.
+              Faites confiance a SuperLife avec ces produits...
             </motion.p>
           </ScrollAnimationWrapper>
           <div className="grid grid-flow-row sm:grid-flow-col grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 sm:px-0 lg:px-6">
+            
+          {PRODUCTS.map((item) => (
             <ScrollAnimationWrapper className="flex justify-center">
               <motion.div
                 variants={scrollAnimation}
@@ -45,20 +95,18 @@ const Pricing = () => {
               >
                 <div className="p-0 lg:p-0 mt-0 lg:mt-0">
                   <Image
-                    src="/assets/Free.png"
-                    width={100}
-                    height={120}
+                    src={item.image}
+                    width={150}
+                    height={180}
                     alt=""
                   />
                 </div>
                 <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">
-                  StarrySite PRO
+                  {item.name}
                 </p>
                 <div>
                   <p>
-                    Beneficiez d'un site professionnel et hebergement annuel
-                    sous le control des experts du domaine... <br />
-                    <br /> (Maintenance gratuite les deux premiers mois)
+                    {item.description}
                   </p>
                 </div>
                 <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
@@ -71,115 +119,50 @@ const Pricing = () => {
                 </div>
               </motion.div>
             </ScrollAnimationWrapper>
-            <ScrollAnimationWrapper className="flex justify-center">
-              <motion.div
-                variants={scrollAnimation}
-                className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
-                whileHover={{
-                  scale: 1.1,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
-              >
-                <div className="p-0 lg:p-0 mt-0 lg:mt-0">
-                  <Image
-                    src="/assets/Standard.png"
-                    width={100}
-                    height={120}
-                    alt="Standard Plan"
-                  />
-                </div>
-                <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">
-                  StarrySite VITRINE{" "}
-                </p>
-                <p>
-                  Ayez une vitrine d'exposition de vos produit sur le net et
-                  repondez au besoin acruel de vos clients grâce à la
-                  numerisation fiable de StarryBoxx. <br /> <br />
-                  Possiblilité de commande et payement sur la plateforme, il ne
-                  vous reste qu'à preparer votre livreur pour son boulot🤷🏻‍♂
-                </p>
-                <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                  <a href="https://wa.me/+243893926051">
-                    <ButtonPrimary>Sélectionnez</ButtonPrimary>
-                  </a>
-                </div>
-              </motion.div>
-            </ScrollAnimationWrapper>
-            <ScrollAnimationWrapper className="flex justify-center">
-              <motion.div
-                variants={scrollAnimation}
-                className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
-                whileHover={{
-                  scale: 1.1,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
-              >
-                <div className="p-0 lg:p-0 mt-0 lg:mt-0">
-                  <Image
-                    src="/assets/Premium.png"
-                    width={145}
-                    height={165}
-                    alt="Premium Plan"
-                  />
-                </div>
-                <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">
-                  StarryFunnel{" "}
-                </p>
-                <p>
-                  Un tunnel professionnel de generation de prospects,
-                  qualification et fidelisation des clients... <br /> <br />{" "}
-                  Laissez StarryFunnel faire la magie dans votre processus de
-                  prospection et vous generer des leads
-                </p>
-                <div className="flex flex-col w-full justify-center mb-8 flex-none mt-12">
-                  <a href="https://wa.me/+243893926051">
-                    <ButtonPrimary>Sélectionnez</ButtonPrimary>
-                  </a>
-                </div>
-              </motion.div>
-            </ScrollAnimationWrapper>
+            ))}
           </div>
-        </div>
-        <div className="flex flex-col w-full my-16">
-          <ScrollAnimationWrapper>
-            <motion.h3
-              variants={scrollAnimation}
-              className="text-2xl sm:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed w-9/12 sm:w-6/12 lg:w-4/12 mx-auto"
-            >
-              L'internet est vaste, ne vous limitez pas...{" "}
-            </motion.h3>
-            <motion.p
-              className="leading-normal  mx-auto my-2 w-10/12 sm:w-7/12 lg:w-6/12"
-              variants={scrollAnimation}
-            >
-              L'internet est un marché vaste et inépuisable, n'hesitez pas
-              d'exploiter toutes les potentialités à votre disposition pour
-              développer votre activité. <br /> Utilisez votre reseau favorie
-              pour atteindre un maximum de prospects et generez des ventes
-              automatisées...
-              <br /> Vendre n'est plus un souci pour personne StarryBoxx vient
-              repondre à vos besoins de prospectionet automatisation de vos
-              ventes. Devenez un AS de la vente.
-            </motion.p>
-          </ScrollAnimationWrapper>
-          <ScrollAnimationWrapper>
-            <motion.div
-              className="py-12 w-full px-8 mt-16"
-              variants={scrollAnimation}
-            >
-              <Maps className="w-full h-auto" />
-            </motion.div>
-          </ScrollAnimationWrapper>
-          <ScrollAnimationWrapper>
-            <motion.div
-              className="w-full flex justify-evenly items-center mt-4 flex-wrap lg:flex-nowrap"
-              variants={scrollAnimation}
-            ></motion.div>
-          </ScrollAnimationWrapper>
+          <div className="grid grid-flow-row sm:grid-flow-col grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 sm:px-0 lg:px-6">
+            
+          {PRODUCTS1.map((item) => (
+            <ScrollAnimationWrapper className="flex justify-center">
+              <motion.div
+                variants={scrollAnimation}
+                className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
+                whileHover={{
+                  scale: 1.1,
+                  transition: {
+                    duration: 0.2,
+                  },
+                }}
+              >
+                <div className="p-0 lg:p-0 mt-0 lg:mt-0">
+                  <Image
+                    src={item.image}
+                    width={150}
+                    height={180}
+                    alt=""
+                  />
+                </div>
+                <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">
+                  {item.name}
+                </p>
+                <div>
+                  <p>
+                    {item.description}
+                  </p>
+                </div>
+                <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
+                  {/* <p className="text-2xl text-black-600 text-center mb-4 ">
+                    Free
+                  </p> */}
+                  <a href="https://wa.me/+243893926051">
+                    <ButtonPrimary>Sélectionnez</ButtonPrimary>
+                  </a>
+                </div>
+              </motion.div>
+            </ScrollAnimationWrapper>
+            ))}
+          </div>
         </div>
         <div className="flex flex-col w-full my-16" id="testimoni">
           <ScrollAnimationWrapper>
@@ -201,7 +184,7 @@ const Pricing = () => {
           </ScrollAnimationWrapper>
           <ScrollAnimationWrapper className="w-full flex flex-col py-12">
             <motion.div variants={scrollAnimation}>
-              {/* <Testimoni /> */}
+              <Testimoni />
             </motion.div>
           </ScrollAnimationWrapper>
           <ScrollAnimationWrapper className="relative w-full mt-16">

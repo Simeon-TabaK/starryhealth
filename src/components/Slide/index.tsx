@@ -40,7 +40,7 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
           ))}
         </div>
       </div>
-      
+
       <div className="embla__controls">
         {/* <div className="embla__buttons">
           <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
@@ -55,8 +55,9 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
               className={"embla__dot".concat(
                 index === selectedIndex ? " embla__dot--selected" : ""
               )}
-              
-              children = <button>o</button>
+              children=<button>
+                <span className="text-5xl text-red-400">.</span>
+              </button>
             />
           ))}
         </div>
