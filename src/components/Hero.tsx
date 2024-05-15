@@ -2,8 +2,8 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
-import EmblaCarousel from "./Slide";
-import { EmblaOptionsType } from 'embla-carousel'
+// import EmblaCarousel from "./Slide";
+// import { EmblaOptionsType } from 'embla-carousel'
 
 const Hero = ({
   listUser = [
@@ -25,16 +25,16 @@ const Hero = ({
   ],
 }) => {
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);
-  let OPTIONS: EmblaOptionsType = {};
-  // const SLIDE_COUNT = 5;
-  // const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
+  // let OPTIONS: EmblaOptionsType = {};
+  // // const SLIDE_COUNT = 5;
+  // // const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
 
-  let SLIDES :  [string, string, string] = [
-    // "/assets/logo.png",
-    "https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_0rWvumyST3jwTlWdO88YL4CT1OuovQcHLwhymlmfurLCqekh5l7XHZV-A8O_aUBeLzE&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeatZ3nkxayRGgpV5CTjM5SIkkuUdInheBkc3n30Eo4Q&s",
-  ];
+  // let SLIDES :  [string, string, string] = [
+  //   // "/assets/logo.png",
+  //   "https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg",
+  //   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_0rWvumyST3jwTlWdO88YL4CT1OuovQcHLwhymlmfurLCqekh5l7XHZV-A8O_aUBeLzE&usqp=CAU",
+  //   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeatZ3nkxayRGgpV5CTjM5SIkkuUdInheBkc3n30Eo4Q&s",
+  // ];
 
   return (
     <div className="mt-20 ">
@@ -43,7 +43,7 @@ const Hero = ({
           className="gap-8 py-2 sm:py-12"
           // variants={scrollAnimation}
         >
-          <EmblaCarousel slides={SLIDES} options={OPTIONS} />
+          {/* <EmblaCarousel slides={SLIDES} options={OPTIONS} /> */}
         </motion.div>
       </ScrollAnimationWrapper>
       <div className="relative w-full flex">
