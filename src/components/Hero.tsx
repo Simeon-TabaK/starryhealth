@@ -38,7 +38,7 @@ const Hero = ({
 
   return (
     <div className="mt-20 ">
-      <ScrollAnimationWrapper className="slider" >
+      <ScrollAnimationWrapper className="slider-0" >
         <motion.div
           className="gap-8 py-2 sm:py-12"
           // variants={scrollAnimation}
