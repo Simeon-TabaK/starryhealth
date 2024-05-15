@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 import EmblaCarousel from "./Slide";
-import { EmblaOptionsType } from 'embla-carousel'
+import { EmblaOptionsType } from "embla-carousel";
 
 const Hero = ({
   listUser = [
@@ -29,7 +29,8 @@ const Hero = ({
   // const SLIDE_COUNT = 5;
   // const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
 
-  let SLIDES = string [
+  let SLIDES = [];
+  SLIDES = [
     // "/assets/logo.png",
     "https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg",
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_0rWvumyST3jwTlWdO88YL4CT1OuovQcHLwhymlmfurLCqekh5l7XHZV-A8O_aUBeLzE&usqp=CAU",
@@ -38,7 +39,7 @@ const Hero = ({
 
   return (
     <div className="mt-20 ">
-      <ScrollAnimationWrapper className="" >
+      <ScrollAnimationWrapper className="">
         <motion.div
           className="gap-8 py-2 sm:py-12"
           // variants={scrollAnimation}
