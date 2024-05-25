@@ -2,6 +2,17 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import {
+  ArchiveBoxIcon,
+  BuildingOfficeIcon,
+  BuildingStorefrontIcon,
+  ExclamationCircleIcon,
+  FingerPrintIcon,
+  HomeIcon,
+  PhoneIcon,
+  RectangleStackIcon,
+  StopCircleIcon,
+} from "@heroicons/react/24/solid";
 
 const Header = () => {
   const [scrollActive, setScrollActive] = useState(false);
@@ -19,26 +30,31 @@ const Header = () => {
       name: "Accueil",
       description: "Page d'accueil",
       href: "/",
+      icon: HomeIcon,
     },
     {
       name: "Produits",
       description: "Page de Produit",
       href: "/product",
+      icon: BuildingStorefrontIcon,
     },
     {
       name: "Témoignage",
       description: "Page de témoignage",
       href: "/testmony",
+      icon: RectangleStackIcon,
     },
     {
       name: "A propos",
       description: "Page d'a propos",
       href: "/about",
+      icon: ExclamationCircleIcon,
     },
     {
       name: "Contacts",
       description: "Page de contact",
       href: "/contact",
+      icon: PhoneIcon,
     },
   ];
   return (
@@ -81,7 +97,6 @@ const Header = () => {
         </nav>
       </header>
 
-      
       {/* Mobile Navigation */}
 
       <nav className="fixed lg:hidden bottom-0 left-0 right-0 z-20 px-4 sm:px-8 shadow-t ">
@@ -98,6 +113,16 @@ const Header = () => {
                     : " border-transparent")
                 }
               >
+                <item.icon
+                  className={
+                    "h-6 w-6 text-gray-600  group-hover:text-indigo-600" +
+                    (activeLink === item.href
+                      ? " text-red-500"
+                      : " text-blue-500")
+                  }
+                  aria-hidden="true"
+                  // fill="solid"
+                />
                 {item.name}
               </Link>
             ))}

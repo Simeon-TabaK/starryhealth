@@ -38,13 +38,16 @@ const Hero = ({
 
   return (
     <div className="mt-20 ">
-      <ScrollAnimationWrapper className="slider-0" >
+      <ScrollAnimationWrapper className="slider-0">
         <motion.div
           className="gap-8 py-2 sm:py-12"
           // variants={scrollAnimation}
         >
           {/* <EmblaCarousel slides={SLIDES} options={OPTIONS} /> */}
-          <img src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg" style={{ width: "100%", height: "65vh" }} />
+          <img
+            src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg"
+            style={{ width: "100%", height: "auto" }}
+          />
         </motion.div>
       </ScrollAnimationWrapper>
       <div className="relative w-full flex">
@@ -57,8 +60,8 @@ const Hero = ({
               variants={scrollAnimation}
             >
               <div className="flex mx-auto w-40 sm:w-auto">
-                <div className="flex items-center justify-center bg-orange-100 w-12 h-12 mr-6 rounded-full">
-                  <img src={listUsers.icon} className="h-6 w-6" />
+                <div className="flex items-center justify-center bg-white-300 w-12 h-12 mr-6 rounded-full">
+                  <img src={listUsers.icon} className="h-6 w-6 fill-red-500" />
                 </div>
                 <div className="flex flex-col">
                   <p className="text-xl text-black-600 font-bold">

@@ -16,7 +16,7 @@ const Pricing = () => {
       name: "SUPERLIFE TOTAL CARE 30",
       image: "/assets/products/stc30.JPG",
       description:
-        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+        "Libérez le potentiel de guérison ❤‍🩹 de votre corps dès aujourd’hui !",
       link: "/product",
     },
     {
@@ -30,7 +30,7 @@ const Pricing = () => {
       name: "SUPERLIFE IMMUNE CARE",
       image: "/assets/products/sic.JPG",
       description:
-        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+        "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
       link: "/product",
     }
   ];
@@ -46,7 +46,7 @@ const Pricing = () => {
       name: "SUPER ROOT COFFEE",
       image: "/assets/products/src.JPG",
       description:
-        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+        "☕ Élevez vos matinées avec Super Root Coffee !",
       link: "/product",
     },
     {
@@ -63,23 +63,23 @@ const Pricing = () => {
       className="bg-gradient-to-b from-white-300 to-white-500 w-full py-14 mt-20 "
       id="pricing"
     >
-      <div className=" px-6 sm:px-8 lg:px-16 mx-auto flex flex-col w-full text-center justify-center">
+      <div className=" px-6 md:px-8 lg:px-16 mx-auto flex flex-col w-full text-center justify-center">
         <div className="flex flex-col w-full">
           <ScrollAnimationWrapper className="pricing">
             <motion.h3
               variants={scrollAnimation}
-              className="text-2xl sm:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed"
+              className="text-2xl md:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed"
             >
               Nos produits
             </motion.h3>
             <motion.p
               variants={scrollAnimation}
-              className="leading-normal w-10/12 sm:w-7/12 lg:w-6/12 mx-auto my-2 text-center"
+              className="leading-normal w-10/12 md:w-7/12 lg:w-6/12 mx-auto my-2 text-center"
             >
               Faites confiance a SuperLife avec ces produits...
             </motion.p>
           </ScrollAnimationWrapper>
-          <div className="grid grid-flow-row sm:grid-flow-col grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 sm:px-0 lg:px-6">
+          <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6">
             
           {PRODUCTS.map((item) => (
             <ScrollAnimationWrapper className="flex justify-center" key={item.name}>
@@ -96,12 +96,12 @@ const Pricing = () => {
                 <div className="p-0 lg:p-0 mt-0 lg:mt-0">
                   <Image
                     src={item.image}
-                    width={150}
+                    width={200}
                     height={180}
                     alt=""
                   />
                 </div>
-                <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">
+                <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
                   {item.name}
                 </p>
                 <div>
@@ -114,14 +114,14 @@ const Pricing = () => {
                     Free
                   </p> */}
                   <a href="https://wa.me/+243893926051">
-                    <ButtonPrimary>Sélectionnez</ButtonPrimary>
+                    <ButtonPrimary>Plus d'infos</ButtonPrimary>
                   </a>
                 </div>
               </motion.div>
             </ScrollAnimationWrapper>
             ))}
           </div>
-          <div className="grid grid-flow-row sm:grid-flow-col grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 sm:px-0 lg:px-6">
+          <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6">
             
           {PRODUCTS1.map((item) => (
             <ScrollAnimationWrapper className="flex justify-center" key={item.name}>
@@ -138,12 +138,12 @@ const Pricing = () => {
                 <div className="p-0 lg:p-0 mt-0 lg:mt-0">
                   <Image
                     src={item.image}
-                    width={150}
+                    width={200}
                     height={180}
                     alt=""
                   />
                 </div>
-                <p className="text-lg text-black-600 font-medium capitalize my-2 sm:my-7">
+                <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
                   {item.name}
                 </p>
                 <div>
@@ -168,13 +168,13 @@ const Pricing = () => {
           <ScrollAnimationWrapper className="pricing">
             <motion.h3
               variants={scrollAnimation}
-              className="text-2xl sm:text-3xl lg:text-4xl font-medium text-black-600 leading-normal w-9/12 sm: lg:w-4/12 mx-auto"
+              className="text-2xl md:text-3xl lg:text-4xl font-medium text-black-600 leading-normal w-9/12 md: lg:w-4/12 mx-auto"
             >
               Des clients satisfaits nous font confiance{" "}
             </motion.h3>
             <motion.p
               variants={scrollAnimation}
-              className="leading-normal mx-auto mb-2 mt-4 w-10/12 sm:w-7/12 lg:w-6/12"
+              className="leading-normal mx-auto mb-2 mt-4 w-10/12 md:w-7/12 lg:w-6/12"
             >
               Voici les histoires de nos clients qui nous ont rejoints avec{" "}
               <br />
@@ -189,9 +189,9 @@ const Pricing = () => {
           </ScrollAnimationWrapper>
           <ScrollAnimationWrapper className="relative w-full mt-16">
             <motion.div variants={scrollAnimation} custom={{ duration: 3 }}>
-              <div className="absolute rounded-xl  py-8 sm:py-14 px-6 sm:px-12 lg:px-16 w-full flex flex-col sm:flex-row justify-between items-center z-10 bg-white-500">
-                <div className="flex flex-col text-left w-10/12 sm:w-7/12 lg:w-5/12 mb-6 sm:mb-0">
-                  <h5 className="text-black-600 text-lg sm:text-xl lg:text-xl leading-relaxed font-medium">
+              <div className="absolute rounded-xl  py-8 md:py-14 px-6 md:px-12 lg:px-16 w-full flex flex-col md:flex-row justify-between items-center z-10 bg-white-500">
+                <div className="flex flex-col text-left w-10/12 md:w-7/12 lg:w-5/12 mb-6 md:mb-0">
+                  <h5 className="text-black-600 text-lg md:text-xl lg:text-xl leading-relaxed font-medium">
                     Abonnez-vous maintenant pour <br /> Bénéficiez de
                     fonctionnalités spéciales!
                   </h5>
@@ -202,7 +202,7 @@ const Pricing = () => {
                 </a>
               </div>
               <div
-                className="absolute bg-black-600 opacity-5 w-11/12 roudned-lg h-60 sm:h-56 top-0 mt-8 mx-auto left-0 right-0"
+                className="absolute bg-black-600 opacity-5 w-11/12 roudned-lg h-60 md:h-56 top-0 mt-8 mx-auto left-0 right-0"
                 style={{ filter: "blur(114px)" }}
               ></div>
             </motion.div>
