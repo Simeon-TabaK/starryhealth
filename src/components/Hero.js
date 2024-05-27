@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
+import SimpleSlider from "./Slide"
 // import EmblaCarousel from "./Slide";
 // import { EmblaOptionsType } from 'embla-carousel'
 
@@ -44,12 +45,13 @@ const Hero = ({
           // variants={scrollAnimation}
         >
           {/* <EmblaCarousel slides={SLIDES} options={OPTIONS} /> */}
-          <div className="h-2/3">
+          <SimpleSlider/>
+          {/* <div className="h-2/3">
             <img
               src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg"
               style={{ width: "100%", height: "30%" }}
             />
-          </div>
+          </div> */}
         </motion.div>
       </ScrollAnimationWrapper>
       <div className="relative w-full flex">
