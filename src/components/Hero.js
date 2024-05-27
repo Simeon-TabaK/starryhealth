@@ -44,10 +44,12 @@ const Hero = ({
           // variants={scrollAnimation}
         >
           {/* <EmblaCarousel slides={SLIDES} options={OPTIONS} /> */}
-          <img
-            src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg"
-            style={{ width: "100%", height: "auto" }}
-          />
+          <div className="h-2/3">
+            <img
+              src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg"
+              style={{ width: "100%", height: "30%" }}
+            />
+          </div>
         </motion.div>
       </ScrollAnimationWrapper>
       <div className="relative w-full flex">
