@@ -6,31 +6,29 @@ import Slider from "react-slick";
 // import "slick-carousel/slick/slick-theme.css";
 
 const SimpleSlider = () => {
-  const [shownSlide, SetShownSlide] = useState(0);
+  const [slideIndex, SetSlideIndex] = useState(0);
+  console.log(slideIndex);
 
-  let slideIndex = 1;
-  //   showSlides(slideIndex);
 
   // Next/previous controls
   function dotButton(n) {
-    SetShownSlide(n);
+    SetSlideIndex(n);
   }
 
   function rightButton() {
-    if (slideImg.length == shownSlide) SetShownSlide(0);
-    else SetShownSlide(shownSlide++);
+    if (slideIndex == slideImg.length) SetSlideIndex(0);
+    else SetSlideIndex(slideIndex + 1);
   }
 
-  
   function leftButton() {
-    if (shownSlide == 0) SetShownSlide(slideImg.length);
-    else SetShownSlide(shownSlide--);
+    if (slideIndex == 0) SetSlideIndex(slideImg.length);
+    else SetSlideIndex(slideIndex - 1);
   }
 
   // Thumbnail image controls
   function currentSlide(n) {
     // showSlides((slideIndex = n));
-    SetShownSlide(slideIndex);
+    SetSlideIndex(slideIndex);
   }
 
   //   function showSlides(n) {
@@ -68,7 +66,7 @@ const SimpleSlider = () => {
         {slideImg.map((s) => (
           <div
             key={s.index}
-            className={"" + (shownSlide === s.index ? "block" : "hidden")}
+            className={"" + (slideIndex === s.index ? "block" : "hidden")}
             style={{ animationName: "fade", animationDuration: "1.5s" }}
           >
             {/* <div class="numbertext">1 / 3</div> */}
@@ -81,14 +79,14 @@ const SimpleSlider = () => {
         <button
           className="cursor-pointer absolute top-1/2 w-auto -mt-6 p-4 text-white-500 text-3xl left-0"
           style={{ userSelect: "none", transition: "0.6s" }}
-          onclick={rightButton}
+          onClick={leftButton}
         >
           &#10094;
         </button>
         <button
           className="cursor-pointer absolute top-1/2 w-auto -mt-6 p-4 text-white-500 text-3xl right-0"
           style={{ userSelect: "none", transition: "0.6s" }}
-          onclick={leftButton}
+          onClick={rightButton}
         >
           &#10095;
         </button>
