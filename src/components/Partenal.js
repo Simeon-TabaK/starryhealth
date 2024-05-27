@@ -41,7 +41,7 @@ const Partenal = () => {
                 alt=""
               />
               <img
-                src="/assets/logo.png"
+                src="/assets/logoStarry.png"
                 className="h-12 w-auto mt-2 lg:mt-0"
                 alt=""
               />

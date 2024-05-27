@@ -95,6 +95,7 @@ const Pricing = () => {
               >
                 <div className="p-0 lg:p-0 mt-0 lg:mt-0">
                   <Image
+                  className="rounded-sm"
                     src={item.image}
                     width={200}
                     height={180}

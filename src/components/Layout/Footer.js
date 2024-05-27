@@ -72,7 +72,7 @@ const Footer = () => {
           </p>
           <ul className="text-white-300">
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              StarryBoxx {" "}
+              Starry Boxx {" "}
             </li>
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
               Starry Digital{" "}
