@@ -74,11 +74,13 @@ const Pricing = () => {
               variants={scrollAnimation}
               className="leading-normal w-10/12 md:w-7/12 lg:w-6/12 mx-auto my-2 text-center"
             >
-              <span className="italic">Faites confiance a nos produits pour le traitement de tout vos
-              problèmes de sante.</span>
+              <span className="italic">
+                Faites confiance a nos produits pour le traitement de tout vos
+                problèmes de sante.
+              </span>
               <br />
-              La synergie de nos produits est souvent reconnu pour différents
-              cas de maladie enfin d’assurer l’efficacit2 et un traitement plus
+              La synergie de nos produits est souvent reconnue pour différents
+              cas de maladie enfin d’assurer l’efficacité et un traitement plus
               dans un délai raisonnable
             </motion.p>
           </ScrollAnimationWrapper>
@@ -114,11 +116,11 @@ const Pricing = () => {
                     <p>{item.description}</p>
                   </div>
                   <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                    {/* <p className="text-2xl text-black-600 text-center mb-4 ">
-                    Free
-                  </p> */}
+                    <p className="text-2xl text-black-600 text-center mb-4 ">
+                      Voir plus
+                    </p>
                     <a href="https://wa.me/+243893926051">
-                      <ButtonPrimary>Plus d'infos</ButtonPrimary>
+                      <ButtonPrimary>Achetez</ButtonPrimary>
                     </a>
                   </div>
                 </motion.div>
