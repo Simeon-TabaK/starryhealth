@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
-import SimpleSlider from "./Slide";
+import SimpleSlider from "@/components/Slide";
 // import EmblaCarousel from "./Slide";
 // import { EmblaOptionsType } from 'embla-carousel'
 
