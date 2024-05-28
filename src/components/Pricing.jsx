@@ -1,12 +1,13 @@
 import React, { useMemo } from "react";
 import Image from "next/image";
 import ButtonPrimary from "./misc/ButtonPrimary";
-import ButtonOutline from "./misc/ButtonOutline.";
+import ButtonOutline from "@/components/misc/ButtonOutline.";
 import Maps from "../../public/assets/HugeGlobal.svg";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 import Testimoni from "./Testimoni";
+import Link from "next/link";
 
 const Pricing = () => {
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);
@@ -17,20 +18,20 @@ const Pricing = () => {
       image: "/assets/products/stc30.JPG",
       description:
         "Libérez le potentiel de guérison ❤‍🩹 de votre corps dès aujourd’hui !",
-      link: "/product",
+      link: "/products/stc",
     },
     {
       name: "SUPERLIFE COLON CARE",
       image: "/assets/products/scc.JPG",
       description:
         "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
-      link: "/product",
+      link: "/product/scc",
     },
     {
       name: "SUPERLIFE IMMUNE CARE",
       image: "/assets/products/sic.JPG",
       description: "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
-      link: "/product",
+      link: "/products/sic",
     },
   ];
   const PRODUCTS1 = [
@@ -39,20 +40,20 @@ const Pricing = () => {
       image: "/assets/products/snc.JPG",
       description:
         "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
-      link: "/product",
+      link: "/products/snc",
     },
     {
       name: "SUPER ROOT COFFEE",
       image: "/assets/products/src.JPG",
       description: "☕ Élevez vos matinées avec Super Root Coffee !",
-      link: "/product",
+      link: "/products/src",
     },
     {
       name: "SUPER CELLTEC ESSENCE MIST",
       image: "/assets/products/scem.JPG",
       description:
         "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
-      link: "/product",
+      link: "/products/sce",
     },
   ];
 
@@ -116,12 +117,12 @@ const Pricing = () => {
                     <p>{item.description}</p>
                   </div>
                   <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                    <p className="text-2xl text-black-600 text-center mb-4 ">
-                      Voir plus
-                    </p>
-                    <a href="https://wa.me/+243893926051">
+                    <Link href={item.link} className="mb-4 ">
+                      <ButtonOutline>Voir plus</ButtonOutline>
+                    </Link>
+                    <Link href="https://wa.me/+243893926051">
                       <ButtonPrimary>Achetez</ButtonPrimary>
-                    </a>
+                    </Link>
                   </div>
                 </motion.div>
               </ScrollAnimationWrapper>
@@ -153,12 +154,12 @@ const Pricing = () => {
                     <p>{item.description}</p>
                   </div>
                   <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                    {/* <p className="text-2xl text-black-600 text-center mb-4 ">
-                    Free
-                  </p> */}
-                    <a href="https://wa.me/+243893926051">
-                      <ButtonPrimary>Sélectionnez</ButtonPrimary>
-                    </a>
+                    <Link href={item.link} className="mb-4 ">
+                      <ButtonOutline>Voir plus</ButtonOutline>
+                    </Link>
+                    <Link href="https://wa.me/+243893926051">
+                      <ButtonPrimary>Achetez</ButtonPrimary>
+                    </Link>
                   </div>
                 </motion.div>
               </ScrollAnimationWrapper>

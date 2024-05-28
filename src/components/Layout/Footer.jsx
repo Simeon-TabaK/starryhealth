@@ -7,6 +7,49 @@ import Image from "next/image";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 
 const Footer = () => {
+  const PRODUCTS = [
+    {
+      name: "SUPERLIFE TOTAL CARE 30",
+      image: "/assets/products/stc30.JPG",
+      description:
+        "Libérez le potentiel de guérison ❤‍🩹 de votre corps dès aujourd’hui !",
+      link: "/products/stc",
+    },
+    {
+      name: "SUPERLIFE COLON CARE",
+      image: "/assets/products/scc.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/products/scc",
+    },
+    {
+      name: "SUPERLIFE IMMUNE CARE",
+      image: "/assets/products/sic.JPG",
+      description: "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
+      link: "/products/sic",
+    },
+    {
+      name: "SUPERLIFE NEURON CARE",
+      image: "/assets/products/snc.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/products/snc",
+    },
+    {
+      name: "SUPER ROOT COFFEE",
+      image: "/assets/products/src.JPG",
+      description: "☕ Élevez vos matinées avec Super Root Coffee !",
+      link: "/products/src",
+    },
+    {
+      name: "SUPER CELLTEC ESSENCE MIST",
+      image: "/assets/products/scem.JPG",
+      description:
+        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+      link: "/products/sce",
+    },
+  ];
+
   return (
     <div className="bg-blue-300 pt-32">
       <div className="w-full mx-auto px-6 sm:px-8 lg:px-16 md:flex justify-between ">
@@ -44,26 +87,16 @@ const Footer = () => {
         <div className=" row-span-2 md:col-span-2 md:col-start-5 md:col-end-9 flex flex-col">
           <p className="text-red-500 mb-4 font-medium text-lg">Nos produits</p>
           <ul className="text-white-300 ">
-            <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              <ArrowRightCircleIcon className="h-6 w-6" /> SUPERLIFE TOTAL CARE
-              30{" "}
-            </li>
-            <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              <ArrowRightCircleIcon className="h-6 w-6" /> SUPERLIFE COLON CARE{" "}
-            </li>
-            <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              <ArrowRightCircleIcon className="h-6 w-6" /> SUPERLIFE IMMUNE CARE{" "}
-            </li>
-            <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              <ArrowRightCircleIcon className="h-6 w-6" /> SUPERLIFE NEURON CARE{" "}
-            </li>
-            <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              <ArrowRightCircleIcon className="h-6 w-6" /> SUPER ROOT COFFEE{" "}
-            </li>
-            <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              <ArrowRightCircleIcon className="h-6 w-6" /> SUPER CELLTEC ESSENCE
-              MIST{" "}
-            </li>
+            {PRODUCTS.map((item) => (
+              <li key={item.name}>
+                <Link
+                  href={item.link}
+                  className="flex my-2 hover:text-red-500 cursor-pointer transition-all"
+                >
+                  <ArrowRightCircleIcon className="h-6 w-6" /> {item.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
         <div className="row-span-2 md:col-span-2 md:col-start-9 md:col-end-11 flex flex-col">
@@ -72,7 +105,7 @@ const Footer = () => {
           </p>
           <ul className="text-white-300">
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
-              Starry Boxx {" "}
+              Starry Boxx{" "}
             </li>
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
               Starry Digital{" "}
