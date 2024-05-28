@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
-import SimpleSlider from "./Slide"
+import SimpleSlider from "./Slide";
 // import EmblaCarousel from "./Slide";
 // import { EmblaOptionsType } from 'embla-carousel'
 
@@ -45,7 +45,7 @@ const Hero = ({
           // variants={scrollAnimation}
         >
           {/* <EmblaCarousel slides={SLIDES} options={OPTIONS} /> */}
-          <SimpleSlider/>
+          <SimpleSlider />
           {/* <div className="h-2/3">
             <img
               src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg"
@@ -53,6 +53,21 @@ const Hero = ({
             />
           </div> */}
         </motion.div>
+      </ScrollAnimationWrapper>
+
+      <ScrollAnimationWrapper className="home">
+        <motion.h3
+          variants={scrollAnimation}
+          className="text-2xl uppercase sm:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed w-9/12 sm:w-6/12 lg:w-4/12 mx-auto"
+        >
+          Bienvenu à Starry Health{" "}
+        </motion.h3>
+        <motion.p
+          className="leading-normal  mx-auto my-2 w-10/12 sm:w-7/12 lg:w-6/12"
+          variants={scrollAnimation}
+        >
+          Leader global
+        </motion.p>
       </ScrollAnimationWrapper>
       <div className="relative w-full flex">
         <ScrollAnimationWrapper className="rounded-lg w-full grid grid-flow-row sm:grid-flow-row grid-cols-1 sm:grid-cols-3 py-9 divide-y-2 sm:divide-y-0 sm:divide-x-2 divide-gray-100 bg-white-500 z-10">

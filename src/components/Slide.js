@@ -10,11 +10,6 @@ const SimpleSlider = () => {
   console.log(slideIndex);
 
 
-  // Next/previous controls
-  function dotButton(n) {
-    SetSlideIndex(n);
-  }
-
   function rightButton() {
     if (slideIndex == slideImg.length) SetSlideIndex(0);
     else SetSlideIndex(slideIndex + 1);
@@ -71,20 +66,20 @@ const SimpleSlider = () => {
           >
             {/* <div class="numbertext">1 / 3</div> */}
             <img src={s.src} style={{ width: "100%" }} />
-            <div className="text-white-300 text-xl px-2 py-3">Caption Text</div>
+            <div className="text-white-300 text-xl px-3 py-0">Caption Text</div>
           </div>
         ))}
 
         {/* <!-- Next and previous buttons --> */}
         <button
-          className="cursor-pointer absolute top-1/2 w-auto -mt-6 p-4 text-white-500 text-3xl left-0"
+          className="cursor-pointer absolute hover:bg-blue-300 top-1/2 w-auto -mt-6 p-4 text-white-500 text-3xl left-0"
           style={{ userSelect: "none", transition: "0.6s" }}
           onClick={leftButton}
         >
           &#10094;
         </button>
         <button
-          className="cursor-pointer absolute top-1/2 w-auto -mt-6 p-4 text-white-500 text-3xl right-0"
+          className="cursor-pointer absolute hover:bg-blue-300 top-1/2 w-auto -mt-6 p-4 text-white-500 text-3xl right-0"
           style={{ userSelect: "none", transition: "0.6s" }}
           onClick={rightButton}
         >
@@ -94,10 +89,18 @@ const SimpleSlider = () => {
       <br />
 
       {/* <!-- The dots/circles --> */}
-      <div style={{ textAlign: "center" }}>
-        <span class="dot" onclick="currentSlide(1)"></span>
-        <span class="dot" onclick="currentSlide(2)"></span>
-        <span class="dot" onclick="currentSlide(3)"></span>
+      <div className="flex justify-center" >
+        {slideImg.map((s) => (
+            <span
+              key={s.index}
+            //   onClick={currentSlide(s.index)}
+              className={
+                "cursor-pointer h-3 w-3 mx-1 " +
+                (slideIndex === s.index ? "bg-blue-200" : "bg-translucide") +
+                " rounded-xl inline-block hover:bg-blue-200"
+              }
+            ></span>
+        ))}
       </div>
     </div>
   );
