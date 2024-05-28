@@ -35,7 +35,7 @@ const Header = () => {
     {
       name: "Produits",
       description: "Page de Produit",
-      href: "/product",
+      href: "/products",
       icon: BuildingStorefrontIcon,
     },
     {

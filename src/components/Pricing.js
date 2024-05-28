@@ -29,10 +29,9 @@ const Pricing = () => {
     {
       name: "SUPERLIFE IMMUNE CARE",
       image: "/assets/products/sic.JPG",
-      description:
-        "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
+      description: "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
       link: "/product",
-    }
+    },
   ];
   const PRODUCTS1 = [
     {
@@ -45,8 +44,7 @@ const Pricing = () => {
     {
       name: "SUPER ROOT COFFEE",
       image: "/assets/products/src.JPG",
-      description:
-        "☕ Élevez vos matinées avec Super Root Coffee !",
+      description: "☕ Élevez vos matinées avec Super Root Coffee !",
       link: "/product",
     },
     {
@@ -70,98 +68,98 @@ const Pricing = () => {
               variants={scrollAnimation}
               className="text-2xl md:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed"
             >
-              Nos produits
+              Découvrez notre gamme des produits
             </motion.h3>
             <motion.p
               variants={scrollAnimation}
               className="leading-normal w-10/12 md:w-7/12 lg:w-6/12 mx-auto my-2 text-center"
             >
-              Faites confiance a SuperLife avec ces produits...
+              <span className="italic">Faites confiance a nos produits pour le traitement de tout vos
+              problèmes de sante.</span>
+              <br />
+              La synergie de nos produits est souvent reconnu pour différents
+              cas de maladie enfin d’assurer l’efficacit2 et un traitement plus
+              dans un délai raisonnable
             </motion.p>
           </ScrollAnimationWrapper>
           <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6">
-            
-          {PRODUCTS.map((item) => (
-            <ScrollAnimationWrapper className="flex justify-center" key={item.name}>
-              <motion.div
-                variants={scrollAnimation}
-                className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
-                whileHover={{
-                  scale: 1.1,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
+            {PRODUCTS.map((item) => (
+              <ScrollAnimationWrapper
+                className="flex justify-center"
+                key={item.name}
               >
-                <div className="p-0 lg:p-0 mt-0 lg:mt-0">
-                  <Image
-                  className="rounded-sm"
-                    src={item.image}
-                    width={200}
-                    height={180}
-                    alt=""
-                  />
-                </div>
-                <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
-                  {item.name}
-                </p>
-                <div>
-                  <p>
-                    {item.description}
+                <motion.div
+                  variants={scrollAnimation}
+                  className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
+                  whileHover={{
+                    scale: 1.1,
+                    transition: {
+                      duration: 0.2,
+                    },
+                  }}
+                >
+                  <div className="p-0 lg:p-0 mt-0 lg:mt-0">
+                    <Image
+                      className="rounded-md"
+                      src={item.image}
+                      width={200}
+                      height={180}
+                      alt=""
+                    />
+                  </div>
+                  <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
+                    {item.name}
                   </p>
-                </div>
-                <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                  {/* <p className="text-2xl text-black-600 text-center mb-4 ">
+                  <div>
+                    <p>{item.description}</p>
+                  </div>
+                  <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
+                    {/* <p className="text-2xl text-black-600 text-center mb-4 ">
                     Free
                   </p> */}
-                  <a href="https://wa.me/+243893926051">
-                    <ButtonPrimary>Plus d'infos</ButtonPrimary>
-                  </a>
-                </div>
-              </motion.div>
-            </ScrollAnimationWrapper>
+                    <a href="https://wa.me/+243893926051">
+                      <ButtonPrimary>Plus d'infos</ButtonPrimary>
+                    </a>
+                  </div>
+                </motion.div>
+              </ScrollAnimationWrapper>
             ))}
           </div>
           <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6">
-            
-          {PRODUCTS1.map((item) => (
-            <ScrollAnimationWrapper className="flex justify-center" key={item.name}>
-              <motion.div
-                variants={scrollAnimation}
-                className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
-                whileHover={{
-                  scale: 1.1,
-                  transition: {
-                    duration: 0.2,
-                  },
-                }}
+            {PRODUCTS1.map((item) => (
+              <ScrollAnimationWrapper
+                className="flex justify-center"
+                key={item.name}
               >
-                <div className="p-0 lg:p-0 mt-0 lg:mt-0">
-                  <Image
-                    src={item.image}
-                    width={200}
-                    height={180}
-                    alt=""
-                  />
-                </div>
-                <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
-                  {item.name}
-                </p>
-                <div>
-                  <p>
-                    {item.description}
+                <motion.div
+                  variants={scrollAnimation}
+                  className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
+                  whileHover={{
+                    scale: 1.1,
+                    transition: {
+                      duration: 0.2,
+                    },
+                  }}
+                >
+                  <div className="p-0 lg:p-0 mt-0 lg:mt-0">
+                    <Image src={item.image} width={200} height={180} alt="" />
+                  </div>
+                  <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
+                    {item.name}
                   </p>
-                </div>
-                <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                  {/* <p className="text-2xl text-black-600 text-center mb-4 ">
+                  <div>
+                    <p>{item.description}</p>
+                  </div>
+                  <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
+                    {/* <p className="text-2xl text-black-600 text-center mb-4 ">
                     Free
                   </p> */}
-                  <a href="https://wa.me/+243893926051">
-                    <ButtonPrimary>Sélectionnez</ButtonPrimary>
-                  </a>
-                </div>
-              </motion.div>
-            </ScrollAnimationWrapper>
+                    <a href="https://wa.me/+243893926051">
+                      <ButtonPrimary>Sélectionnez</ButtonPrimary>
+                    </a>
+                  </div>
+                </motion.div>
+              </ScrollAnimationWrapper>
             ))}
           </div>
         </div>

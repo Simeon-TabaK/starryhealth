@@ -19,23 +19,13 @@ const Hero = ({
       icon: "/assets/Icon/gridicons_location.svg",
     },
     {
-      name: "Services",
+      name: "Témoignages",
       number: "3",
       icon: "/assets/Icon/bx_bxs-server.svg",
     },
   ],
 }) => {
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);
-  // let OPTIONS: EmblaOptionsType = {};
-  // // const SLIDE_COUNT = 5;
-  // // const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
-
-  // let SLIDES :  [string, string, string] = [
-  //   // "/assets/logo.png",
-  //   "https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg",
-  //   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_0rWvumyST3jwTlWdO88YL4CT1OuovQcHLwhymlmfurLCqekh5l7XHZV-A8O_aUBeLzE&usqp=CAU",
-  //   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeatZ3nkxayRGgpV5CTjM5SIkkuUdInheBkc3n30Eo4Q&s",
-  // ];
 
   return (
     <div className="mt-20 ">
@@ -58,7 +48,7 @@ const Hero = ({
       <ScrollAnimationWrapper className="home">
         <motion.h3
           variants={scrollAnimation}
-          className="text-2xl uppercase sm:text-3xl lg:text-4xl font-medium text-black-600 leading-relaxed w-9/12 sm:w-6/12 lg:w-4/12 mx-auto"
+          className="text-xl sm:text-xl lg:text-2xl font-medium text-black-600 leading-relaxed w-full flex justify-center mx-auto"
         >
           Bienvenu à Starry Health{" "}
         </motion.h3>
@@ -66,7 +56,9 @@ const Hero = ({
           className="leading-normal  mx-auto my-2 w-10/12 sm:w-7/12 lg:w-6/12"
           variants={scrollAnimation}
         >
-          Leader global
+          Leader global dans la promotion de la santé et le bien être de
+          l'humanité par m'utilisation des produits lis; testés et approuvées
+          scientifiquement
         </motion.p>
       </ScrollAnimationWrapper>
       <div className="relative w-full flex">
@@ -97,6 +89,39 @@ const Hero = ({
           style={{ filter: "blur(114px)" }}
         ></div>
       </div>
+      <ScrollAnimationWrapper className="home">
+        <motion.h3
+          variants={scrollAnimation}
+          className="text-xl sm:text-xl lg:text-2xl font-medium text-black-600 leading-relaxed w-full flex justify-center mx-auto"
+        >
+          STC30{" "}
+        </motion.h3>
+        <motion.p
+          className="leading-normal font text-justify mx-auto my-2 w-11/12 sm:w-8/12 lg:w-7/12"
+          variants={scrollAnimation}
+        >
+          <span className="italic flex justify-center text-center ">
+            La thérapie cellulaire par cellules souches végétales : un domaine
+            en plein essort
+          </span>
+          <br />
+          La thérapie cellulaire par cellules souches végétales, aussi appelée
+          phytothérapie cellulaire, est une approche thérapeutique innovante qui
+          utilise les cellules souches végétales pour stimuler la régénération
+          et la protection des cellules de l'organisme humain.
+          <br />
+          Contrairement aux cellules souches animales ou humaines, les cellules
+          souches végétales ont la capacité de se totipotentes, c'est-à-dire
+          qu'elles peuvent se différencier en tous les types de cellules
+          végétales. Cette plasticité unique les rend prometteuses pour un large
+          éventail d'applications thérapeutiques.
+          <br />
+          La thérapie cellulaire par cellules souches végétales offre une
+          promesse thérapeutique considérable pour un large éventail de maladies
+          et de conditions. elle représente une approche innovante et
+          prometteuse pour la médecine régénérative.
+        </motion.p>
+      </ScrollAnimationWrapper>
     </div>
   );
 };
