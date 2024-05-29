@@ -1,12 +1,10 @@
 module.exports = {
-    boxShadow: {
   content: [
-    "./src/pages/*.jsx",
-    "./src/pages/**/*.jsx",
-    "./src/components/*.jsx",
-    "./src/components/**/*.jsx",
+    './src/pages/*.jsx',
+    './src/pages/**/*.jsx',
+    './src/components/*.jsx',
+    './src/components/**/*.jsx',
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
