@@ -4,9 +4,9 @@ module.exports = {
     "./src/pages/**/*.jsx",
     "./src/components/*.jsx",
     "./src/components/**/*.jsx",
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/pages/**/*.{jsx,ts,js,tsx,mdx}",
+    "./src/components/**/*.{jsx,ts,js,tsx,mdx}",
+    "./src/app/**/*.{jsx,ts,js,tsx,mdx}",
   ],
   theme: {
     boxShadow: {
