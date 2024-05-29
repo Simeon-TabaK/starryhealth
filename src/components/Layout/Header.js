@@ -12,6 +12,7 @@ import {
   PhoneIcon,
   RectangleStackIcon,
   StopCircleIcon,
+  UserIcon,
 } from "@heroicons/react/24/solid";
 
 const Header = () => {
@@ -90,9 +91,8 @@ const Header = () => {
               href="/"
               className="text-black-600 mx-2 sm:mx-4 capitalize tracking-wide hover:text-red-500 transition-all"
             >
-                Sign In
+                <UserIcon className="h-6 w-6 text-blue-500"/>
             </Link>
-            <ButtonOutline>Sign Up</ButtonOutline>
           </div> */}
         </nav>
       </header>

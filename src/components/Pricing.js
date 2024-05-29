@@ -33,8 +33,6 @@ const Pricing = () => {
       description: "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
       link: "/products/sic",
     },
-  ];
-  const PRODUCTS1 = [
     {
       name: "SUPERLIFE NEURON CARE",
       image: "/assets/products/snc.JPG",
@@ -85,7 +83,8 @@ const Pricing = () => {
               dans un délai raisonnable
             </motion.p>
           </ScrollAnimationWrapper>
-          <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6">
+          {/* <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6"> */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {PRODUCTS.map((item) => (
               <ScrollAnimationWrapper
                 className="flex justify-center"
@@ -109,43 +108,6 @@ const Pricing = () => {
                       height={180}
                       alt=""
                     />
-                  </div>
-                  <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
-                    {item.name}
-                  </p>
-                  <div>
-                    <p>{item.description}</p>
-                  </div>
-                  <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                    <Link href={item.link} className="mb-4 ">
-                      <ButtonOutline>Voir plus</ButtonOutline>
-                    </Link>
-                    <Link href="https://wa.me/+243893926051">
-                      <ButtonPrimary>Achetez</ButtonPrimary>
-                    </Link>
-                  </div>
-                </motion.div>
-              </ScrollAnimationWrapper>
-            ))}
-          </div>
-          <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6">
-            {PRODUCTS1.map((item) => (
-              <ScrollAnimationWrapper
-                className="flex justify-center"
-                key={item.name}
-              >
-                <motion.div
-                  variants={scrollAnimation}
-                  className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
-                  whileHover={{
-                    scale: 1.1,
-                    transition: {
-                      duration: 0.2,
-                    },
-                  }}
-                >
-                  <div className="p-0 lg:p-0 mt-0 lg:mt-0">
-                    <Image src={item.image} width={200} height={180} alt="" />
                   </div>
                   <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
                     {item.name}

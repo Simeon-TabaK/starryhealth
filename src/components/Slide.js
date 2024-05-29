@@ -63,8 +63,13 @@ const SimpleSlider = () => {
             className={"" + (slideIndex === s.index ? "block" : "hidden")}
             style={{ animationName: "fade", animationDuration: "1.5s" }}
           >
-            {/* <div class="numbertext">1 / 3</div> */}
-            <img src={s.src} style={{ width: "100%" }} />
+            <div class="">
+              <img
+                src={s.src}
+                style={{ width: "100%" }}
+                className="saturate-150 grayscale-0"
+              />
+            </div>
             <div className="text-white-300 text-xl px-3 py-0">Caption Text</div>
           </div>
         ))}
