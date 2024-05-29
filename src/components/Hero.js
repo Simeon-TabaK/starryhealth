@@ -28,7 +28,7 @@ const Hero = ({
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);
 
   return (
-    <div className="mt-20 ">
+    <div className="mt-8">
       <ScrollAnimationWrapper className="slider-0">
         <motion.div
           className="gap-8 py-2 sm:py-12"

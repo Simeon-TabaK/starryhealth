@@ -2,12 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
-// import "slick-carousel/slick/slick.css";
-// import "slick-carousel/slick/slick-theme.css";
 
 const SimpleSlider = () => {
   const [slideIndex, SetSlideIndex] = useState(0);
-  console.log(slideIndex);
+  
 
   function rightButton() {
     if (slideIndex == slideImg.length - 1) SetSlideIndex(0);
@@ -21,29 +19,9 @@ const SimpleSlider = () => {
 
   // Thumbnail image controls
   function currentSlide(n) {
-    // showSlides((slideIndex = n));
-    SetSlideIndex(slideIndex);
+    SetSlideIndex(n);
   }
 
-  //   function showSlides(n) {
-  //     let i;
-  //     let slides = document.getElementsByClassName("mySlides");
-  //     let dots = document.getElementsByClassName("dot");
-  //     if (n > slides.length) {
-  //       slideIndex = 1;
-  //     }
-  //     if (n < 1) {
-  //       slideIndex = slides.length;
-  //     }
-  //     for (i = 0; i < slides.length; i++) {
-  //       slides[i].style.display = "none";
-  //     }
-  //     for (i = 0; i < dots.length; i++) {
-  //       dots[i].className = dots[i].className.replace(" active", "");
-  //     }
-  //     slides[slideIndex - 1].style.display = "block";
-  //     dots[slideIndex - 1].className += " active";
-  //   }
   const slideImg = [
     { index: 0, src: "assets/slides/slide1.jpg", text: "Lorem ...." },
     { index: 1, src: "assets/slides/slide2.jpg", text: "Lorem ...." },
@@ -97,7 +75,7 @@ const SimpleSlider = () => {
         {slideImg.map((s) => (
           <span
             key={s.index}
-            //   onClick={currentSlide(s.index)}
+            onClick={() => currentSlide(s.index)}
             className={
               "cursor-pointer h-3 w-3 mx-1 " +
               (slideIndex === s.index ? "bg-blue-200" : "bg-translucide") +

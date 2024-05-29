@@ -83,16 +83,15 @@ const Pricing = () => {
               dans un délai raisonnable
             </motion.p>
           </ScrollAnimationWrapper>
-          {/* <div className="grid grid-flow-row md:grid-flow-col grid-cols-1 md:grid-cols-3 gap-4 lg:gap-12 py-8 lg:py-12 px-6 md:px-0 lg:px-6"> */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {PRODUCTS.map((item) => (
-              <ScrollAnimationWrapper
+              <div
                 className="flex justify-center"
                 key={item.name}
               >
                 <motion.div
                   variants={scrollAnimation}
-                  className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-4 px-6 lg:px-12 xl:px-20"
+                  className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-2 px-2 "
                   whileHover={{
                     scale: 1.1,
                     transition: {
@@ -101,11 +100,11 @@ const Pricing = () => {
                   }}
                 >
                   <div className="p-0 lg:p-0 mt-0 lg:mt-0">
-                    <Image
+                    <img
                       className="rounded-md"
                       src={item.image}
-                      width={200}
-                      height={180}
+                      // width={250}
+                      // height={180}
                       alt=""
                     />
                   </div>
@@ -124,7 +123,7 @@ const Pricing = () => {
                     </Link>
                   </div>
                 </motion.div>
-              </ScrollAnimationWrapper>
+              </div>
             ))}
           </div>
         </div>

@@ -25,6 +25,9 @@ module.exports = {
       transparent: "transparent",
       translucide: "#F5385555",
       transwhite: "#ffffffaa",
+      // primary: "#c82b27",
+      // secondary: "#02173c",
+      // infos: "#AFB5C0",
       blue: {
         200:"#8ca7df",
         300:"#02173c",
