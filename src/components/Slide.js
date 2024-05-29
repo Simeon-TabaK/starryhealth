@@ -44,7 +44,7 @@ const SimpleSlider = () => {
             <div class="">
               <img
                 src={s.src}
-                style={{ width: "100%" }}
+                style={{ width: "100%", minHeight:"400px" }}
                 className="saturate-150 grayscale-0"
               />
             </div>

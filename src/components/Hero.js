@@ -48,7 +48,7 @@ const Hero = ({
       <ScrollAnimationWrapper className="home">
         <motion.h3
           variants={scrollAnimation}
-          className="text-xl sm:text-xl lg:text-2xl font-medium text-black-600 leading-relaxed w-full flex justify-center mx-auto"
+          className="text-xl sm:text-xl lg:text-2xl font-medium text-black-600 leading-relaxed w-full flex justify-center mt-10 mx-auto"
         >
           Bienvenu à Starry Health{" "}
         </motion.h3>
