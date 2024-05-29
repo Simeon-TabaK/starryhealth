@@ -14,7 +14,7 @@ import "slick-carousel/slick/slick-theme.css";
 export default function Testimoni(){
   const listTestimoni = [
     {
-      name: "Pene Foundation",
+      name: "Clovis CHAP",
       image: "/assets/people-3.png",
       city: "Goma",
       country: "RD Congo",
@@ -23,7 +23,7 @@ export default function Testimoni(){
         "Pleurage... Je suis très heureux de travail avec Starry Digital, ils se sont avéré être plus que mes attentes et jusqu’à présent, il n’y a eu aucun problème. StarryBoxx assure",
     },
     {
-      name: "Goma Food Group",
+      name: "Gaelle",
       image: "/assets/people-3.png",
       city: "Goma",
       country: "RD Congo",
