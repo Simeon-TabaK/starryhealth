@@ -51,7 +51,7 @@ export default function Carousel() {
             <div class="">
               <img
                 src={s.src}
-                style={{ width: "100%" }}
+                style={{ width: "100%" ,minHeight:"300px" }}
                 // style={{ width: "100%", minHeight: "300px" }}
                 className="saturate-150 grayscale-0"
               />
