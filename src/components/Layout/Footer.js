@@ -51,10 +51,10 @@ const Footer = () => {
   ];
 
   return (
-    <div className="bg-blue-300 pt-32">
+    <div className="bg-blue-300 pt-32 pb-16 md:pb-1">
       <div className="w-full mx-auto px-6 sm:px-8 lg:px-16 md:flex justify-between ">
         <div className="row-span-2 md:w-1/4 flex flex-col items-start ">
-          <Image src="/assets/logo1.png" width={60} height={60} alt="" />
+          <Image src="/assets/starry-logo-white.png" width={60} height={60} alt="" />
           <p className="mb-4 text-white-300">
             <strong className="font-medium">Starry Digital</strong> aide dans les
             ventes et marketing des produits medicaux en partenariat avec les
@@ -107,9 +107,9 @@ const Footer = () => {
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
               Starry Boxx{" "}
             </li>
-            <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
+            {/* <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
               Starry Digital{" "}
-            </li>
+            </li> */}
             <li className="flex my-2 hover:text-red-500 cursor-pointer transition-all">
               Starry Health{" "}
             </li>

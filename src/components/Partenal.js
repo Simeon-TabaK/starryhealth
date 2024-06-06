@@ -15,7 +15,7 @@ const Partenal = () => {
     slidesToScroll: 1,
     autoplay: true,
     speed: 1000,
-    autoplaySpeed: 4000,
+    autoplaySpeed: 2000,
     waitForAnimate: false,
     responsive: [
       {
@@ -37,7 +37,7 @@ const Partenal = () => {
       {
         breakpoint: 480,
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 2,
           slidesToScroll: 1,
         },
       },
@@ -54,10 +54,10 @@ const Partenal = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-b from-white-300 to-white-500 w-full py-14">
+    <div className="bg-gradient-to-b from-white-300 to-white-500 w-full py-5">
       <div className=" px-6 sm:px-8 lg:px-16 mx-auto flex flex-col w-full text-center justify-center">
         <div className="flex flex-col w-full"></div>
-        <div className="flex flex-col w-full my-16">
+        <div className="flex flex-col w-full my-8">
           <ScrollAnimationWrapper className="partenal">
             <motion.h3
               variants={scrollAnimation}
@@ -81,7 +81,7 @@ const Partenal = () => {
               <div className="w-9/12">
                 <Slider arrows={false} {...settings}>
                   {paternalLogo.map((s) => (
-                    <a className="h-24" href={s.href}>
+                    <a className="h-28 w-auto" href={s.href}>
                       <img
                         key={s.index}
                         src={s.src}
