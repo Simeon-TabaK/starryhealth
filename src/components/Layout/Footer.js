@@ -56,7 +56,7 @@ const Footer = () => {
         <div className="row-span-2 md:w-1/4 flex flex-col items-start ">
           <Image src="/assets/logo1.png" width={60} height={60} alt="" />
           <p className="mb-4 text-white-300">
-            <strong className="font-medium">SuperLife</strong> aide dans les
+            <strong className="font-medium">Starry Digital</strong> aide dans les
             ventes et marketing des produits medicaux en partenariat avec les
             memebres de SuperLife.
           </p>

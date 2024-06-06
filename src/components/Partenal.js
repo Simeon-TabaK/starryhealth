@@ -31,12 +31,12 @@ const Partenal = () => {
           <ScrollAnimationWrapper className="partenal">
             <motion.div className="w-full flex justify-evenly items-center mt-4 flex-wrap lg:flex-nowrap" variants={scrollAnimation}>
               <img
-                src="/assets/logo.png"
+                src="/assets/logoSuperLife.png"
                 className="h-14 w-auto mt-4 lg:mt-2"
                 alt=""
               />
               <img
-                src="/assets/logo.png"
+                src="/assets/logoSuperLife.png"
                 className="h-14 w-auto mt-2 lg:mt-0"
                 alt=""
               />
@@ -46,12 +46,12 @@ const Partenal = () => {
                 alt=""
               />
               <img
-                src="/assets/logo.png"
+                src="/assets/logoSuperLife.png"
                 className="h-14 w-auto mt-2 lg:mt-0"
                 alt=""
               />
               <img
-                src="/assets/logo.png"
+                src="/assets/logoSuperLife.png"
                 className="h-12 w-auto mt-2 lg:mt-0"
                 alt=""
               />
