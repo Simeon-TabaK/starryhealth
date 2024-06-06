@@ -16,7 +16,7 @@ const Hero = ({
     },
     {
       name: "RDC",
-      number: "4",
+      number: "7",
       icon: "/assets/Icon/gridicons_location.svg",
     },
     {
@@ -33,16 +33,8 @@ const Hero = ({
       <ScrollAnimationWrapper className="slider-0">
         <motion.div
           className="gap-8 py-2 sm:py-12"
-          // variants={scrollAnimation}
         >
-          {/* <EmblaCarousel slides={SLIDES} options={OPTIONS} /> */}
           <Carousel />
-          {/* <div className="h-2/3">
-            <img
-              src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg"
-              style={{ width: "100%", height: "30%" }}
-            />
-          </div> */}
         </motion.div>
       </ScrollAnimationWrapper>
 
