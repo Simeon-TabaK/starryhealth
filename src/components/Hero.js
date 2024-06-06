@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 import SimpleSlider from "@/components/Slide";
+import Carousel from "@/components/Carousel";
 // import EmblaCarousel from "./Slide";
 // import { EmblaOptionsType } from 'embla-carousel'
 
@@ -14,7 +15,7 @@ const Hero = ({
       icon: "/assets/Icon/heroicons_sm-user.svg",
     },
     {
-      name: "Goma",
+      name: "RDC",
       number: "4",
       icon: "/assets/Icon/gridicons_location.svg",
     },
@@ -35,7 +36,7 @@ const Hero = ({
           // variants={scrollAnimation}
         >
           {/* <EmblaCarousel slides={SLIDES} options={OPTIONS} /> */}
-          <SimpleSlider />
+          <Carousel />
           {/* <div className="h-2/3">
             <img
               src="https://cdn.mos.cms.futurecdn.net/xaycNDmeyxpHDrPqU6LmaD.jpg"

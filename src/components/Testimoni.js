@@ -24,7 +24,7 @@ export default function Testimoni(){
     },
     {
       name: "Gaelle",
-      image: "/assets/people-3.png",
+      image: "/assets/people-2.png",
       city: "Goma",
       country: "RD Congo",
       rating: "4.2",
@@ -42,7 +42,7 @@ export default function Testimoni(){
     },
     {
       name: "Devis Gailon",
-      image: "/assets/people-3.png",
+      image: "/assets/people-2.png",
       city: "Kampala",
       country: "Uganda",
       rating: "4.5",
@@ -99,8 +99,9 @@ export default function Testimoni(){
                 <div className="flex order-2 xl:order-1">
                   <Image
                     src={listTestimonis.image}
-                    height={50}
-                    width={50}
+                    height={55}
+                    width={55}
+                    className="rounded-full"
                     alt="Icon People"
                   />
                   <div className="flex flex-col ml-5 text-left">
