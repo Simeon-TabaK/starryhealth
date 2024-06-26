@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import ButtonPrimary from "./misc/ButtonPrimary";
 import ButtonOutline from "@/components/misc/ButtonOutline.";
-import Maps from "../../public/assets/HugeGlobal.svg";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
@@ -83,7 +82,7 @@ const Pricing = () => {
               dans un délai raisonnable
             </motion.p>
           </ScrollAnimationWrapper>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
             {PRODUCTS.map((item) => (
               <div
                 className="flex justify-center"
@@ -91,7 +90,7 @@ const Pricing = () => {
               >
                 <motion.div
                   variants={scrollAnimation}
-                  className="flex flex-col justify-center items-center border-2 border-gray-500 rounded-xl py-2 px-2 "
+                  className="flex flex-col items-center border-2 border-gray-500 rounded-xl  "
                   whileHover={{
                     scale: 1.1,
                     transition: {
@@ -99,28 +98,28 @@ const Pricing = () => {
                     },
                   }}
                 >
-                  <div className="p-0 lg:p-0 mt-0 lg:mt-0">
+                  <div className="p-0 lg:p-0 mt-0 lg:mt-0 top-0">
                     <img
-                      className="rounded-md"
+                      className="rounded-tl-xl rounded-tr-xl w-full"
                       src={item.image}
                       // width={250}
                       // height={180}
                       alt=""
                     />
-                  </div>
-                  <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-7">
-                    {item.name}
-                  </p>
-                  <div>
-                    <p>{item.description}</p>
-                  </div>
-                  <div className="flex flex-col w-full justify-center mb-4 flex-none mt-12">
-                    <Link href={item.link} className="mb-4 ">
-                      <ButtonOutline>Voir plus</ButtonOutline>
-                    </Link>
-                    <Link href="https://wa.me/+243893926051">
-                      <ButtonPrimary>Achetez</ButtonPrimary>
-                    </Link>
+                    <p className="text-lg text-black-600 font-medium capitalize my-2 md:my-2">
+                      {item.name}
+                    </p>
+                    <div>
+                      <p>{item.description}</p>
+                    </div>
+                    <div className="flex flex-col w-full justify-center mb-4 flex-none mt-5">
+                      <Link href={item.link} className="mb-4 ">
+                        <ButtonOutline>Voir plus</ButtonOutline>
+                      </Link>
+                      <Link href="https://wa.me/+243893926051">
+                        <ButtonPrimary>Achetez</ButtonPrimary>
+                      </Link>
+                    </div>
                   </div>
                 </motion.div>
               </div>

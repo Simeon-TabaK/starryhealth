@@ -15,44 +15,35 @@ import {
   UserIcon,
 } from "@heroicons/react/24/solid";
 
-const Header = () => {
-  const [scrollActive, setScrollActive] = useState(false);
-
-  const currentPathLink = usePathname();
-
-  useEffect(() => {
-    window.addEventListener("scroll", () => {
-      setScrollActive(window.scrollY > 20);
-    });
-  }, []);
+const SideBar = () => {
 
   const links = [
     {
-      name: "Accueil",
+      name: "Admin",
       description: "Page d'accueil",
       href: "/",
       icon: HomeIcon,
     },
     {
-      name: "Produits",
+      name: "Admin",
       description: "Page de Produit",
       href: "/products",
       icon: BuildingStorefrontIcon,
     },
     {
-      name: "Témoignage",
+      name: "Admin",
       description: "Page de témoignage",
       href: "/testmony",
       icon: RectangleStackIcon,
     },
     {
-      name: "A propos",
+      name: "Admin",
       description: "Page d'a propos",
       href: "/about",
       icon: ExclamationCircleIcon,
     },
     {
-      name: "Contacts",
+      name: "Admin",
       description: "Page de contact",
       href: "/contact",
       icon: PhoneIcon,
@@ -134,4 +125,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default SideBar;

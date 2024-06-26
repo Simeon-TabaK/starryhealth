@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import Slider from "react-slick";
-import Maps from "../../public/assets/HugeGlobal.svg";
 import { motion } from "framer-motion";
 import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
@@ -53,6 +52,8 @@ const Partenal = () => {
     { index: 5, src: "/assets/logo.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
   ];
 
+  // console.log(paternal)
+
   return (
     <div className="bg-gradient-to-b from-white-300 to-white-500 w-full py-5">
       <div className=" px-6 sm:px-8 lg:px-16 mx-auto flex flex-col w-full text-center justify-center">
@@ -100,7 +101,6 @@ const Partenal = () => {
               className="py-2 w-full px-2 mt-2"
               variants={scrollAnimation}
             >
-              {/* <Maps className="w-full h-auto" /> */}
               <div className="flex justify-center">
                 <img src="/assets/rdc.png" className="w-2/3" alt="" />
               </div>

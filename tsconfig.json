@@ -18,6 +18,10 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/api/hellott", "src/pages/api/route", "src/components/Layout/AdminLayout/SideBar.jsx"],
   "exclude": ["node_modules"]
 }
+
+
+// "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/api/hello.ts", "src/pages/api/route.tsx"],
+// "exclude": ["node_modules"]
