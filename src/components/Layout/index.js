@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation';
 
 const Layout = ({ children }) => {
   const current = usePathname();
-  console.log(current);
-  console.log(current.includes("Être"));
-  console.log(current.includes("/admin"));
+  // console.log(current);
+  // console.log(current.includes("Être"));
+  // console.log(current.includes("/admin"));
 
   return (
     <>
