@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+"use client";
+import React, { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
 import ButtonPrimary from "./misc/ButtonPrimary";
 import ButtonOutline from "@/components/misc/ButtonOutline.";
@@ -8,51 +9,60 @@ import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 import Testimoni from "./Testimoni";
 import Link from "next/link";
 
-const Pricing = () => {
+ const Pricing = () => {
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);
 
-  const PRODUCTS = [
-    {
-      name: "SUPERLIFE TOTAL CARE 30",
-      image: "/assets/products/stc30.JPG",
-      description:
-        "Libérez le potentiel de guérison ❤‍🩹 de votre corps dès aujourd’hui !",
-      link: "/products/stc",
-    },
-    {
-      name: "SUPERLIFE COLON CARE",
-      image: "/assets/products/scc.JPG",
-      description:
-        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
-      link: "/product/scc",
-    },
-    {
-      name: "SUPERLIFE IMMUNE CARE",
-      image: "/assets/products/sic.JPG",
-      description: "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
-      link: "/products/sic",
-    },
-    {
-      name: "SUPERLIFE NEURON CARE",
-      image: "/assets/products/snc.JPG",
-      description:
-        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
-      link: "/products/snc",
-    },
-    {
-      name: "SUPER ROOT COFFEE",
-      image: "/assets/products/src.JPG",
-      description: "☕ Élevez vos matinées avec Super Root Coffee !",
-      link: "/products/src",
-    },
-    {
-      name: "SUPER CELLTEC ESSENCE MIST",
-      image: "/assets/products/scem.JPG",
-      description:
-        "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
-      link: "/products/sce",
-    },
-  ];
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => setProducts(data));
+  }, []);
+
+  // const PRODUCTS = [
+  //   {
+  //     name: "SUPERLIFE TOTAL CARE 30",
+  //     image: "/assets/products/stc30.JPG",
+  //     description:
+  //       "Libérez le potentiel de guérison ❤‍🩹 de votre corps dès aujourd’hui !",
+  //     link: "/products/stc",
+  //   },
+  //   {
+  //     name: "SUPERLIFE COLON CARE",
+  //     image: "/assets/products/scc.JPG",
+  //     description:
+  //       "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+  //     link: "/product/scc",
+  //   },
+  //   {
+  //     name: "SUPERLIFE IMMUNE CARE",
+  //     image: "/assets/products/sic.JPG",
+  //     description: "Renforcez votre immunité avec SuperLife Immune Care ! 🌿💪",
+  //     link: "/products/sic",
+  //   },
+  //   {
+  //     name: "SUPERLIFE NEURON CARE",
+  //     image: "/assets/products/snc.JPG",
+  //     description:
+  //       "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+  //     link: "/products/snc",
+  //   },
+  //   {
+  //     name: "SUPER ROOT COFFEE",
+  //     image: "/assets/products/src.JPG",
+  //     description: "☕ Élevez vos matinées avec Super Root Coffee !",
+  //     link: "/products/src",
+  //   },
+  //   {
+  //     name: "SUPER CELLTEC ESSENCE MIST",
+  //     image: "/assets/products/scem.JPG",
+  //     description:
+  //       "Une formulation révolutionnaire à base de cellules souches de pomme et de raisin.",
+  //     link: "/products/sce",
+  //   },
+  // ];
+  
 
   return (
     <div
@@ -83,7 +93,7 @@ const Pricing = () => {
             </motion.p>
           </ScrollAnimationWrapper>
           <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-            {PRODUCTS.map((item) => (
+            {products.map((item) => (
               <div
                 className="flex justify-center"
                 key={item.name}
@@ -101,7 +111,7 @@ const Pricing = () => {
                   <div className="p-0 lg:p-0 mt-0 lg:mt-0 top-0">
                     <img
                       className="rounded-tl-xl rounded-tr-xl w-full"
-                      src={item.image}
+                      src={item.imageUrl}
                       // width={250}
                       // height={180}
                       alt=""

@@ -33,7 +33,7 @@ const SimpleSlider = () => {
 
   return (
     <div>
-      <div class="w-full relative m-auto">
+      <div className="w-full relative m-auto">
         {/* <!-- Full-width images with number and caption text --> */}
         {slideImg.map((s) => (
           <div
@@ -41,7 +41,7 @@ const SimpleSlider = () => {
             className={"" + (slideIndex === s.index ? "block" : "hidden")}
             style={{ animationName: "fade", animationDuration: "1.5s" }}
           >
-            <div class="">
+            <div className="">
               <img
                 src={s.src}
                 style={{ width: "100%", minHeight:"300px" }}

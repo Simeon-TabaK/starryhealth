@@ -1,0 +1,157 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  schemas  = ["public", "analytics"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           Int             @id @default(autoincrement())
+  email        String          @unique
+  password     String
+  slug         String          @unique
+  role         Role            @default(USER)   // rôle par défaut
+  subscription Subscription?
+  profile      Profile?
+  createdAt    DateTime        @default(now())
+}
+
+model Profile {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @unique
+  user         User    @relation(fields: [userId], references: [id])
+  
+  fName        String
+  pName        String
+  lName        String?
+  contact      String?
+  whatsapp     String?   
+  email        String?     
+  image        String?
+
+  facebook     String?
+  linkedin     String?
+  instagram    String?
+  tiktok       String?
+
+  
+  products     UserProduct[]
+  carousel     UserCarousel[]
+  testimonies Testimony[]
+}
+
+model SubscriptionPlan {
+  id          Int      @id @default(autoincrement())
+  name        String   // ex: Basic, Premium, Pro
+  description String?
+  priceMonthly   Float    // prix pour 1 mois
+  priceQuarterly Float?   // prix pour 3 mois
+  priceSemiAnnual Float?  // prix pour 6 mois
+  priceAnnual    Float?   // prix pour 12 mois
+  durationInDays Int   // durée de validité (ex: 30 jours)
+  subscriptions Subscription[]
+}
+
+enum Duration {
+  ONE_MONTH
+  THREE_MONTHS
+  SIX_MONTHS
+  TWELVE_MONTHS
+}
+
+model Subscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  planId    Int
+  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
+  duration  Duration
+  startDate DateTime @default(now())
+  endDate   DateTime
+  active    Boolean  @default(true)
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  imageUrl    String?
+
+  details   ProductDetails[]
+  
+  userProducts UserProduct[]
+  testimonies Testimony[]
+}
+
+
+enum Type {
+  INTRO
+  PROBLEM
+  SOLUTION
+  INGREDIENT
+  BENEFIT
+}
+
+model ProductDetails {
+  id          Int     @id @default(autoincrement())
+  name        String?
+  description String?
+  type        Type
+  productId   Int
+  product     Product @relation(fields: [productId], references: [id])
+}
+
+model UserProduct {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          Profile     @relation(fields: [userId], references: [id])
+  defaultId     Int
+  default       Product @relation(fields: [defaultId], references: [id])
+  price         Float?   // prix défini par l’utilisateur
+  visible       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+model DefaultCarousel {
+  id        Int     @id @default(autoincrement())
+  title     String?
+  imageUrl  String
+  userCarousels UserCarousel[]
+}
+
+model UserCarousel {
+  id            Int     @id @default(autoincrement())
+  userId        Int
+  user          Profile    @relation(fields: [userId], references: [id])
+  defaultId     Int?
+  default       DefaultCarousel? @relation(fields: [defaultId], references: [id])
+  imageUrl      String
+  visible       Boolean @default(true)
+}
+
+model Testimony {
+  id          Int      @id @default(autoincrement())
+  content     String
+  public      Boolean  @default(false)   // privé par défaut
+  validated   Boolean  @default(false)   // validé par l’admin ou non
+  createdAt   DateTime @default(now())
+
+  // Relations
+  userId      Int
+  user        Profile     @relation(fields: [userId], references: [id])
+
+  productId   Int?
+  product     Product? @relation(fields: [productId], references: [id])
+}

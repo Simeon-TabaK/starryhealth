@@ -2,7 +2,7 @@
   "Partenals": [
     {
       "index": 0,
-      "src": "/assets/logoSuperLife.png",
+      "src": "/assets/logo-entreprise.png",
       "text": "Lorem ....",
       "href": "starryboxx.vercel.app"
     },
@@ -14,7 +14,7 @@
     },
     {
       "index": 2,
-      "src": "/assets/logoSuperLife.png",
+      "src": "/assets/logo-entreprise.png",
       "text": "Lorem ....",
       "href": "starryboxx.vercel.app"
     },
@@ -26,7 +26,7 @@
     },
     {
       "index": 4,
-      "src": "/assets/logoSuperLife.png",
+      "src": "/assets/logo-entreprise.png",
       "text": "Lorem ....",
       "href": "starryboxx.vercel.app"
     },

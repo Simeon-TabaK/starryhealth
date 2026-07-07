@@ -44,11 +44,11 @@ const Partenal = () => {
     cssEase: "ease-in-out",
   };
   const paternalLogo = [
-    { index: 0, src: "/assets/logoSuperLife.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
+    { index: 0, src: "/assets/logo-entreprise.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
     { index: 1, src: "/assets/logo.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
-    { index: 2, src: "/assets/logoSuperLife.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
+    { index: 2, src: "/assets/logo-entreprise.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
     { index: 3, src: "/assets/logo.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
-    { index: 4, src: "/assets/logoSuperLife.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
+    { index: 4, src: "/assets/logo-entreprise.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
     { index: 5, src: "/assets/logo.png", text: "Lorem ....", href: "starryboxx.vercel.app" },
   ];
 

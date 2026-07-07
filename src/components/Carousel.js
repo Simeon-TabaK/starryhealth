@@ -48,7 +48,7 @@ export default function Carousel() {
             // className={"" + (slideIndex === s.index ? "block" : "hidden")}
             // style={{ animationName: "fade", animationDuration: "1.5s" }}
           >
-            <div class="">
+            <div className="">
               <img
                 src={s.src}
                 style={{ width: "100%" ,minHeight:"300px" }}
