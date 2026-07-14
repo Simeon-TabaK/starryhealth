@@ -1,19 +1,17 @@
+// src/components/Carousel.js
 import React, { useRef } from "react";
 import Slider from "react-slick";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 
+export default function Carousel({ items = [] }) {
+  const sliderRef = useRef(null);
 
+  const next = () => sliderRef.current?.slickNext();
+  const previous = () => sliderRef.current?.slickPrev();
 
-export default function Carousel() {
-  let sliderRef = useRef();
-  const next = () => {
-    sliderRef.slickNext();
-  };
-  const previous = () => {
-    sliderRef.slickPrev();
-  };
   const settings = {
     dots: true,
-    // fade:true,
     infinite: true,
     slidesToShow: 1,
     slidesToScroll: 1,
@@ -24,51 +22,50 @@ export default function Carousel() {
     cssEase: "ease-in-out",
   };
 
-  const slideImg = [
-    { index: 0, src: "assets/slides/slide1.jpg", text: "Lorem ...." },
-    { index: 1, src: "assets/slides/slide2.jpg", text: "Lorem ...." },
-    { index: 2, src: "assets/slides/slide3.jpg", text: "Lorem ...." },
-    { index: 3, src: "assets/slides/slide4.jpg", text: "Lorem ...." },
-    { index: 4, src: "assets/slides/slide5.jpg", text: "Lorem ...." },
-    { index: 5, src: "assets/slides/slide6.jpg", text: "Lorem ...." },
+  const defaultSlides = [
+    { id: 0, imageUrl: "/assets/slides/slide1.jpg", title: "Bienvenue sur la plateforme" },
+    { id: 1, imageUrl: "/assets/slides/slide2.jpg", title: "Découvrez nos produits" },
+    { id: 2, imageUrl: "/assets/slides/slide3.jpg", title: "Personnalisez votre espace" },
   ];
+
+  const slidesToRender = items.length > 0 ? items : defaultSlides;
 
   return (
     <div className="w-full relative m-auto">
-      <Slider
-        ref={(slider) => {
-          sliderRef = slider;
-        }}
-        arrows={false}
-        {...settings}
-      >
-        {slideImg.map((s) => (
-          <div
-            key={s.index}
-            // className={"" + (slideIndex === s.index ? "block" : "hidden")}
-            // style={{ animationName: "fade", animationDuration: "1.5s" }}
-          >
-            <div className="">
+      <Slider ref={sliderRef} arrows={false} {...settings}>
+        {slidesToRender
+          .filter((item) => item.visible !== false)
+          .map((item) => (
+            <div key={item.id} className="relative">
+              {/* 🔹 Image */}
               <img
-                src={s.src}
-                style={{ width: "100%" ,minHeight:"300px" }}
-                // style={{ width: "100%", minHeight: "300px" }}
-                className="saturate-150 grayscale-0"
+                src={item.imageUrl}
+                alt={item.title || "carousel image"}
+                className="saturate-150 grayscale-0 object-contain mx-auto"
+                style={{ maxHeight: "500px", width: "100%" }}
               />
+
+              {/* 🔹 Container titre avec dégradé */}
+              {item.title && (
+                <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent flex justify-center items-end">
+                  <h3 className="text-3xl font-bold text-white px-6 py-4 text-center">
+                    {item.title}
+                  </h3>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          ))}
       </Slider>
+
+      {/* Boutons navigation */}
       <button
-        className="cursor-pointer absolute bg-translucide hover:bg-blue-300 top-1/2 w-auto -mt-6 p-4 text-white-500 text-2xl left-0"
-        style={{ userSelect: "none", transition: "0.6s" }}
+        className="cursor-pointer absolute bg-gray-700/40 hover:bg-blue-500 top-1/2 -translate-y-1/2 p-4 text-white text-2xl left-0"
         onClick={previous}
       >
         &#10094;
       </button>
       <button
-        className="cursor-pointer absolute bg-translucide hover:bg-blue-300 top-1/2 w-auto -mt-6 p-4 text-white-500 text-2xl right-0"
-        style={{ userSelect: "none", transition: "0.6s" }}
+        className="cursor-pointer absolute bg-gray-700/40 hover:bg-blue-500 top-1/2 -translate-y-1/2 p-4 text-white text-2xl right-0"
         onClick={next}
       >
         &#10095;
