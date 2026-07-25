@@ -4,7 +4,7 @@ import Image from "next/image";
 import ButtonPrimary from "./misc/ButtonPrimary";
 import ButtonOutline from "@/components/misc/ButtonOutline.";
 import { motion } from "framer-motion";
-import getScrollAnimation from "../utils/getScrollAnimation";
+import getScrollAnimation from "@/utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 import Testimoni from "./Testimoni";
 import Link from "next/link";

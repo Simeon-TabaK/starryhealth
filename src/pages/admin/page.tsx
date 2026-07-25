@@ -1,6 +1,6 @@
+import { Search } from '@/components/admin/search';
+import { UsersTable } from '@/components/admin/users-table';
 import { getUsers } from '@/lib/db';
-import { UsersTable } from './users-table';
-import { Search } from './search';
 
 export default async function IndexPage({
   searchParams

@@ -2,8 +2,8 @@ import React, { useMemo } from "react";
 import Testimoni from "./Testimoni";
 import ButtonPrimary from "./misc/ButtonPrimary";
 import { motion } from "framer-motion";
-import getScrollAnimation from "../utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
+import getScrollAnimation from "@/utils/getScrollAnimation";
 
 const ContactUs = () => {
   const scrollAnimation = useMemo(() => getScrollAnimation(), []);

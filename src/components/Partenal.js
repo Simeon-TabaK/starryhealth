@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
-import getScrollAnimation from "../utils/getScrollAnimation";
+import getScrollAnimation from "@/utils/getScrollAnimation";
 import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 
 const Partenal = () => {

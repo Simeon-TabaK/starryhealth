@@ -1,8 +1,6 @@
 import Image from "next/image";
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import getScrollAnimation from "../utils/getScrollAnimation";
-import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 
 const features = [
   "Beneficiez d'un site professionnel et hebergement annuel sous le control des experts.",

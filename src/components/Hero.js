@@ -1,11 +1,9 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import getScrollAnimation from "../utils/getScrollAnimation";
-import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 import SimpleSlider from "@/components/Slide";
 import Carousel from "@/components/Carousel";
-// import EmblaCarousel from "./Slide";
-// import { EmblaOptionsType } from 'embla-carousel'
+import getScrollAnimation from "@/utils/getScrollAnimation";
+import ScrollAnimationWrapper from "./Layout/ScrollAnimationWrapper";
 
 const Hero = ({
   listUser = [
