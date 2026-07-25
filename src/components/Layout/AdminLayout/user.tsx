@@ -10,7 +10,6 @@ export async function User() {
   //   return (
   //     <form
   //       action={async () => {
-  //         'use server';
   //         await signIn('github');
   //       }}
   //     >
@@ -23,7 +22,6 @@ export async function User() {
     <div className="flex items-center gap-4">
       {/* <form
         action={async () => {
-          'use server';
           await signOut();
         }}
       >

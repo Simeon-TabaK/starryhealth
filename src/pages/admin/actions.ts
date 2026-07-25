@@ -1,5 +1,3 @@
-'use server';
-
 import { deleteUserById } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
