@@ -9,8 +9,7 @@ import {
   Table
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { SelectUser } from '@/lib/db';
-import { deleteUser } from './actions';
+import { deleteUserById, SelectUser } from '@/lib/db';
 import { useRouter } from 'next/navigation';
 
 export function UsersTable({
@@ -60,7 +59,7 @@ export function UsersTable({
 
 function UserRow({ user }: { user: SelectUser }) {
   const userId = user.id;
-  const deleteUserWithId = deleteUser.bind(null, userId);
+  const deleteUserWithId = deleteUserById.bind(null, userId);
 
   return (
     <TableRow>
