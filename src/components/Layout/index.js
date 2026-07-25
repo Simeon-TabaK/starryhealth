@@ -1,5 +1,5 @@
 import React from 'react';
-import Footer from '../../pages/admin/LayoutAdmin/TopBar';
+import Footer from '../LayoutAdmin/TopBar';
 import Header from './Header';
 import SideBar from './AdminLayout/SideBar'
 import { usePathname } from 'next/navigation';
