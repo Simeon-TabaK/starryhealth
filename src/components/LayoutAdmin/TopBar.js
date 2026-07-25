@@ -1,7 +1,7 @@
 import React from "react";
-import Facebook from "../../public/assets/Icon/facebook.svg";
-import Twitter from "../../public/assets/Icon/twitter.svg";
-import Instagram from "../../public/assets/Icon/instagram.svg";
+import Facebook from "../../../public/assets/Icon/facebook.svg";
+import Twitter from "../../../public/assets/Icon/twitter.svg";
+import Instagram from "../../../public/assets/Icon/instagram.svg";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
