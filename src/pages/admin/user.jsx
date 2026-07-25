@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 export default function AdminUsers() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     fetch("/api/admin/users")
