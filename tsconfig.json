@@ -18,7 +18,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/api/hellott", "src/pages/api/route", "src/components/Layout/AdminLayout/SideBar.jsx", "src/pages/api/products.ss", "src/lib/prisma.ts", "src/components/ProductCard.jsx", "src/components/Carousel.jsx", "src/components/Carousel.js", "src/pages/api/testimonies.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/api/hellott", "src/pages/api/route", "src/components/Layout/AdminLayout/SideBar.jsx", "src/pages/api/products.ss", "src/lib/prisma.ts", "src/components/ProductCard.jsx", "src/components/Carousel.jsx", "src/components/Carousel.js", "src/pages/api/testimonies.js", "src/pages/index.js"],
   "exclude": ["node_modules"]
 }
 
