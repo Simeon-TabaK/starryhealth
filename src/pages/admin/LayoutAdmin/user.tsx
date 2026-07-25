@@ -10,7 +10,6 @@ export async function User() {
     return (
       <form
         action={async () => {
-          'use server';
           await signIn('github');
         }}
       >
