@@ -1,1 +1,0 @@
-//  Intégration Stripe/PayPal
