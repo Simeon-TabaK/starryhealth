@@ -1,12 +1,12 @@
 # Étape 1 : Builder
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Installer les dépendances
 COPY package*.json ./
 RUN npm install
 
-# Copier le code
+# Copier le code source
 COPY . .
 
 # Générer Prisma client
@@ -17,7 +17,7 @@ RUN npm run build
 
 
 # Étape 2 : Runner
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -34,5 +34,5 @@ COPY --from=builder /app/src ./src
 # Exposer le port
 EXPOSE 3000
 
-# Lancer Prisma migration au démarrage (optionnel mais pratique en dev)
+# Déployer les migrations Prisma avant de lancer Next.js
 CMD npx prisma migrate deploy && npm run start
