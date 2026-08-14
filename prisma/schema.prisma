@@ -1,7 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Prisma schema for Starry Health (Oqata)
 
 generator client {
   provider = "prisma-client-js"
@@ -12,151 +9,109 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  SUPER_ADMIN
+  USER
+}
+
+enum SubscriptionStatus {
+  FREE
+  ACTIVE
+}
+
+enum SubscriptionPlan {
+  PRO
+  VITRINE
+  TUNNEL
+}
 
 model User {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  password     String
-  slug         String         @unique
-  role         Role           @default(USER)
-  createdAt    DateTime       @default(now())
-  clientAccess ClientAccess[]
-  profile      Profile?
-  subscription Subscription?
-}
+  id                 Int                @id @default(autoincrement())
+  name               String?
+  email              String             @unique
+  password           String?
+  googleId           String?
+  username           String?            @unique
+  slug               String             @unique
+  role               Role               @default(USER)
+  subscriptionStatus SubscriptionStatus @default(FREE)
+  primaryColor       String             @default("#0f766e")
+  bio                String?
+  avatar             String?
+  contactPhone       String?
+  contactEmail       String?
+  whatsapp           String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
-model Profile {
-  id          Int            @id @default(autoincrement())
-  userId      Int            @unique
-  contact     String?
-  facebook    String?
-  linkedin    String?
-  instagram   String?
-  tiktok      String?
-  email       String?
-  image       String?
-  whatsapp    String?
-  firstName   String
-  lastName    String?
-  middleName  String
-  city        String?
-  country     String?
-  user        User           @relation(fields: [userId], references: [id])
-  testimonies Testimony[]
-  carousel    UserCarousel[]
-  products    UserProduct[]
-}
-
-model SubscriptionPlan {
-  id              Int            @id @default(autoincrement())
-  name            String
-  description     String?
-  priceMonthly    Float
-  priceQuarterly  Float?
-  priceSemiAnnual Float?
-  priceAnnual     Float?
-  durationInDays  Int
-  subscriptions   Subscription[]
+  subscriptions    Subscription[]
+  userProductPrices UserProductPrice[]
+  carouselItems    CarouselItem[]
+  testimonials     Testimonial[]
 }
 
 model Subscription {
   id        Int              @id @default(autoincrement())
-  userId    Int              @unique
-  planId    Int
-  duration  Duration
-  startDate DateTime         @default(now())
-  endDate   DateTime
-  active    Boolean          @default(true)
-  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
-  user      User             @relation(fields: [userId], references: [id])
+  userId    Int
+  plan      SubscriptionPlan @default(VITRINE)
+  status    String           @default("ACTIVE") // ACTIVE, CANCELLED, EXPIRED
+  expiresAt DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Product {
-  id           Int              @id @default(autoincrement())
+  id           Int                @id @default(autoincrement())
   name         String
-  description  String?
-  imageUrl     String?
-  details      ProductDetails[]
-  testimonies  Testimony[]
-  userProducts UserProduct[]
+  description  String
+  defaultPrice Float
+  images       String             // Store comma-separated URLs or JSON string array
+  category     String             @default("Santé & Bien-être")
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  userPrices UserProductPrice[]
 }
 
-model ProductDetails {
-  id          Int     @id @default(autoincrement())
-  name        String?
-  description String?
-  type        Type
+model UserProductPrice {
+  id          Int   @id @default(autoincrement())
+  userId      Int
   productId   Int
-  product     Product @relation(fields: [productId], references: [id])
-}
+  customPrice Float
 
-model UserProduct {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  price     Float?
-  visible   Boolean  @default(true)
-  createdAt DateTime @default(now())
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id])
-  user      Profile  @relation(fields: [userId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
 }
 
-model DefaultCarousel {
-  id            Int            @id @default(autoincrement())
-  title         String?
-  imageUrl      String
-  userCarousels UserCarousel[]
-}
-
-model UserCarousel {
-  id        Int              @id @default(autoincrement())
-  userId    Int
-  defaultId Int?
+model CarouselItem {
+  id        Int     @id @default(autoincrement())
+  userId    Int?    // Nullable: null = general/default carousel, set = user custom
   imageUrl  String
-  visible   Boolean          @default(true)
-  default   DefaultCarousel? @relation(fields: [defaultId], references: [id])
-  user      Profile          @relation(fields: [userId], references: [id])
+  title     String
+  subtitle  String?
+  link      String?
+  order     Int     @default(0)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Testimony {
-  id        Int      @id @default(autoincrement())
-  content   String
-  public    Boolean  @default(false)
-  validated Boolean  @default(false)
-  createdAt DateTime @default(now())
-  productId Int?
-  profileId Int
-  product   Product? @relation(fields: [productId], references: [id])
-  profile   Profile  @relation(fields: [profileId], references: [id])
+model Testimonial {
+  id         Int     @id @default(autoincrement())
+  userId     Int?    // Nullable: null = public global, set = user custom
+  authorName String
+  content    String
+  rating     Int     @default(5)
+  avatar     String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model ClientAccess {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique
-  subdomain String?  @unique
-  userId    Int
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-enum Role {
-  USER
-  ADMIN
-}
-
-enum Duration {
-  ONE_MONTH
-  THREE_MONTHS
-  SIX_MONTHS
-  TWELVE_MONTHS
-}
-
-enum Type {
-  INTRO
-  PROBLEM
-  SOLUTION
-  INGREDIENT
-  BENEFIT
+model Partner {
+  id      Int     @id @default(autoincrement())
+  name    String
+  logoUrl String
+  website String?
 }

@@ -1,26 +1,94 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --tenant-primary: #0f766e;
+    --tenant-primary-hover: #115e59;
+    --tenant-primary-light: #ccfbf1;
+    --tenant-primary-ring: rgba(15, 118, 110, 0.25);
+  }
+
+  /* Light mode (default) body styling */
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    overflow-x: hidden;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+}
+
+:is(.dark) .glass-card {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 40px 0 rgba(15, 118, 110, 0.15);
+}
+
+:is(.dark) .glass-card-hover:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 40px 0 rgba(15, 118, 110, 0.25);
+}
+
+.tenant-bg-primary {
+  background-color: var(--tenant-primary);
+}
+
+.tenant-text-primary {
+  color: var(--tenant-primary);
+}
+
+.tenant-border-primary {
+  border-color: var(--tenant-primary);
+}
+
+.tenant-btn-primary {
+  background-color: var(--tenant-primary);
+  color: #ffffff;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.tenant-btn-primary:hover {
+  background-color: var(--tenant-primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Custom scrollbar - Light mode */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom scrollbar - Dark mode */
+:is(.dark) ::-webkit-scrollbar-track {
+  background: #0b1320;
+}
+:is(.dark) ::-webkit-scrollbar-thumb {
+  background: #1f2937;
+}
+:is(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #374151;
 }
