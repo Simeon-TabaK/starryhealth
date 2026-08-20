@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Sparkles, LogIn, Lock, Mail, ShieldAlert } from "lucide-react";
+import { Sparkles, LogIn, Lock, Mail, ShieldAlert, Eye, EyeOff } from "lucide-react";
 
 export default function SignInPage() {
   const router = useRouter();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -40,15 +41,15 @@ export default function SignInPage() {
   return (
     <div className="max-w-md mx-auto my-16 px-4">
       <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
-        
+
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-md">
-            <Sparkles className="w-6 h-6" />
+          <div className="w-24 h-24 rounded-2xl  text-white flex items-center justify-center mx-auto shadow-md">
+            <img src="/assets/logo.png" alt="Logo Starry Health" />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Espace de Connexion</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Accédez à votre tableau de bord Starry Health / Oqata
+            Accédez à votre tableau de bord Starry Health
           </p>
         </div>
 
@@ -85,13 +86,26 @@ export default function SignInPage() {
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none"
+                title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -137,7 +151,7 @@ export default function SignInPage() {
         </button>
 
         <div className="text-center pt-2 text-[11px] text-slate-500 dark:text-slate-400">
-          Super Admin (admin / password123) & Membre (jean / password123)
+          Admin (admin / Pass12345) & Utilisateur (user / Pass12345)
         </div>
 
       </div>

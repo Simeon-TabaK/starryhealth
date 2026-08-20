@@ -23,7 +23,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
       <ScrollReveal direction="down">
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold uppercase">
-            <Sparkles className="w-4 h-4" /> Gamme Certifiée Oqata
+            <Sparkles className="w-4 h-4" /> Gamme Certifiée
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">

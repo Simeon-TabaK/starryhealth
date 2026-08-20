@@ -120,7 +120,7 @@ export function StatsSection({ primaryColor = "#0f766e" }: StatsSectionProps) {
       id: 4,
       endValue: 100,
       suffix: "%",
-      label: "Approuvé par Oqata",
+      label: "Approuvé par nos experts",
       description: "Normes de qualité et sécurité biologiques strictes",
       icon: Award,
     },

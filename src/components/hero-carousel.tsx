@@ -77,7 +77,7 @@ export function HeroCarousel({ slides, primaryColor = "#0f766e", tenantQuery = "
           className="space-y-6 max-w-3xl"
         >
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold tracking-wide uppercase shadow-sm">
-            <Sparkles className="w-4 h-4" /> Produits d'Excellence Oqata
+            <Sparkles className="w-4 h-4" /> Produits d'Excellence
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight drop-shadow-md">
@@ -103,7 +103,7 @@ export function HeroCarousel({ slides, primaryColor = "#0f766e", tenantQuery = "
               href={`/a-propos${tenantQuery}`}
               className="inline-flex items-center gap-2 px-7 py-4 rounded-xl font-medium text-white bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 transition-colors"
             >
-              En savoir plus sur Oqata
+              En savoir plus
             </Link>
           </div>
         </motion.div>

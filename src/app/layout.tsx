@@ -5,11 +5,17 @@ import { SessionProvider } from "@/components/session-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { getCurrentTenant } from "@/lib/get-current-tenant";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const metadata: Metadata = {
-  title: "Starry Health | Produits de Santé et Bien-être - Oqata",
+  title: "Starry Health | Produits de Santé et Bien-être",
   description:
-    "Leader global dans la promotion de la santé et le bien-être de l'humanité par l'utilisation des produits lisses, testés et approuvés scientifiquement par Oqata.",
+    "Leader global dans la promotion de la santé et le bien-être de l'humanité par l'utilisation des produits lisses, testés et approuvés scientifiquement.",
+  icons: {
+    icon: "/assets/logo.png",
+    shortcut: "/assets/logo.png",
+    apple: "/assets/logo.png",
+  },
 };
 
 export default async function RootLayout({
@@ -35,6 +41,7 @@ export default async function RootLayout({
             <Navbar tenant={tenant} />
             <main className="flex-1">{children}</main>
             <Footer tenant={tenant} />
+            <ScrollToTop />
           </SessionProvider>
         </ThemeProvider>
       </body>

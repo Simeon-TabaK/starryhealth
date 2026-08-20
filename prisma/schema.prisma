@@ -68,10 +68,12 @@ model Product {
   defaultPrice Float
   images       String             // Store comma-separated URLs or JSON string array
   category     String             @default("Santé & Bien-être")
+  isVisible    Boolean            @default(true)
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
-  userPrices UserProductPrice[]
+  userPrices   UserProductPrice[]
+  testimonials Testimonial[]
 }
 
 model UserProductPrice {
@@ -99,14 +101,17 @@ model CarouselItem {
 }
 
 model Testimonial {
-  id         Int     @id @default(autoincrement())
-  userId     Int?    // Nullable: null = public global, set = user custom
+  id         Int      @id @default(autoincrement())
+  userId     Int?     // Nullable: null = public global, set = user custom
+  productId  Int?     // Product associated with testimonial
   authorName String
   content    String
-  rating     Int     @default(5)
+  rating     Int      @default(5)
   avatar     String?
+  isPublic   Boolean  @default(true)
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
 model Partner {

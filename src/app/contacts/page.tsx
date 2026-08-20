@@ -34,7 +34,7 @@ export default async function ContactsPage({ searchParams }: PageProps) {
           <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
             {isTenant
               ? `Posez vos questions ou commandez vos produits directement auprès de votre conseiller agréé.`
-              : `Une question sur nos produits ou sur l'opportunité Oqata ? Écrivez-nous et notre équipe vous répondra sous 24h.`}
+              : `Une question sur nos produits ou sur nos opportunités ? Écrivez-nous et notre équipe vous répondra sous 24h.`}
           </p>
         </div>
       </ScrollReveal>

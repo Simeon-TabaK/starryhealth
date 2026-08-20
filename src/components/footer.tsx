@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Sparkles, Phone, Mail, MapPin, Globe, ShieldCheck } from "lucide-react";
 
 interface FooterProps {
@@ -16,6 +19,12 @@ interface FooterProps {
 }
 
 export function Footer({ tenant }: FooterProps) {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/dashboard") || pathname === "/auth/signin") {
+    return null;
+  }
+
   const isTenant = tenant?.isTenant;
   const vendorName = tenant?.user?.name || tenant?.slug;
   const primaryColor = tenant?.user?.primaryColor || "#0f766e";
@@ -44,7 +53,7 @@ export function Footer({ tenant }: FooterProps) {
               </span>
             </Link>
             <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-              Leader global dans la promotion de la santé et du bien-être de l'humanité grâce aux produits lisses, testés et approuvés scientifiquement par <strong>Oqata</strong>.
+              Leader global dans la promotion de la santé et du bien-être de l'humanité grâce aux produits lisses, testés et approuvés scientifiquement.
             </p>
             {isTenant && (
               <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-emerald-500/30 text-xs text-slate-800 dark:text-slate-300 shadow-sm">
@@ -72,7 +81,7 @@ export function Footer({ tenant }: FooterProps) {
           <div>
             <h4 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Maison Mère & Offres</h4>
             <ul className="space-y-2.5 text-xs">
-              <li><span className="text-slate-700 dark:text-slate-300">Oqata Network Marketing</span></li>
+              <li><span className="text-slate-700 dark:text-slate-300">Starry Health Network</span></li>
               <li><span className="text-slate-700 dark:text-slate-300">Starry Boxx - Site Web Pro</span></li>
               <li><span className="text-slate-700 dark:text-slate-300">Starry Boxx - Offre Vitrine</span></li>
               <li><span className="text-slate-700 dark:text-slate-300">Starry Boxx - Tunnel de Vente</span></li>
@@ -108,7 +117,7 @@ export function Footer({ tenant }: FooterProps) {
         </div>
 
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-4">
-          <p>© {new Date().getFullYear()} Starry Health by Oqata. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} Starry Health. Tous droits réservés.</p>
           <div className="flex gap-6">
             <span>Mentions Légales</span>
             <span>Politique de Confidentialité</span>

@@ -18,11 +18,19 @@ export default async function DashboardPage() {
 
   const currentUser = await prisma.user.findUnique({
     where: { id: userId },
+    include: {
+      subscriptions: true,
+    },
   });
 
   if (!currentUser) {
     redirect("/auth/signin");
   }
+
+  const userSubscription = await prisma.subscription.findFirst({
+    where: { userId: currentUser.id },
+    orderBy: { createdAt: "desc" },
+  });
 
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
@@ -37,14 +45,26 @@ export default async function DashboardPage() {
     orderBy: { order: "asc" },
   });
 
+  const globalCarousel = await prisma.carouselItem.findMany({
+    where: { userId: null },
+    orderBy: { order: "asc" },
+  });
+
   const userTestimonials = await prisma.testimonial.findMany({
     where: { userId: currentUser.id },
+    include: { product: true },
+    orderBy: { id: "desc" },
+  });
+
+  const allTestimonials = await prisma.testimonial.findMany({
+    include: { product: true, user: true },
     orderBy: { id: "desc" },
   });
 
   let allUsers: any[] = [];
   if (currentUser.role === "SUPER_ADMIN") {
     allUsers = await prisma.user.findMany({
+      include: { subscriptions: true },
       orderBy: { id: "asc" },
     });
   }
@@ -52,10 +72,13 @@ export default async function DashboardPage() {
   return (
     <DashboardClient
       user={currentUser}
+      userSubscription={userSubscription}
       products={products}
       customPrices={customPrices}
       userCarousel={userCarousel}
+      globalCarousel={globalCarousel}
       userTestimonials={userTestimonials}
+      allTestimonials={allTestimonials}
       allUsers={allUsers}
     />
   );

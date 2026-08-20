@@ -92,6 +92,7 @@ export async function getCarouselItems(userId?: number | null) {
 export async function getProductsForTenant(tenant?: TenantContext | null) {
   try {
     const products = await prisma.product.findMany({
+      where: { isVisible: true },
       orderBy: { createdAt: "desc" },
     });
 
@@ -144,14 +145,17 @@ export async function getTestimonialsForTenant(tenant?: TenantContext | null) {
     if (tenant && tenant.isTenant && tenant.user) {
       return await prisma.testimonial.findMany({
         where: {
+          isPublic: true,
           OR: [{ userId: null }, { userId: tenant.user.id }],
         },
+        include: { product: true },
         orderBy: { id: "desc" },
       });
     }
 
     return await prisma.testimonial.findMany({
-      where: { userId: null },
+      where: { userId: null, isPublic: true },
+      include: { product: true },
       orderBy: { id: "desc" },
     });
   } catch (error) {

@@ -159,7 +159,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                 Prêt à transformer votre bien-être au quotidien ?
               </h2>
               <p className="text-slate-200 text-sm leading-relaxed">
-                Consultez notre catalogue complet et profitez d'un accompagnement personnalisé avec nos experts Oqata & Starry Health.
+                Consultez notre catalogue complet et profitez d'un accompagnement personnalisé avec nos experts Starry Health.
               </p>
             </div>
 

@@ -6,10 +6,13 @@ import { motion } from "framer-motion";
 export interface TestimonialItem {
   id: number;
   userId?: number | null;
+  productId?: number | null;
+  product?: { name: string } | null;
   authorName: string;
   content: string;
   rating: number;
   avatar?: string | null;
+  isPublic?: boolean;
 }
 
 interface TestimonialCardProps {
@@ -57,11 +60,11 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
           className="w-10 h-10 rounded-full object-cover border border-emerald-500/40 shrink-0"
         />
         <div>
-          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
             {testimonial.authorName}
-            {testimonial.userId && (
-              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                Avis Vendeur
+            {testimonial.product && (
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                Produit: {testimonial.product.name}
               </span>
             )}
           </h4>

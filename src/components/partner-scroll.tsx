@@ -27,7 +27,7 @@ export function PartnerScroll({ partners }: PartnerScrollProps) {
           <Handshake className="w-4 h-4" /> Partenaires de Confiance
         </span>
         <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-2">
-          Réseau Officiel Oqata & Laboratoires Associés
+          Réseau Officiel & Laboratoires Associés
         </h3>
       </div>
 

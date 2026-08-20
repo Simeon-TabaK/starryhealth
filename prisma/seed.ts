@@ -21,13 +21,13 @@ async function main() {
   await prisma.partner.deleteMany();
   await prisma.user.deleteMany();
 
-  const adminPasswordHash = await bcrypt.hash("password123", 10);
-  const userPasswordHash = await bcrypt.hash("password123", 10);
+  const adminPasswordHash = await bcrypt.hash("Pass12345", 10);
+  const userPasswordHash = await bcrypt.hash("Pass12345", 10);
 
   // 1. Super Admin
   const admin = await prisma.user.create({
     data: {
-      name: "Super Admin Oqata",
+      name: "Starry Digital",
       email: "admin@starryhealth.com",
       username: "admin",
       password: adminPasswordHash,
@@ -35,27 +35,27 @@ async function main() {
       role: Role.SUPER_ADMIN,
       subscriptionStatus: SubscriptionStatus.ACTIVE,
       primaryColor: "#0f766e",
-      bio: "Administration Centrale Starry Health & Oqata Network Marketing.",
+      bio: "Administration Centrale Starry Health & Starry Digital.",
       contactPhone: "+243 810 000 000",
       contactEmail: "contact@starryhealth.com",
       whatsapp: "+243810000000",
     },
   });
 
-  // 2. Member User (Independent Seller with Active Subscription)
+  // 2. Default User (Independent Seller with Active Subscription)
   const userJean = await prisma.user.create({
     data: {
-      name: "Jean Dupont",
-      email: "jean.dupont@starryhealth.com",
-      username: "jean",
+      name: "Utilisateur Test",
+      email: "user@starryhealth.com",
+      username: "user",
       password: userPasswordHash,
-      slug: "jean_dupont",
+      slug: "user",
       role: Role.USER,
       subscriptionStatus: SubscriptionStatus.ACTIVE,
       primaryColor: "#0284c7", // Sky blue custom primary color
       bio: "Distributeur Indépendant Agréé Oqata / Starry Health. Expert en nutrition et produits de santé naturelle.",
       contactPhone: "+243 990 123 456",
-      contactEmail: "jean.dupont@oqata-partner.com",
+      contactEmail: "user@starryhealth.com",
       whatsapp: "+243990123456",
       subscriptions: {
         create: {

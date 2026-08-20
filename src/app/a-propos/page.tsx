@@ -25,7 +25,7 @@ export default async function AboutPage({ searchParams }: PageProps) {
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            À Propos de <span style={{ color: primaryColor }}>Starry Health</span> & Oqata
+            À Propos de <span style={{ color: primaryColor }}>Starry Health</span>
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
@@ -45,7 +45,7 @@ export default async function AboutPage({ searchParams }: PageProps) {
               </div>
               <div className="space-y-2 text-center md:text-left">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
-                  <UserCheck className="w-4 h-4" /> Conseiller & Distributeur Agréé Oqata
+                  <UserCheck className="w-4 h-4" /> Conseiller & Distributeur Agréé
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{user.name}</h2>
                 <p className="text-slate-500 dark:text-slate-400 text-xs">Partenaire Indépendant Starry Health</p>
@@ -58,7 +58,7 @@ export default async function AboutPage({ searchParams }: PageProps) {
               </h3>
               <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line">
                 {user.bio ||
-                  "Bienvenue sur mon espace personnalisé ! En tant que membre passionné du réseau Oqata & Starry Health, je m'engage au quotidien à vous accompagner vers une vie plus saine grâce aux produits naturels les plus efficaces du marché. N'hésitez pas à me contacter directement pour des conseils personnalisés."}
+                  "Bienvenue sur mon espace personnalisé ! En tant que membre passionné du réseau Starry Health, je m'engage au quotidien à vous accompagner vers une vie plus saine grâce aux produits naturels les plus efficaces du marché. N'hésitez pas à me contacter directement pour des conseils personnalisés."}
               </p>
             </div>
 
@@ -79,10 +79,10 @@ export default async function AboutPage({ searchParams }: PageProps) {
           </section>
         </ScrollReveal>
       ) : (
-        /* MAIN CORPORATE VIEW: Starry Health, Oqata, Starry Boxx */
+        /* MAIN CORPORATE VIEW: Starry Health, Starry Boxx */
         <div className="space-y-16">
           
-          {/* Starry Health & Oqata */}
+          {/* Starry Health */}
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <StaggerItem>
               <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
@@ -101,9 +101,9 @@ export default async function AboutPage({ searchParams }: PageProps) {
                 <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
                   <Globe className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">La Maison Mère : Oqata</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Notre Vision</h3>
                 <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                  Oqata est une entreprise internationale de marketing de réseau et d'innovation technologique. Elle propulse des milliers d'entrepreneurs et de distributeurs indépendants à travers le continent en leur fournissant des produits de haute qualité et des outils digitaux avancés.
+                  Notre organisation est une entreprise internationale de santé et d'innovation technologique. Elle propulse des milliers d'entrepreneurs et de distributeurs indépendants à travers le continent en leur fournissant des produits de haute qualité et des outils digitaux avancés.
                 </p>
               </div>
             </StaggerItem>
@@ -118,7 +118,7 @@ export default async function AboutPage({ searchParams }: PageProps) {
                 </div>
                 <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">La Boîte à Outils : Starry Boxx</h2>
                 <p className="text-slate-600 dark:text-slate-300 text-sm">
-                  Starry Boxx est la suite clé-en-main d'hébergement web et de tunnels de vente conçue spécialement pour automatiser l'activité des distributeurs Oqata.
+                  Starry Boxx est la suite clé-en-main d'hébergement web et de tunnels de vente conçue spécialement pour automatiser l'activité des distributeurs.
                 </p>
               </div>
 
