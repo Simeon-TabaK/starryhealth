@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           slug: user.slug,
           subscriptionStatus: user.subscriptionStatus,
+          subscriptionPlan: user.subscriptionPlan,
           primaryColor: user.primaryColor,
         };
       },
@@ -57,12 +58,68 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        if (!user.email) return false;
+        try {
+          const existing = await prisma.user.findUnique({
+            where: { email: user.email.toLowerCase() },
+          });
+
+          if (!existing) {
+            const baseSlug = (user.name || user.email.split("@")[0])
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, "_")
+              .slice(0, 30);
+
+            let uniqueSlug = baseSlug || "user";
+            let count = 1;
+            while (await prisma.user.findUnique({ where: { slug: uniqueSlug } })) {
+              uniqueSlug = `${baseSlug}_${count++}`;
+            }
+
+            const created = await prisma.user.create({
+              data: {
+                email: user.email.toLowerCase(),
+                name: user.name || user.email.split("@")[0],
+                googleId: account.providerAccountId,
+                slug: uniqueSlug,
+                avatar: user.image,
+                role: "USER",
+                subscriptionStatus: "ACTIVE",
+                subscriptionPlan: "STANDARD",
+                primaryColor: "#0f766e",
+              },
+            });
+
+            user.id = created.id.toString();
+            (user as any).slug = created.slug;
+            (user as any).role = created.role;
+            (user as any).subscriptionStatus = created.subscriptionStatus;
+            (user as any).subscriptionPlan = created.subscriptionPlan;
+            (user as any).primaryColor = created.primaryColor;
+          } else {
+            user.id = existing.id.toString();
+            (user as any).slug = existing.slug;
+            (user as any).role = existing.role;
+            (user as any).subscriptionStatus = existing.subscriptionStatus;
+            (user as any).subscriptionPlan = existing.subscriptionPlan;
+            (user as any).primaryColor = existing.primaryColor;
+          }
+        } catch (error) {
+          console.error("Error during Google OAuth sign-in:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
         token.slug = (user as any).slug;
         token.subscriptionStatus = (user as any).subscriptionStatus;
+        token.subscriptionPlan = (user as any).subscriptionPlan;
         token.primaryColor = (user as any).primaryColor;
       }
       if (trigger === "update" && session) {
@@ -76,6 +133,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role;
         (session.user as any).slug = token.slug;
         (session.user as any).subscriptionStatus = token.subscriptionStatus;
+        (session.user as any).subscriptionPlan = token.subscriptionPlan;
         (session.user as any).primaryColor = token.primaryColor;
       }
       return session;

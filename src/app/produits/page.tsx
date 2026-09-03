@@ -1,6 +1,7 @@
 import { getCurrentTenant } from "@/lib/get-current-tenant";
 import { getProductsForTenant } from "@/lib/tenant";
 import { ProductCard } from "@/components/product-card";
+import { Cart } from "@/components/cart";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
 import { Sparkles, ShieldCheck, Tag } from "lucide-react";
 
@@ -13,12 +14,15 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const tenant = await getCurrentTenant(params.tenant);
   const products = await getProductsForTenant(tenant);
 
-  const primaryColor = tenant?.user?.primaryColor || "#0f766e";
-  const tenantQuery = tenant?.isTenant && tenant?.slug ? `?tenant=${tenant.slug}` : "";
+  const primaryColor =
+    tenant?.config?.headerColor || tenant?.user?.primaryColor || "#0f766e";
+  const vendorName =
+    tenant?.config?.orgName || tenant?.user?.name || "Starry Health";
+  const tenantQuery =
+    tenant?.isTenant && tenant?.slug ? `?tenant=${tenant.slug}` : "";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-      
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 pb-24">
       {/* Header Banner */}
       <ScrollReveal direction="down">
         <div className="text-center max-w-3xl mx-auto space-y-4">
@@ -27,37 +31,26 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Catalogue des Produits <span style={{ color: primaryColor }}>Starry Health</span>
+            Catalogue des Produits <span style={{ color: primaryColor }}>{vendorName}</span>
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
             Découvrez des formules innovantes et 100% naturelles, rigoureusement sélectionnées pour répondre à tous vos besoins en nutrition et vitalité.
           </p>
 
-          {/* Notice: no tenant slug = prices hidden */}
-          {(!tenant?.isTenant || !tenant?.user) && (
-            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-500/30 text-left flex items-center gap-3 mt-6 shadow-sm">
-              <ShieldCheck className="w-6 h-6 text-amber-600 dark:text-amber-400 shrink-0" />
-              <div>
-                <strong className="text-slate-900 dark:text-white text-sm block">Prix masqués</strong>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  Connectez-vous via le lien d'un distributeur agréé pour afficher les prix et bénéficier de tarifs préférentiels.
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Tenant Vendor Price Notice */}
+          {/* Tenant Vendor Price Notice if tenant is present */}
           {tenant?.isTenant && tenant?.user && (
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-500/30 text-left flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 shadow-sm">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <div>
-                  <strong className="text-slate-900 dark:text-white text-sm block">Vendeur Officiel: {tenant.user.name}</strong>
+                  <strong className="text-slate-900 dark:text-white text-sm block">
+                    Vendeur Officiel: {tenant.user.name}
+                  </strong>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     {tenant.user.subscriptionStatus === "ACTIVE"
-                      ? "Abonnement Vendeur Actif — Tarifs privilégiés appliqués automatiquement !"
-                      : "Tarifs officiels du catalogue public."}
+                      ? "Abonnement Vendeur Actif — Tarifs privilégiés et commande directe via WhatsApp !"
+                      : "Tarifs officiels du catalogue Starry Health."}
                   </span>
                 </div>
               </div>
@@ -91,6 +84,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         </StaggerContainer>
       )}
 
+      {/* Floating Cart */}
+      <Cart
+        whatsapp={tenant?.user?.whatsapp}
+        primaryColor={primaryColor}
+        vendorName={vendorName}
+      />
     </div>
   );
 }

@@ -1,10 +1,14 @@
-import { getCurrentTenant } from "@/lib/get-current-tenant";
-import { getCarouselItems, getProductsForTenant, getTestimonialsForTenant, getPartners } from "@/lib/tenant";
+import { getHomePageDataOptimized } from "@/lib/tenant";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { StatsSection } from "@/components/stats-section";
 import { PartnerScroll } from "@/components/partner-scroll";
 import { ProductCard } from "@/components/product-card";
 import { TestimonialCard } from "@/components/testimonial-card";
+import { ServicesSection } from "@/components/services-section";
+import { FaqSection } from "@/components/faq-section";
+import { GallerySection } from "@/components/gallery-section";
+import { SuggestionBox } from "@/components/suggestion-box";
+import { Cart } from "@/components/cart";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
 import { Sparkles, ArrowRight, ShieldCheck, HeartPulse } from "lucide-react";
 import Link from "next/link";
@@ -15,20 +19,28 @@ interface PageProps {
 
 export default async function HomePage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
-  const tenant = await getCurrentTenant(params.tenant);
+  const {
+    tenant,
+    carouselItems,
+    products,
+    testimonials,
+    partners,
+    services,
+    faqs,
+    gallery,
+  } = await getHomePageDataOptimized(params.tenant);
 
-  const carouselItems = await getCarouselItems(tenant?.user?.id);
-  const products = await getProductsForTenant(tenant);
-  const testimonials = await getTestimonialsForTenant(tenant);
-  const partners = await getPartners();
-
-  const primaryColor = tenant?.user?.primaryColor || "#0f766e";
-  const tenantQuery = tenant?.isTenant && tenant?.slug ? `?tenant=${tenant.slug}` : "";
+  const tenantUserId = tenant?.user?.id ?? null;
+  const primaryColor =
+    tenant?.config?.headerColor || tenant?.user?.primaryColor || "#0f766e";
+  const vendorName =
+    tenant?.config?.orgName || tenant?.user?.name || "Starry Health";
+  const tenantQuery =
+    tenant?.isTenant && tenant?.slug ? `?tenant=${tenant.slug}` : "";
 
   return (
-    <div className="space-y-16 pb-20">
-      
-      {/* 1. Hero Carousel - Full Width (100% écran) */}
+    <div className="space-y-20 pb-20">
+      {/* 1. Hero Carousel - Full Width */}
       <section className="w-full">
         <HeroCarousel
           slides={carouselItems}
@@ -45,19 +57,35 @@ export default async function HomePage({ searchParams }: PageProps) {
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-3">
-            Bienvenu à <span style={{ color: primaryColor }}>Starry Health</span>
+            {tenant?.config?.orgName ? (
+              <span>
+                Bienvenue chez{" "}
+                <span style={{ color: primaryColor }}>{tenant.config.orgName}</span>
+              </span>
+            ) : (
+              <span>
+                Bienvenue à{" "}
+                <span style={{ color: primaryColor }}>Starry Health</span>
+              </span>
+            )}
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed max-w-3xl mx-auto mt-2">
-            Leader global dans la promotion de la santé et le bien-être de l'humanité par l'utilisation des produits lisses, testés et approuvés scientifiquement.
+            {tenant?.config?.orgDescription ||
+              "Leader global dans la promotion de la santé et le bien-être de l'humanité par l'utilisation des produits lisses, testés et approuvés scientifiquement."}
           </p>
 
           {tenant?.isTenant && tenant?.user && (
             <div className="pt-4 inline-flex items-center gap-3 bg-white dark:bg-slate-900 px-5 py-3 rounded-2xl border border-emerald-500/30 shadow-md">
               <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <div className="text-left text-xs">
-                <span className="text-slate-500 dark:text-slate-400 block">Votre Distributeur Agréé Starry Health</span>
-                <strong className="text-slate-900 dark:text-white text-sm">{tenant.user.name}</strong> ({tenant.user.bio || "Conseiller Nutrition & Santé"})
+                <span className="text-slate-500 dark:text-slate-400 block">
+                  Votre Distributeur Agréé Starry Health
+                </span>
+                <strong className="text-slate-900 dark:text-white text-sm">
+                  {tenant.user.name}
+                </strong>{" "}
+                ({tenant.user.bio || "Conseiller Nutrition & Santé"})
               </div>
             </div>
           )}
@@ -86,7 +114,8 @@ export default async function HomePage({ searchParams }: PageProps) {
               href={`/produits${tenantQuery}`}
               className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors"
             >
-              Voir tout le catalogue ({products.length} produits) <ArrowRight className="w-4 h-4" />
+              Voir tout le catalogue ({products.length} produits){" "}
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </ScrollReveal>
@@ -104,12 +133,31 @@ export default async function HomePage({ searchParams }: PageProps) {
         </StaggerContainer>
       </section>
 
-      {/* 5. Partners Scroll */}
+      {/* 5. Services Section (SMART+) */}
+      {services.length > 0 && (
+        <ServicesSection
+          services={services}
+          primaryColor={primaryColor}
+          vendorName={vendorName}
+        />
+      )}
+
+      {/* 6. Gallery Section (PREMIUM) */}
+      {gallery.length > 0 && (
+        <GallerySection images={gallery} primaryColor={primaryColor} />
+      )}
+
+      {/* 7. FAQ Section (PREMIUM) */}
+      {faqs.length > 0 && (
+        <FaqSection faqs={faqs} primaryColor={primaryColor} />
+      )}
+
+      {/* 8. Partners Scroll */}
       <section>
         <PartnerScroll partners={partners} />
       </section>
 
-      {/* 6. Testimonials Preview Section */}
+      {/* 9. Testimonials Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal direction="up">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
@@ -117,7 +165,7 @@ export default async function HomePage({ searchParams }: PageProps) {
               Avis & Expériences
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-              Ce que nos clients disent de Starry Health
+              Ce que nos clients disent de {vendorName}
             </h2>
           </div>
         </ScrollReveal>
@@ -142,7 +190,15 @@ export default async function HomePage({ searchParams }: PageProps) {
         </ScrollReveal>
       </section>
 
-      {/* 7. Call To Action Banner */}
+      {/* 10. Suggestion Box */}
+      <section>
+        <SuggestionBox
+          tenantUserId={tenantUserId}
+          primaryColor={primaryColor}
+        />
+      </section>
+
+      {/* 11. Call To Action Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal direction="up">
           <div
@@ -159,7 +215,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                 Prêt à transformer votre bien-être au quotidien ?
               </h2>
               <p className="text-slate-200 text-sm leading-relaxed">
-                Consultez notre catalogue complet et profitez d'un accompagnement personnalisé avec nos experts Starry Health.
+                Consultez notre catalogue complet et profitez d'un accompagnement personnalisé avec nos experts.
               </p>
             </div>
 
@@ -182,6 +238,12 @@ export default async function HomePage({ searchParams }: PageProps) {
         </ScrollReveal>
       </section>
 
+      {/* 12. Floating Cart with WhatsApp export */}
+      <Cart
+        whatsapp={tenant?.user?.whatsapp}
+        primaryColor={primaryColor}
+        vendorName={vendorName}
+      />
     </div>
   );
 }

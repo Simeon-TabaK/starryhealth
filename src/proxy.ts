@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const hostname = request.headers.get("host") || "";
 
@@ -22,9 +22,12 @@ export function middleware(request: NextRequest) {
   } else {
     // 2. Extract subdomain if present
     // e.g. "jean.starryhealth.com" or "jean.localhost:3000"
-    const currentHost = process.env.NODE_ENV === "production"
-      ? hostname.replace(`.starryhealth.com`, "")
-      : hostname.replace(`.localhost:3000`, "").replace(`.localhost:3001`, "");
+    const currentHost =
+      process.env.NODE_ENV === "production"
+        ? hostname.replace(`.starryhealth.com`, "")
+        : hostname
+            .replace(`.localhost:3000`, "")
+            .replace(`.localhost:3001`, "");
 
     if (
       currentHost &&
@@ -42,7 +45,20 @@ export function middleware(request: NextRequest) {
   if (tenantSlug) {
     requestHeaders.set("x-tenant-slug", tenantSlug.toLowerCase());
   } else {
-    requestHeaders.delete("x-tenant-slug");
+    // 3. Check if this is a fully custom domain (not a subdomain)
+    // Set x-custom-host so the app can resolve it via CustomDomain table
+    const isRootDomain =
+      process.env.NODE_ENV === "production"
+        ? !hostname.endsWith(".starryhealth.com") &&
+          hostname !== "starryhealth.com" &&
+          hostname !== "www.starryhealth.com"
+        : false;
+
+    if (isRootDomain) {
+      requestHeaders.set("x-custom-host", hostname);
+    } else {
+      requestHeaders.delete("x-tenant-slug");
+    }
   }
 
   return NextResponse.next({

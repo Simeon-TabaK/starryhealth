@@ -1,4 +1,5 @@
-// Prisma schema for Starry Health (Oqata)
+// Prisma schema for Starry Health (Oqata) — Multi-Tenant with Subscription Tiers
+// Plans: STANDARD (5 products) | SMART (10 products) | PREMIUM (unlimited + all features)
 
 generator client {
   provider = "prisma-client-js"
@@ -9,6 +10,10 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
 enum Role {
   SUPER_ADMIN
   USER
@@ -17,13 +22,26 @@ enum Role {
 enum SubscriptionStatus {
   FREE
   ACTIVE
+  PENDING
+  EXPIRED
 }
 
 enum SubscriptionPlan {
-  PRO
-  VITRINE
-  TUNNEL
+  STANDARD
+  SMART
+  PREMIUM
 }
+
+enum BillingPeriod {
+  MONTHLY
+  QUARTERLY   // 3 months
+  SEMI_ANNUAL // 6 months
+  ANNUAL      // 1 year
+}
+
+// ─────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────
 
 model User {
   id                 Int                @id @default(autoincrement())
@@ -35,46 +53,120 @@ model User {
   slug               String             @unique
   role               Role               @default(USER)
   subscriptionStatus SubscriptionStatus @default(FREE)
-  primaryColor       String             @default("#0f766e")
-  bio                String?
+  subscriptionPlan   SubscriptionPlan?  // Active plan tier (null = FREE)
+
+  // Branding & Identity
   avatar             String?
+  bio                String?
+  primaryColor       String             @default("#0f766e")
+
+  // Contact
   contactPhone       String?
   contactEmail       String?
   whatsapp           String?
+  contactAddress     String?
+  contactWebsite     String?
+
+  // Social links
+  facebook           String?
+  linkedin           String?
+  tiktok             String?
+  instagram          String?
+
+  // Custom copyright text
+  copyright          String?
+
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
-  subscriptions    Subscription[]
-  userProductPrices UserProductPrice[]
-  carouselItems    CarouselItem[]
-  testimonials     Testimonial[]
+  // Relations
+  subscriptions      Subscription[]
+  userProductPrices  UserProductPrice[]
+  carouselItems      CarouselItem[]
+  testimonials       Testimonial[]
+  products           Product[]          // User's own products
+  partners           Partner[]          // User's own partners
+  services           Service[]
+  faqs               FAQ[]
+  galleryImages      GalleryImage[]
+  suggestions        Suggestion[]       // Suggestions received by this user from visitors
+  adminSuggestions   AdminSuggestion[]  // Suggestions sent by this user to Starry Health admin
+  tenantConfig       TenantConfig?
+  customDomain       CustomDomain?
 }
+
+// ─────────────────────────────────────────────
+// TENANT CONFIG (1:1 with User)
+// ─────────────────────────────────────────────
+
+model TenantConfig {
+  id             Int     @id @default(autoincrement())
+  userId         Int     @unique
+  orgName        String?
+  orgDescription String?
+  orgLogo        String?
+  secondaryColor String?
+  headerColor    String?
+  fontFamily     String? // e.g. "Inter", "Outfit", "Roboto"
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION
+// ─────────────────────────────────────────────
 
 model Subscription {
   id        Int              @id @default(autoincrement())
   userId    Int
-  plan      SubscriptionPlan @default(VITRINE)
-  status    String           @default("ACTIVE") // ACTIVE, CANCELLED, EXPIRED
+  plan      SubscriptionPlan @default(STANDARD)
+  status    String           @default("ACTIVE") // ACTIVE, CANCELLED, EXPIRED, PENDING
+  startDate DateTime?        @default(now())
   expiresAt DateTime?
   createdAt DateTime         @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Product {
-  id           Int                @id @default(autoincrement())
-  name         String
-  description  String
-  defaultPrice Float
-  images       String             // Store comma-separated URLs or JSON string array
-  category     String             @default("Santé & Bien-être")
-  isVisible    Boolean            @default(true)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+// ─────────────────────────────────────────────
+// SUBSCRIPTION PLAN PRICING
+// ─────────────────────────────────────────────
 
+model SubscriptionPlanPricing {
+  id             Int              @id @default(autoincrement())
+  plan           SubscriptionPlan
+  billingPeriod  BillingPeriod
+  pricePerMonth  Float            // Price per month (displayed)
+  totalBilled    Float            // Total amount billed for the period
+
+  @@unique([plan, billingPeriod])
+}
+
+// ─────────────────────────────────────────────
+// PRODUCT
+// ─────────────────────────────────────────────
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  userId        Int?     // null = global product (admin), set = user's own product
+  name          String
+  description   String
+  defaultPrice  Float
+  originalPrice Float?   // Original price before discount (if set, shows strikethrough + %)
+  images        String   // Comma-separated URLs or JSON string array
+  category      String   @default("Santé & Bien-être")
+  isVisible     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user         User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userPrices   UserProductPrice[]
   testimonials Testimonial[]
 }
+
+// ─────────────────────────────────────────────
+// USER PRODUCT PRICE (Custom pricing per tenant)
+// ─────────────────────────────────────────────
 
 model UserProductPrice {
   id          Int   @id @default(autoincrement())
@@ -88,22 +180,72 @@ model UserProductPrice {
   @@unique([userId, productId])
 }
 
+// ─────────────────────────────────────────────
+// SERVICE (Offers & custom links — SMART+)
+// ─────────────────────────────────────────────
+
+model Service {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  name   String
+  url    String?
+  order  Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// FAQ (PREMIUM)
+// ─────────────────────────────────────────────
+
+model FAQ {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  question String
+  answer   String
+  order    Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// GALLERY IMAGE (PREMIUM)
+// ─────────────────────────────────────────────
+
+model GalleryImage {
+  id       Int     @id @default(autoincrement())
+  userId   Int
+  imageUrl String
+  caption  String?
+  order    Int     @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// CAROUSEL ITEM
+// ─────────────────────────────────────────────
+
 model CarouselItem {
-  id        Int     @id @default(autoincrement())
-  userId    Int?    // Nullable: null = general/default carousel, set = user custom
-  imageUrl  String
-  title     String
-  subtitle  String?
-  link      String?
-  order     Int     @default(0)
+  id       Int     @id @default(autoincrement())
+  userId   Int?    // null = global/default carousel, set = user custom
+  imageUrl String
+  title    String
+  subtitle String?
+  link     String?
+  order    Int     @default(0)
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// ─────────────────────────────────────────────
+// TESTIMONIAL
+// ─────────────────────────────────────────────
+
 model Testimonial {
   id         Int      @id @default(autoincrement())
-  userId     Int?     // Nullable: null = public global, set = user custom
-  productId  Int?     // Product associated with testimonial
+  userId     Int?     // null = public global, set = user custom
+  productId  Int?
   authorName String
   content    String
   rating     Int      @default(5)
@@ -114,9 +256,61 @@ model Testimonial {
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
+// ─────────────────────────────────────────────
+// PARTNER
+// ─────────────────────────────────────────────
+
 model Partner {
   id      Int     @id @default(autoincrement())
+  userId  Int?    // null = global partner (admin), set = user's own partner
   name    String
   logoUrl String
   website String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// SUGGESTION (Visitor suggestion box)
+// ─────────────────────────────────────────────
+
+model Suggestion {
+  id          Int      @id @default(autoincrement())
+  userId      Int?     // Target user (tenant) who receives the suggestion
+  authorName  String?
+  email       String?
+  message     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// ADMIN SUGGESTION (Subscribers sending message to Starry Health Admin)
+// ─────────────────────────────────────────────
+
+model AdminSuggestion {
+  id        Int      @id @default(autoincrement())
+  userId    Int      // Sender subscriber
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// CUSTOM DOMAIN (PREMIUM)
+// ─────────────────────────────────────────────
+
+model CustomDomain {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @unique
+  domain     String    @unique // e.g. "mysite.com"
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/components/session-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { getCurrentTenant } from "@/lib/get-current-tenant";
+import { getCurrentTenant, getServicesForTenant } from "@/lib/tenant";
 import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const metadata: Metadata = {
@@ -24,7 +24,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const tenant = await getCurrentTenant();
-  const primaryColor = tenant?.user?.primaryColor || "#0f766e";
+  const primaryColor =
+    tenant?.config?.headerColor || tenant?.user?.primaryColor || "#0f766e";
+  const fontFamily = tenant?.config?.fontFamily;
+  const services = await getServicesForTenant(tenant?.user?.id);
 
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -32,15 +35,17 @@ export default async function RootLayout({
         <style>{`
           :root {
             --tenant-primary: ${primaryColor};
+            ${fontFamily ? `--font-sans: '${fontFamily}', sans-serif;` : ""}
           }
+          ${fontFamily ? `body { font-family: '${fontFamily}', sans-serif !important; }` : ""}
         `}</style>
       </head>
       <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <ThemeProvider>
           <SessionProvider>
             <Navbar tenant={tenant} />
             <main className="flex-1">{children}</main>
-            <Footer tenant={tenant} />
+            <Footer tenant={tenant} services={services} />
             <ScrollToTop />
           </SessionProvider>
         </ThemeProvider>

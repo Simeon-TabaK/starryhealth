@@ -1,13 +1,3 @@
-import { headers } from "next/headers";
-import { getTenantContext, TenantContext } from "./tenant";
-
-export async function getCurrentTenant(searchParamSlug?: string): Promise<TenantContext> {
-  if (searchParamSlug) {
-    return getTenantContext(searchParamSlug);
-  }
-
-  const headerList = await headers();
-  const tenantSlug = headerList.get("x-tenant-slug");
-
-  return getTenantContext(tenantSlug);
-}
+// Re-export from the unified tenant module for backwards compatibility
+export { getCurrentTenant, getTenantContext } from "./tenant";
+export type { TenantContext, TenantUser, TenantConfig } from "./tenant";
