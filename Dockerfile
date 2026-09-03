@@ -2,14 +2,17 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Installer les dépendances
+# Installer les dépendances (copier les fichiers Prisma nécessaires au script postinstall: prisma generate)
 COPY package*.json ./
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
+
 RUN npm install
 
-# Copier le code source
+# Copier le reste du code source
 COPY . .
 
-# Générer Prisma client
+# Générer le client Prisma
 RUN npx prisma generate
 
 # Builder l'application Next.js
@@ -29,10 +32,11 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/src ./src
 
 # Exposer le port
 EXPOSE 3000
 
 # Déployer les migrations Prisma avant de lancer Next.js
-CMD npx prisma migrate deploy && npm run start
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
