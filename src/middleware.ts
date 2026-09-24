@@ -4,13 +4,17 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // 1. Récupérer le Host d'origine transmis par Dokploy / Traefik / Vercel
-  let hostname = request.headers.get("host") || "";
+  // 1. Récupération du Host depuis les headers envoyés par Traefik / Dokploy / Vercel
+  const rawHost =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    "";
 
-  // Retirer le port s'il est présent (ex: "jean.starryhealth.com:3000" -> "jean.starryhealth.com")
-  hostname = hostname.split(":")[0].toLowerCase();
+  // 2. Nettoyage du Port (Port Stripping)
+  // Transforme "domaine.com:3000" ou "sub.sslip.io:80" en "domaine.com" ou "sub.sslip.io"
+  const hostname = rawHost.split(":")[0].toLowerCase();
 
-  // Ignorer les fichiers statiques, routes d'API internes et fichiers avec extension
+  // 3. Ignorer les fichiers statiques, routes d'API internes et fichiers avec extension
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -19,20 +23,22 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // 4. Domaine principal configuré via variable d'environnement Dokploy ou valeur par défaut
+  const isProduction = process.env.NODE_ENV === "production";
+  const mainDomain =
+    process.env.NEXT_PUBLIC_MAIN_DOMAIN ||
+    (isProduction ? "starryhealth.com" : "localhost");
+
   let tenantSlug: string | null = null;
 
-  // 2. Vérification par paramètre d'URL `?tenant=username`
+  // 5. Vérification par paramètre d'URL `?tenant=username`
   if (searchParams.has("tenant")) {
     tenantSlug = searchParams.get("tenant");
   } else {
-    // 3. Extraction du sous-domaine
-    const isProduction = process.env.NODE_ENV === "production";
-    const mainDomain = isProduction ? "starryhealth.com" : "localhost";
-
+    // 6. Extraction du sous-domaine (ex: username.starryhealth.com)
     if (hostname.endsWith(`.${mainDomain}`)) {
-      // Extrait la partie située avant .starryhealth.com ou .localhost
       const parts = hostname.replace(`.${mainDomain}`, "").split(".");
-      const extractedSubdomain = parts[parts.length - 1]; // Récupère le sous-domaine immédiat (ex: "jean")
+      const extractedSubdomain = parts[parts.length - 1]; // Récupère le sous-domaine immédiat
 
       if (
         extractedSubdomain &&
@@ -45,19 +51,20 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Injecter les headers de la requête
+  // 7. Injection des headers nettoyés pour les Server Components et API routes
   const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-clean-host", hostname);
 
   if (tenantSlug) {
     requestHeaders.set("x-tenant-slug", tenantSlug.toLowerCase());
   } else {
-    // 4. Vérification pour les domaines personnalisés (ex: mon-cabinet.com)
+    // Vérification pour les domaines personnalisés (ex: mon-cabinet.com)
     const isMainDomain =
-      hostname === "starryhealth.com" ||
-      hostname === "www.starryhealth.com" ||
+      hostname === mainDomain ||
+      hostname === `www.${mainDomain}` ||
       hostname === "localhost";
 
-    if (!isMainDomain && !hostname.endsWith(".starryhealth.com")) {
+    if (!isMainDomain && !hostname.endsWith(`.${mainDomain}`)) {
       requestHeaders.set("x-custom-host", hostname);
     } else {
       requestHeaders.delete("x-tenant-slug");
@@ -65,17 +72,26 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  // Injecter également sur les headers de réponse
+  response.headers.set("x-clean-host", hostname);
+
+  return response;
 }
 
 export const config = {
   matcher: [
     /*
-     * Intercepte toutes les routes à l'exception des assets statiques
+     * Match toutes les routes sauf :
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
      */
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],

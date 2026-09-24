@@ -124,7 +124,7 @@ export function Navbar({ tenant }: NavbarProps) {
                 className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 transition-colors"
               >
                 <Phone className="w-3.5 h-3.5" />
-                Contact Vendeur
+                Contact
               </a>
             )}
           </div>

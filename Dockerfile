@@ -25,6 +25,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Copier les fichiers nécessaires depuis le builder
 COPY --from=builder /app/package*.json ./
