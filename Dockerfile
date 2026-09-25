@@ -28,16 +28,18 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Copie des dépendances minimales et des artefacts du build Next.js
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+# 1. Copier standalone EN PREMIER (inclut server.js + node_modules minimal)
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# 2. Copier les fichiers supplémentaires
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 
-# Si vous utilisez "output: 'standalone'" dans next.config.mjs / .js :
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# 3. Copier node_modules COMPLET PAR-DESSUS le minimal de standalone
+#    (nécessaire pour prisma migrate deploy, dotenv, pg, etc.)
+COPY --from=builder /app/node_modules ./node_modules
 
 # Exposer le port
 EXPOSE 3000
