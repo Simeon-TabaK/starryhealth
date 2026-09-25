@@ -107,7 +107,7 @@ async function main() {
       subscriptionStatus: SubscriptionStatus.ACTIVE,
       subscriptionPlan: SubscriptionPlan.SMART,
       primaryColor: "#0284c7",
-      bio: "Distributeur Certifié Starry Health. Spécialiste en micronutrition et vitalité.",
+      bio: "Distributeur Certifié. Spécialiste en micronutrition et vitalité.",
       contactPhone: "+243 990 123 456",
       contactEmail: "jean.dupont@starryhealth.com",
       contactAddress: "Boulevard du 30 Juin, Kinshasa",

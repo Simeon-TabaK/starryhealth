@@ -34,6 +34,11 @@ import {
   Layers,
   ChevronRight,
   TrendingUp,
+  Edit,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
@@ -48,6 +53,7 @@ import {
   addUserFaq,
   deleteUserFaq,
   addUserGalleryImage,
+  updateUserGalleryImage,
   deleteUserGalleryImage,
   addUserPartner,
   deletePartner,
@@ -58,6 +64,7 @@ import {
   deleteAdminSuggestion,
 } from "./actions";
 import { getProductLimit, planHasFeature } from "@/lib/plans";
+import { CloudinaryUpload } from "@/components/cloudinary-upload";
 
 interface DashboardClientProps {
   user: any;
@@ -114,12 +121,23 @@ export function DashboardClient({
 
   // Modals & form states
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [createProductImageUrl, setCreateProductImageUrl] = useState<string>("");
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [editProductImageUrl, setEditProductImageUrl] = useState<string>("");
+
   const [showAddService, setShowAddService] = useState(false);
   const [showAddFaq, setShowAddFaq] = useState(false);
+
   const [showAddGallery, setShowAddGallery] = useState(false);
+  const [addGalleryImageUrl, setAddGalleryImageUrl] = useState<string>("");
+  const [editingGalleryImage, setEditingGalleryImage] = useState<any | null>(null);
+  const [editGalleryImageUrl, setEditGalleryImageUrl] = useState<string>("");
+
   const [showAddPartner, setShowAddPartner] = useState(false);
   const [domainInput, setDomainInput] = useState(user.customDomain?.domain || "");
+
+  const [orgLogoUrl, setOrgLogoUrl] = useState<string>(user.tenantConfig?.orgLogo || "");
+  const [avatarUrl, setAvatarUrl] = useState<string>(user.avatar || "");
 
   // Super Admin manual activation modal state
   const [selectedUserForSub, setSelectedUserForSub] = useState<any | null>(null);
@@ -171,6 +189,8 @@ export function DashboardClient({
     e.preventDefault();
     setSaving(true);
     const formData = new FormData(e.currentTarget);
+    if (orgLogoUrl) formData.set("orgLogo", orgLogoUrl);
+    if (avatarUrl) formData.set("avatar", avatarUrl);
     try {
       await updateUserProfile(user.id, formData);
       showNotification("Paramètres et organisation mis à jour !");
@@ -183,15 +203,59 @@ export function DashboardClient({
 
   const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!createProductImageUrl) {
+      showNotification("Veuillez ajouter une photo pour le produit.", "error");
+      return;
+    }
     setSaving(true);
     const formData = new FormData(e.currentTarget);
+    formData.set("images", createProductImageUrl);
     try {
       await createUserProduct(user.id, formData);
       showNotification("Produit créé avec succès !");
       setShowAddProduct(false);
+      setCreateProductImageUrl("");
       (e.target as HTMLFormElement).reset();
     } catch (err: any) {
       showNotification(err.message || "Erreur de création produit.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    if (editProductImageUrl) {
+      formData.set("images", editProductImageUrl);
+    }
+    try {
+      await updateUserProduct(editingProduct.id, user.id, formData);
+      showNotification("Produit modifié avec succès !");
+      setEditingProduct(null);
+    } catch (err: any) {
+      showNotification(err.message || "Erreur lors de la modification du produit.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateGalleryImage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingGalleryImage) return;
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    if (editGalleryImageUrl) {
+      formData.set("imageUrl", editGalleryImageUrl);
+    }
+    try {
+      await updateUserGalleryImage(editingGalleryImage.id, user.id, formData);
+      showNotification("Photo de la galerie mise à jour !");
+      setEditingGalleryImage(null);
+    } catch (err: any) {
+      showNotification(err.message || "Erreur de modification de la photo.", "error");
     } finally {
       setSaving(false);
     }
@@ -363,15 +427,14 @@ export function DashboardClient({
           LEFT SIDEBAR (Responsive & Collapsible)
           ───────────────────────────────────────────── */}
       <aside
-        className={`fixed md:sticky top-0 bottom-0 left-0 z-40 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 md:translate-x-0 ${
-          mobileNavOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"
-        } h-screen`}
+        className={`fixed md:sticky top-0 bottom-0 left-0 z-40 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 md:translate-x-0 ${mobileNavOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"
+          } h-screen`}
       >
         {/* Brand Header */}
         <div className="p-6 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md bg-emerald-700 text-white font-bold">
-              <img src="/assets/logo.png" alt="Logo" className="rounded-xl w-10 h-10 object-cover" />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold">
+              <img src="/assets/logo.png" alt="Logo" className="rounded-xl w-12 h-12 object-cover" />
             </div>
             <div>
               <span className="font-extrabold text-base tracking-tight block text-slate-900 dark:text-white">
@@ -407,15 +470,14 @@ export function DashboardClient({
               {user.name || user.username}
             </p>
             <span
-              className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase mt-0.5 ${
-                isSuperAdmin
-                  ? "bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300"
-                  : plan === "PREMIUM"
+              className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase mt-0.5 ${isSuperAdmin
+                ? "bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300"
+                : plan === "PREMIUM"
                   ? "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300"
                   : plan === "SMART"
-                  ? "bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300"
-                  : "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
-              }`}
+                    ? "bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300"
+                    : "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
+                }`}
             >
               {isSuperAdmin ? "Admin" : plan || "Standard"}
             </span>
@@ -434,11 +496,10 @@ export function DashboardClient({
                   setActiveTab(item.id);
                   setMobileNavOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  isActive
-                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
-                }`}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${isActive
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`} />
@@ -449,11 +510,10 @@ export function DashboardClient({
                   {item.locked && <Lock className="w-3 h-3 text-amber-500" />}
                   {item.badge !== null && item.badge !== undefined && (
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                      }`}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        }`}
                     >
                       {item.badge}
                     </span>
@@ -500,11 +560,10 @@ export function DashboardClient({
         {/* Notification Banner */}
         {msg && (
           <div
-            className={`mb-6 p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-sm transition-all ${
-              msg.type === "success"
-                ? "bg-emerald-500 text-white"
-                : "bg-rose-500 text-white"
-            }`}
+            className={`mb-6 p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-sm transition-all ${msg.type === "success"
+              ? "bg-emerald-500 text-white"
+              : "bg-rose-500 text-white"
+              }`}
           >
             <span>{msg.text}</span>
             <button onClick={() => setMsg(null)} className="text-white/80 hover:text-white">
@@ -733,13 +792,12 @@ export function DashboardClient({
                               </td>
                               <td className="p-4">
                                 <span
-                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
-                                    u.subscriptionStatus === "ACTIVE"
-                                      ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300"
-                                      : u.subscriptionStatus === "PENDING"
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${u.subscriptionStatus === "ACTIVE"
+                                    ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300"
+                                    : u.subscriptionStatus === "PENDING"
                                       ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300"
                                       : "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300"
-                                  }`}
+                                    }`}
                                 >
                                   {u.subscriptionStatus}
                                 </span>
@@ -920,19 +978,42 @@ export function DashboardClient({
             ───────────────────────────────────────────── */}
         {activeTab === "products" && (
           <div className="space-y-6">
+            {/* Visibility status notice if user is not active */}
+            {!isSubscribed && !isSuperAdmin && (
+              <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <div>
+                    <strong className="block text-slate-900 dark:text-white font-semibold">Note de visibilité publique</strong>
+                    <span>Vous pouvez créer et configurer vos produits dès maintenant. Toutefois, vos produits créés restent <strong>masqués publiquement</strong> sur votre vitrine tant que vous n'avez pas souscrit à un abonnement actif.</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("users")}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shrink-0 shadow-sm transition-colors"
+                >
+                  Activer un abonnement
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                   Mes Produits ({ownProductsCount} / {isFinite(productQuota) ? productQuota : "Illimité"})
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Créez vos produits propres ou ajustez vos tarifs revendeurs privilégiés.
+                  Créez vos produits propres avec photos rognées ou ajustez vos tarifs revendeurs privilégiés.
                 </p>
               </div>
 
               {canAddMoreProducts ? (
                 <button
-                  onClick={() => setShowAddProduct(true)}
+                  onClick={() => {
+                    setCreateProductImageUrl("");
+                    setShowAddProduct(true);
+                  }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-transform hover:scale-105"
                 >
                   <Plus className="w-4 h-4" /> Ajouter un Produit
@@ -944,12 +1025,17 @@ export function DashboardClient({
               )}
             </div>
 
-            {/* Modal Add Product */}
+            {/* Modal Add Product with Cloudinary Upload & Crop */}
             {showAddProduct && (
-              <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
                 <div className="bg-white dark:bg-slate-900 max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
                   <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <h3 className="font-bold text-base">Nouveau Produit</h3>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">Nouveau Produit</h3>
+                    </div>
                     <button onClick={() => setShowAddProduct(false)} className="text-slate-400 hover:text-slate-600">
                       <X className="w-5 h-5" />
                     </button>
@@ -957,36 +1043,129 @@ export function DashboardClient({
                   <form onSubmit={handleCreateProduct} className="space-y-4 pt-4">
                     <div>
                       <label className="text-xs font-semibold block mb-1">Nom du produit</label>
-                      <input required type="text" name="name" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm" />
+                      <input required type="text" name="name" placeholder="Ex: Spiruline Bio Pure" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
                     </div>
                     <div>
                       <label className="text-xs font-semibold block mb-1">Description</label>
-                      <textarea required name="description" rows={3} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm" />
+                      <textarea required name="description" rows={3} placeholder="Présentez les bienfaits et ingrédients..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-xs font-semibold block mb-1">Prix public ($)</label>
-                        <input required type="number" step="0.01" name="defaultPrice" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm" />
+                        <input required type="number" step="0.01" name="defaultPrice" placeholder="Ex: 39.99" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold block mb-1">Prix original barré ($)</label>
-                        <input type="number" step="0.01" name="originalPrice" placeholder="Ex: 55.00" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm" />
+                        <label className="text-xs font-semibold block mb-1">Prix barré avant réduction ($)</label>
+                        <input type="number" step="0.01" name="originalPrice" placeholder="Optionnel (ex: 49.99)" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
                       </div>
                     </div>
                     <div>
                       <label className="text-xs font-semibold block mb-1">Catégorie</label>
-                      <input type="text" name="category" defaultValue="Santé & Bien-être" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm" />
+                      <input type="text" name="category" defaultValue="Santé & Bien-être" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
                     </div>
+
+                    {/* Image Upload with Crop Section */}
                     <div>
-                      <label className="text-xs font-semibold block mb-1">URL(s) d'images</label>
-                      <input required type="text" name="images" placeholder="https://.../img.jpg" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm" />
+                      <label className="text-xs font-semibold block mb-1.5">
+                        Photo du produit <span className="text-slate-400 font-normal">(Upload direct Cloudinary & Rognage interactif)</span>
+                      </label>
+                      <CloudinaryUpload
+                        folder="starryhealth/products"
+                        cropAspect="4:3"
+                        onUpload={(url) => setCreateProductImageUrl(url)}
+                        currentUrl={createProductImageUrl}
+                        label="Sélectionner, rogner et uploader la photo"
+                        primaryColor={user.primaryColor || "#0f766e"}
+                      />
                     </div>
-                    <div className="flex justify-end gap-2 pt-2">
-                      <button type="button" onClick={() => setShowAddProduct(false)} className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500">
+
+                    <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <button type="button" onClick={() => setShowAddProduct(false)} className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700">
                         Annuler
                       </button>
-                      <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700">
+                      <button type="submit" disabled={saving || !createProductImageUrl} className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50">
                         Créer le produit
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Edit Product with Cloudinary Upload & Crop */}
+            {editingProduct && (
+              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-slate-900 max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 flex items-center justify-center">
+                        <Edit className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">Modifier le Produit</h3>
+                    </div>
+                    <button onClick={() => setEditingProduct(null)} className="text-slate-400 hover:text-slate-600">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <form onSubmit={handleUpdateProduct} className="space-y-4 pt-4">
+                    <div>
+                      <label className="text-xs font-semibold block mb-1">Nom du produit</label>
+                      <input required type="text" name="name" defaultValue={editingProduct.name} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold block mb-1">Description</label>
+                      <textarea required name="description" rows={3} defaultValue={editingProduct.description} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">Prix public ($)</label>
+                        <input required type="number" step="0.01" name="defaultPrice" defaultValue={editingProduct.defaultPrice} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">Prix original barré ($)</label>
+                        <input type="number" step="0.01" name="originalPrice" defaultValue={editingProduct.originalPrice || ""} placeholder="Optionnel" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold block mb-1">Catégorie</label>
+                      <input type="text" name="category" defaultValue={editingProduct.category || "Santé & Bien-être"} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                    </div>
+
+                    {/* Image Upload with Crop Section */}
+                    <div>
+                      <label className="text-xs font-semibold block mb-1.5">
+                        Photo du produit <span className="text-slate-400 font-normal">(Remplacer ou rogner à nouveau)</span>
+                      </label>
+                      <CloudinaryUpload
+                        folder="starryhealth/products"
+                        cropAspect="4:3"
+                        onUpload={(url) => setEditProductImageUrl(url)}
+                        currentUrl={editProductImageUrl || editingProduct.images?.split(",")[0]}
+                        label="Changer, rogner et uploader la photo"
+                        primaryColor={user.primaryColor || "#0f766e"}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="checkbox"
+                        name="isVisible"
+                        value="true"
+                        defaultChecked={editingProduct.isVisible !== false}
+                        id="edit-prod-vis"
+                        className="rounded accent-emerald-600"
+                      />
+                      <label htmlFor="edit-prod-vis" className="text-xs text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
+                        Activer ce produit (visible quand l'abonnement est actif)
+                      </label>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <button type="button" onClick={() => setEditingProduct(null)} className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700">
+                        Annuler
+                      </button>
+                      <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700">
+                        Enregistrer les modifications
                       </button>
                     </div>
                   </form>
@@ -1000,34 +1179,58 @@ export function DashboardClient({
                 const isOwn = p.userId === user.id;
                 const hasDiscount = p.originalPrice && p.originalPrice > p.defaultPrice;
                 const discountPct = hasDiscount ? Math.round(((p.originalPrice - p.defaultPrice) / p.originalPrice) * 100) : 0;
+                const mainImg = p.images?.split(",")[0] || "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80";
+
                 return (
-                  <div key={p.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between">
+                  <div key={p.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between overflow-hidden">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                          {p.category}
-                        </span>
-                        {isOwn && (
-                          <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
-                            Mon Produit
+                      {/* Product Image Thumbnail */}
+                      <div className="h-40 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 mb-3 border border-slate-100 dark:border-slate-800 relative group">
+                        <img
+                          src={mainImg}
+                          alt={p.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {hasDiscount && (
+                          <span className="absolute top-2 right-2 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                            -{discountPct}%
                           </span>
                         )}
                       </div>
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">{p.name}</h3>
+
+                      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                          {p.category}
+                        </span>
+                        {isOwn ? (
+                          isSubscribed || isSuperAdmin ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                              <Eye className="w-3 h-3" /> Visible en ligne
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                              <EyeOff className="w-3 h-3" /> Masqué (Sans abonnement)
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                            Catalogue Global
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white line-clamp-1">{p.name}</h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">{p.description}</p>
 
-                      <div className="mt-4 flex items-baseline gap-2">
+                      <div className="mt-3 flex items-baseline gap-2">
                         <span className="text-xl font-extrabold text-emerald-600">${p.defaultPrice.toFixed(2)}</span>
                         {hasDiscount && (
-                          <>
-                            <span className="text-xs text-slate-400 line-through">${p.originalPrice.toFixed(2)}</span>
-                            <span className="text-[10px] font-bold text-rose-500">-{discountPct}%</span>
-                          </>
+                          <span className="text-xs text-slate-400 line-through">${p.originalPrice.toFixed(2)}</span>
                         )}
                       </div>
 
                       {/* Custom pricing */}
-                      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                           Votre Prix Revendeur Partenaire ($)
                         </label>
@@ -1052,8 +1255,17 @@ export function DashboardClient({
                       </div>
                     </div>
 
-                    {isOwn && (
-                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                    {(isOwn || isSuperAdmin) && (
+                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => {
+                            setEditingProduct(p);
+                            setEditProductImageUrl(p.images?.split(",")[0] || "");
+                          }}
+                          className="text-xs text-sky-600 hover:text-sky-700 dark:text-sky-400 font-semibold flex items-center gap-1"
+                        >
+                          <Edit className="w-3.5 h-3.5" /> Modifier
+                        </button>
                         <button
                           onClick={() => handleDeleteProduct(p.id)}
                           className="text-xs text-rose-500 hover:text-rose-700 font-semibold flex items-center gap-1"
@@ -1074,15 +1286,18 @@ export function DashboardClient({
             ───────────────────────────────────────────── */}
         {activeTab === "gallery" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">Galerie d'Images ("Notre univers en images")</h2>
-                <p className="text-xs text-slate-500 mt-1">Carrousel de photos immersives visible sur votre vitrine.</p>
+                <p className="text-xs text-slate-500 mt-1">Carrousel de photos immersives visible sur votre vitrine avec upload et rognage.</p>
               </div>
 
               {hasPremiumFeatures && (
                 <button
-                  onClick={() => setShowAddGallery(true)}
+                  onClick={() => {
+                    setAddGalleryImageUrl("");
+                    setShowAddGallery(true);
+                  }}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md"
                 >
                   <Plus className="w-4 h-4" /> Ajouter une Photo
@@ -1095,7 +1310,7 @@ export function DashboardClient({
                 <Lock className="w-8 h-8 text-amber-500 mx-auto mb-3" />
                 <h3 className="font-bold text-base text-slate-900 dark:text-white">Réservé au Forfait PREMIUM</h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-1 mb-4">
-                  Sur votre vitrine, une galerie Unsplash de haute qualité est affichée par défaut. Passez à PREMIUM pour personnaliser vos propres clichés.
+                  Sur votre vitrine, une galerie de haute qualité est affichée par défaut. Passez à PREMIUM pour personnaliser et rogner vos propres clichés.
                 </p>
                 <button onClick={() => setActiveTab("users")} className="px-5 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-bold">
                   Voir les forfaits
@@ -1103,56 +1318,160 @@ export function DashboardClient({
               </div>
             ) : (
               <>
+                {/* Modal Add Gallery Image with Crop */}
                 {showAddGallery && (
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
+                      if (!addGalleryImageUrl) {
+                        showNotification("Veuillez ajouter une photo.", "error");
+                        return;
+                      }
                       setSaving(true);
+                      const formData = new FormData(e.currentTarget);
+                      formData.set("imageUrl", addGalleryImageUrl);
                       try {
-                        await addUserGalleryImage(user.id, new FormData(e.currentTarget));
-                        showNotification("Image ajoutée !");
+                        await addUserGalleryImage(user.id, formData);
+                        showNotification("Image ajoutée à la galerie !");
                         setShowAddGallery(false);
+                        setAddGalleryImageUrl("");
                       } catch {
-                        showNotification("Erreur d'ajout.", "error");
+                        showNotification("Erreur lors de l'ajout.", "error");
                       } finally {
                         setSaving(false);
                       }
                     }}
-                    className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4"
+                    className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl max-w-lg mx-auto"
                   >
-                    <h3 className="font-bold text-sm">Ajouter une image</h3>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">URL de l'image</label>
-                      <input required type="url" name="imageUrl" placeholder="https://.../photo.jpg" className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center gap-2">
+                        <Camera className="w-4 h-4 text-amber-600" />
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Ajouter une photo à la galerie</h3>
+                      </div>
+                      <button type="button" onClick={() => setShowAddGallery(false)} className="text-slate-400 hover:text-slate-600">
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
+
+                    <div>
+                      <label className="text-xs font-semibold block mb-1.5">
+                        Photo <span className="text-slate-400 font-normal">(Upload direct Cloudinary & Rognage interactif)</span>
+                      </label>
+                      <CloudinaryUpload
+                        folder="starryhealth/gallery"
+                        cropAspect="16:9"
+                        onUpload={(url) => setAddGalleryImageUrl(url)}
+                        currentUrl={addGalleryImageUrl}
+                        label="Sélectionner, rogner et uploader la photo"
+                        primaryColor={user.primaryColor || "#0f766e"}
+                      />
+                    </div>
+
                     <div>
                       <label className="text-xs font-semibold block mb-1">Légende</label>
-                      <input type="text" name="caption" placeholder="Nos équipements..." className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
+                      <input
+                        type="text"
+                        name="caption"
+                        placeholder="Ex: Laboratoire de contrôle qualité certifié..."
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                      />
                     </div>
-                    <div className="flex justify-end gap-2">
-                      <button type="button" onClick={() => setShowAddGallery(false)} className="px-4 py-2 text-xs text-slate-500">Annuler</button>
-                      <button type="submit" disabled={saving} className="px-4 py-2 bg-amber-600 text-white rounded-xl text-xs font-bold">Enregistrer</button>
+
+                    <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <button type="button" onClick={() => setShowAddGallery(false)} className="px-4 py-2 text-xs text-slate-500">
+                        Annuler
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={saving || !addGalleryImageUrl}
+                        className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold disabled:opacity-50"
+                      >
+                        Enregistrer
+                      </button>
                     </div>
                   </form>
                 )}
 
+                {/* Modal Edit Gallery Image with Crop */}
+                {editingGalleryImage && (
+                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 max-w-md w-full rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-2">
+                          <Edit className="w-4 h-4 text-amber-600" />
+                          <h3 className="font-bold text-sm text-slate-900 dark:text-white">Modifier la photo de galerie</h3>
+                        </div>
+                        <button onClick={() => setEditingGalleryImage(null)} className="text-slate-400 hover:text-slate-600">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <form onSubmit={handleUpdateGalleryImage} className="space-y-4 pt-4">
+                        <div>
+                          <label className="text-xs font-semibold block mb-1.5">
+                            Photo <span className="text-slate-400 font-normal">(Remplacer ou rogner à nouveau)</span>
+                          </label>
+                          <CloudinaryUpload
+                            folder="starryhealth/gallery"
+                            cropAspect="16:9"
+                            onUpload={(url) => setEditGalleryImageUrl(url)}
+                            currentUrl={editGalleryImageUrl || editingGalleryImage.imageUrl}
+                            label="Changer, rogner et uploader"
+                            primaryColor={user.primaryColor || "#0f766e"}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold block mb-1">Légende</label>
+                          <input
+                            type="text"
+                            name="caption"
+                            defaultValue={editingGalleryImage.caption || ""}
+                            placeholder="Ex: Laboratoire de recherche..."
+                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                          <button type="button" onClick={() => setEditingGalleryImage(null)} className="px-4 py-2 text-xs text-slate-500">
+                            Annuler
+                          </button>
+                          <button type="submit" disabled={saving} className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold">
+                            Enregistrer
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {gallery.map((img) => (
-                    <div key={img.id} className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900">
-                      <img src={img.imageUrl} alt={img.caption || ""} className="w-full h-44 object-cover" />
+                    <div key={img.id} className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 group">
+                      <img src={img.imageUrl} alt={img.caption || ""} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
                       <div className="p-3 bg-white dark:bg-slate-900">
-                        <p className="text-xs font-medium truncate">{img.caption || "Sans légende"}</p>
+                        <p className="text-xs font-medium truncate text-slate-900 dark:text-white">{img.caption || "Sans légende"}</p>
                       </div>
-                      <button
-                        onClick={async () => {
-                          if (!confirm("Supprimer cette photo ?")) return;
-                          await deleteUserGalleryImage(img.id, user.id);
-                          showNotification("Image supprimée !");
-                        }}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 hover:bg-rose-600 text-white transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => {
+                            setEditingGalleryImage(img);
+                            setEditGalleryImageUrl(img.imageUrl);
+                          }}
+                          className="p-1.5 rounded-lg bg-black/70 hover:bg-amber-600 text-white transition-colors shadow-md"
+                          title="Modifier la photo"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!confirm("Supprimer cette photo ?")) return;
+                            await deleteUserGalleryImage(img.id, user.id);
+                            showNotification("Image supprimée !");
+                          }}
+                          className="p-1.5 rounded-lg bg-black/70 hover:bg-rose-600 text-white transition-colors shadow-md"
+                          title="Supprimer la photo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1190,11 +1509,10 @@ export function DashboardClient({
                     {adminSuggestions.map((asug) => (
                       <div
                         key={asug.id}
-                        className={`p-5 rounded-2xl border transition-all ${
-                          asug.isRead
-                            ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-80"
-                            : "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/40 shadow-sm"
-                        }`}
+                        className={`p-5 rounded-2xl border transition-all ${asug.isRead
+                          ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-80"
+                          : "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/40 shadow-sm"
+                          }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                           <div className="flex items-center gap-2">
@@ -1327,7 +1645,7 @@ export function DashboardClient({
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className="text-xs font-semibold block mb-1">Nom de l'organisation / Boutique</label>
                   <input
@@ -1335,19 +1653,33 @@ export function DashboardClient({
                     name="orgName"
                     defaultValue={user.tenantConfig?.orgName || ""}
                     placeholder="Cabinet Santé, Espace Nutrition..."
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm mb-4"
                   />
+
+                  <label className="text-xs font-semibold block mb-1">Photo de profil / Avatar (1:1 Carré)</label>
+                  <CloudinaryUpload
+                    folder="starryhealth/avatars"
+                    cropAspect="1:1"
+                    onUpload={(url) => setAvatarUrl(url)}
+                    currentUrl={avatarUrl}
+                    label="Uploader photo de profil"
+                    primaryColor={user.primaryColor || "#0f766e"}
+                  />
+                  <input type="hidden" name="avatar" value={avatarUrl} />
                 </div>
+
                 <div>
-                  <label className="text-xs font-semibold block mb-1">Logo URL</label>
-                  <input
-                    type="url"
-                    name="orgLogo"
-                    defaultValue={user.tenantConfig?.orgLogo || ""}
-                    placeholder="https://.../logo.png"
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                  <label className="text-xs font-semibold block mb-1">Logo de l'organisation / Vitrine</label>
+                  <CloudinaryUpload
+                    folder="starryhealth/logos"
+                    onUpload={(url) => setOrgLogoUrl(url)}
+                    currentUrl={orgLogoUrl}
+                    label="Uploader et rogner le logo"
+                    primaryColor={user.primaryColor || "#0f766e"}
                   />
+                  <input type="hidden" name="orgLogo" value={orgLogoUrl} />
                 </div>
+
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold block mb-1">Description</label>
                   <textarea

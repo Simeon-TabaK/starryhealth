@@ -8,7 +8,6 @@ import { ServicesSection } from "@/components/services-section";
 import { FaqSection } from "@/components/faq-section";
 import { GallerySection } from "@/components/gallery-section";
 import { SuggestionBox } from "@/components/suggestion-box";
-import { Cart } from "@/components/cart";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
 import { Sparkles, ArrowRight, ShieldCheck, HeartPulse } from "lucide-react";
 import Link from "next/link";
@@ -80,7 +79,7 @@ export default async function HomePage({ searchParams }: PageProps) {
               <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <div className="text-left text-xs">
                 <span className="text-slate-500 dark:text-slate-400 block">
-                  Votre Distributeur Agréé Starry Health
+                  Votre Distributeur Agréé
                 </span>
                 <strong className="text-slate-900 dark:text-white text-sm">
                   {tenant.user.name}
@@ -238,12 +237,6 @@ export default async function HomePage({ searchParams }: PageProps) {
         </ScrollReveal>
       </section>
 
-      {/* 12. Floating Cart with WhatsApp export */}
-      <Cart
-        whatsapp={tenant?.user?.whatsapp}
-        primaryColor={primaryColor}
-        vendorName={vendorName}
-      />
     </div>
   );
 }

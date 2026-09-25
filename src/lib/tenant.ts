@@ -253,8 +253,12 @@ export async function getProductsForTenant(
   try {
     const userId = tenant?.user?.id ?? null;
 
-    // If tenant exists, try to load their own products first
-    if (userId) {
+    // If tenant exists and HAS ACTIVE SUBSCRIPTION, load their own products
+    const isSubscribed =
+      tenant?.user?.subscriptionStatus === "ACTIVE" ||
+      tenant?.user?.role === "SUPER_ADMIN";
+
+    if (userId && isSubscribed) {
       const ownProducts = await prisma.product.findMany({
         where: { userId, isVisible: true },
         orderBy: { createdAt: "desc" },
@@ -263,10 +267,8 @@ export async function getProductsForTenant(
       if (ownProducts.length > 0) {
         // Use custom prices if ACTIVE subscription
         let customPriceMap = new Map<number, number>();
-        if (tenant?.user?.subscriptionStatus === "ACTIVE") {
-          const cps = await prisma.userProductPrice.findMany({ where: { userId } });
-          cps.forEach((cp) => customPriceMap.set(cp.productId, cp.customPrice));
-        }
+        const cps = await prisma.userProductPrice.findMany({ where: { userId } });
+        cps.forEach((cp) => customPriceMap.set(cp.productId, cp.customPrice));
 
         return ownProducts.map((p) => {
           const customPrice = customPriceMap.get(p.id);

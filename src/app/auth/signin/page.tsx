@@ -72,7 +72,7 @@ export default function SignInPage() {
                 type="text"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="admin ou jean.dupont@starryhealth.com"
+                placeholder="username ou adresse mail"
                 required
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500"
               />
@@ -150,9 +150,6 @@ export default function SignInPage() {
           Google OAuth (Compte Utilisateur)
         </button>
 
-        <div className="text-center pt-2 text-[11px] text-slate-500 dark:text-slate-400">
-          Admin (admin / Pass12345) & Utilisateur (user / Pass12345)
-        </div>
 
       </div>
     </div>

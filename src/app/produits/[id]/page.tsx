@@ -22,9 +22,18 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
   const product = await prisma.product.findUnique({
     where: { id: productId },
+    include: { user: true },
   });
 
-  if (!product) return notFound();
+  if (!product || !product.isVisible) return notFound();
+
+  // A user's product is only publicly visible if they have an active subscription
+  if (product.userId !== null) {
+    const isOwnerActive =
+      product.user?.subscriptionStatus === "ACTIVE" ||
+      product.user?.role === "SUPER_ADMIN";
+    if (!isOwnerActive) return notFound();
+  }
 
   let effectivePrice = product.defaultPrice;
   let isCustomPrice = false;

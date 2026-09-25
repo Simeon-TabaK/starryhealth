@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/components/session-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { Cart } from "@/components/cart";
 import { getCurrentTenant, getServicesForTenant } from "@/lib/tenant";
 import { ScrollToTop } from "@/components/scroll-to-top";
 
@@ -43,10 +44,16 @@ export default async function RootLayout({
       <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
         <ThemeProvider>
           <SessionProvider>
-            <Navbar tenant={tenant} />
+            <Navbar tenant={tenant} primaryColor={primaryColor} />
             <main className="flex-1">{children}</main>
             <Footer tenant={tenant} services={services} />
             <ScrollToTop />
+            {/* Cart drawer — available on all pages, opened via NavbarCartButton */}
+            <Cart
+              whatsapp={tenant?.user?.whatsapp}
+              primaryColor={primaryColor}
+              vendorName={tenant?.config?.orgName || tenant?.user?.name || "Starry Health"}
+            />
           </SessionProvider>
         </ThemeProvider>
       </body>

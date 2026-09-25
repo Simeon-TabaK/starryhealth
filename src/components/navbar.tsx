@@ -5,13 +5,15 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X, ShieldCheck, Phone } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NavbarCartButton } from "@/components/cart";
 import type { TenantContext } from "@/lib/tenant";
 
 interface NavbarProps {
   tenant?: TenantContext | null;
+  primaryColor?: string;
 }
 
-export function Navbar({ tenant }: NavbarProps) {
+export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -19,6 +21,7 @@ export function Navbar({ tenant }: NavbarProps) {
   const vendorName =
     tenant?.config?.orgName || tenant?.user?.name || tenant?.slug;
   const primaryColor =
+    primaryColorProp ||
     tenant?.config?.headerColor ||
     tenant?.user?.primaryColor ||
     "#0f766e";
@@ -52,13 +55,14 @@ export function Navbar({ tenant }: NavbarProps) {
 
           {/* Brand & Logo */}
           <Link href={`/${tenantQuery}`} className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
+            {/* Logo card — size increased */}
+            <div className="w-18 h-18  flex items-center justify-center transition-transform group-hover:scale-105 overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
               <img
-                className="rounded-xl"
+                className="w-full h-full object-contain "
                 src={logoSrc}
                 alt="Logo"
-                width={40}
-                height={40}
+                width={100}
+                height={100}
               />
             </div>
             <div>
@@ -71,24 +75,14 @@ export function Navbar({ tenant }: NavbarProps) {
                   </>
                 )}
               </span>
-              {isTenant && tenant?.config?.orgName && (
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 block leading-none mt-0.5">
-                  by Starry Health
-                </span>
-              )}
+              {/* "by StarryHealth" intentionally removed */}
             </div>
           </Link>
 
-          {/* Tenant Badge */}
+          {/* Tenant Badge — icon only + vendor name, no "Boutique Partenaire:" label */}
           {isTenant && (
             <div className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-slate-900 border border-emerald-500/30 text-xs font-medium text-slate-700 dark:text-slate-200">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>
-                Boutique Partenaire:{" "}
-                <strong className="text-emerald-700 dark:text-emerald-300">
-                  {vendorName}
-                </strong>
-              </span>
+              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             </div>
           )}
 
@@ -100,11 +94,10 @@ export function Navbar({ tenant }: NavbarProps) {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`px-4 py-2 text-sm font-medium transition-all ${
-                    isActive
-                      ? "text-slate-900 dark:text-white font-semibold border-b-2 border-emerald-500"
-                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/50 rounded-lg"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium transition-all ${isActive
+                    ? "text-slate-900 dark:text-white font-semibold border-b-2 border-emerald-500"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/50 rounded-lg"
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -112,9 +105,12 @@ export function Navbar({ tenant }: NavbarProps) {
             })}
           </nav>
 
-          {/* Action Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop Action Buttons */}
+          <div className="hidden md:flex items-center gap-2">
             <ThemeToggle />
+
+            {/* Cart button in header */}
+            <NavbarCartButton primaryColor={primaryColor} />
 
             {isTenant && tenant?.user?.whatsapp && (
               <a
@@ -132,6 +128,8 @@ export function Navbar({ tenant }: NavbarProps) {
           {/* Mobile Right Bar */}
           <div className="flex md:hidden items-center gap-2">
             <ThemeToggle />
+            {/* Cart button visible on mobile too */}
+            <NavbarCartButton primaryColor={primaryColor} />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none"

@@ -371,6 +371,41 @@ export async function deleteUserGalleryImage(imageId: number, userId: number) {
   return { success: true };
 }
 
+export async function updateUserGalleryImage(
+  imageId: number,
+  userId: number,
+  formData: FormData
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, subscriptionPlan: true },
+  });
+
+  const img = await prisma.galleryImage.findUnique({ where: { id: imageId } });
+  if (!img) throw new Error("Image introuvable.");
+
+  if (user?.role !== "SUPER_ADMIN" && img.userId !== userId) {
+    throw new Error("Action non autorisée.");
+  }
+
+  const imageUrl = formData.get("imageUrl") as string;
+  const caption = formData.get("caption") as string;
+  const order = parseInt((formData.get("order") as string) || "0", 10);
+
+  await prisma.galleryImage.update({
+    where: { id: imageId },
+    data: {
+      imageUrl: imageUrl || img.imageUrl,
+      caption: caption !== undefined ? caption || null : img.caption,
+      order: isNaN(order) ? img.order : order,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
 // --- CAROUSEL ACTIONS ---
 
 export async function addUserCarouselItem(userId: number | null, formData: FormData) {
