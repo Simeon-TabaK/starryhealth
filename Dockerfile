@@ -2,20 +2,21 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Installer les dépendances (copier les fichiers Prisma nécessaires au script postinstall: prisma generate)
+# Copie des définitions de dépendances et des fichiers Prisma
 COPY package*.json ./
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
 
+# Installation des dépendances (déclenche automatiquement 'prisma generate' si 'postinstall' est présent)
 RUN npm install
 
-# Copier le reste du code source
+# Copie du reste du code source
 COPY . .
 
-# Générer le client Prisma
+# Génération explicite pour garantir la présence du client compilé
 RUN npx prisma generate
 
-# Builder l'application Next.js
+# Build de l'application Next.js
 RUN npm run build
 
 
@@ -27,17 +28,19 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Copier les fichiers nécessaires depuis le builder
+# Copie des dépendances minimales et des artefacts du build Next.js
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
-COPY --from=builder /app/src ./src
+
+# Si vous utilisez "output: 'standalone'" dans next.config.mjs / .js :
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 # Exposer le port
 EXPOSE 3000
 
-# Déployer les migrations Prisma avant de lancer Next.js
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+# Exécuter les migrations Prisma puis lancer le serveur Next.js compilé
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
