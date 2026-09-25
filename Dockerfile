@@ -18,7 +18,8 @@ COPY . .
 # Génération explicite pour garantir la présence du client compilé
 RUN npx prisma generate
 
-# Build de l'application Next.js
+# Build de l'application Next.js en mode production
+ENV NODE_ENV=production
 RUN npm run build
 
 
