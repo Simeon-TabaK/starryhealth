@@ -7,8 +7,10 @@ COPY package*.json ./
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
 
-# Installation des dépendances (déclenche automatiquement 'prisma generate' si 'postinstall' est présent)
-RUN npm install
+ENV NODE_ENV=development
+
+# Installation de toutes les dépendances (y compris devDependencies nécessaires pour le build)
+RUN npm install --include=dev
 
 # Copie du reste du code source
 COPY . .
