@@ -4,17 +4,16 @@ import type { NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // 1. Récupération du Host depuis les headers envoyés par Traefik / Dokploy / Vercel
+  // 1. Récupérer le header 'host' ou 'x-forwarded-host' envoyé par Traefik / Coolify / Reverse-Proxy
   const rawHost =
     request.headers.get("x-forwarded-host") ||
     request.headers.get("host") ||
     "";
 
-  // 2. Nettoyage du Port (Port Stripping)
-  // Transforme "domaine.com:3000" ou "sub.sslip.io:80" en "domaine.com" ou "sub.sslip.io"
-  const hostname = rawHost.split(":")[0].toLowerCase();
+  // 2. Nettoyage du port (ex: "sboxx.site:3000" -> "sboxx.site")
+  const hostname = rawHost.split(":")[0].toLowerCase().trim();
 
-  // 3. Ignorer les fichiers statiques, routes d'API internes et fichiers avec extension
+  // 3. Ignorer les fichiers statiques, images et routes internes
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -23,53 +22,79 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Domaine principal configuré via variable d'environnement Dokploy ou valeur par défaut
-  const isProduction = process.env.NODE_ENV === "production";
-  const mainDomain =
-    process.env.NEXT_PUBLIC_MAIN_DOMAIN ||
-    (isProduction ? "starryhealth.com" : "localhost");
+  // 4. Liste des domaines racine configurables (via env ou defaults sboxx.site, starryhealth.com, localhost)
+  const envDomains = [
+    process.env.ROOT_DOMAIN,
+    process.env.NEXT_PUBLIC_MAIN_DOMAIN,
+    ...(process.env.ROOT_DOMAINS ? process.env.ROOT_DOMAINS.split(",") : []),
+  ]
+    .filter(Boolean)
+    .map((d) => d!.trim().toLowerCase());
 
-  let tenantSlug: string | null = null;
+  const rootDomains = Array.from(
+    new Set([
+      "sboxx.site",
+      "localhost",
+      "127.0.0.1",
+      ...envDomains,
+    ])
+  );
 
-  // 5. Vérification par paramètre d'URL `?tenant=username`
+  let tenant: string | null = null;
+  let isCustomDomain = false;
+
+  // 5. Extraction par paramètre de requête `?tenant=slug` (priorité pour tests ou partages)
   if (searchParams.has("tenant")) {
-    tenantSlug = searchParams.get("tenant");
+    tenant = searchParams.get("tenant")?.toLowerCase().trim() || null;
   } else {
-    // 6. Extraction du sous-domaine (ex: username.starryhealth.com)
-    if (hostname.endsWith(`.${mainDomain}`)) {
-      const parts = hostname.replace(`.${mainDomain}`, "").split(".");
-      const extractedSubdomain = parts[parts.length - 1]; // Récupère le sous-domaine immédiat
-
-      if (
-        extractedSubdomain &&
-        extractedSubdomain !== "www" &&
-        extractedSubdomain !== "starryhealth" &&
-        extractedSubdomain !== mainDomain
-      ) {
-        tenantSlug = extractedSubdomain;
+    // 6. Vérifier si l'hôte correspond à un sous-domaine de l'un de nos root domains
+    let matchedRoot: string | null = null;
+    for (const rootDomain of rootDomains) {
+      if (hostname === rootDomain || hostname === `www.${rootDomain}`) {
+        matchedRoot = rootDomain;
+        break;
       }
+      if (hostname.endsWith(`.${rootDomain}`)) {
+        matchedRoot = rootDomain;
+        const prefix = hostname.replace(`.${rootDomain}`, "");
+        const parts = prefix.split(".");
+        const subdomain = parts[parts.length - 1];
+
+        // Ignorer 'www', 'mail', etc.
+        if (
+          subdomain &&
+          subdomain !== "www" &&
+          subdomain !== "main" &&
+          subdomain !== "app"
+        ) {
+          tenant = subdomain;
+        }
+        break;
+      }
+    }
+
+    // 7. Si l'hôte n'est aucun de nos root domains / sous-domaines, c'est un Custom Domain (ex: mon-cabinet.com)
+    if (!matchedRoot && hostname && hostname !== "localhost") {
+      isCustomDomain = true;
     }
   }
 
-  // 7. Injection des headers nettoyés pour les Server Components et API routes
+  // 8. Transmission de la valeur du tenant et de l'hôte dans les headers
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-clean-host", hostname);
 
-  if (tenantSlug) {
-    requestHeaders.set("x-tenant-slug", tenantSlug.toLowerCase());
+  if (tenant) {
+    requestHeaders.set("x-tenant", tenant);
+    requestHeaders.set("x-tenant-slug", tenant);
+    requestHeaders.delete("x-custom-host");
+  } else if (isCustomDomain) {
+    requestHeaders.set("x-custom-host", hostname);
+    requestHeaders.delete("x-tenant");
+    requestHeaders.delete("x-tenant-slug");
   } else {
-    // Vérification pour les domaines personnalisés (ex: mon-cabinet.com)
-    const isMainDomain =
-      hostname === mainDomain ||
-      hostname === `www.${mainDomain}` ||
-      hostname === "localhost";
-
-    if (!isMainDomain && !hostname.endsWith(`.${mainDomain}`)) {
-      requestHeaders.set("x-custom-host", hostname);
-    } else {
-      requestHeaders.delete("x-tenant-slug");
-      requestHeaders.delete("x-custom-host");
-    }
+    requestHeaders.delete("x-tenant");
+    requestHeaders.delete("x-tenant-slug");
+    requestHeaders.delete("x-custom-host");
   }
 
   const response = NextResponse.next({
@@ -78,20 +103,25 @@ export function proxy(request: NextRequest) {
     },
   });
 
-  // Injecter également sur les headers de réponse
   response.headers.set("x-clean-host", hostname);
+  if (tenant) {
+    response.headers.set("x-tenant", tenant);
+  }
 
   return response;
 }
+
+// Export middleware alias for Next.js convention
+export const middleware = proxy;
 
 export const config = {
   matcher: [
     /*
      * Match toutes les routes sauf :
      * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - _next/static (fichiers statiques)
+     * - _next/image (optimisation d'images)
+     * - favicon.ico (icône)
      */
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],

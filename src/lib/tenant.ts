@@ -200,8 +200,8 @@ export async function getCurrentTenant(searchParamSlug?: string): Promise<Tenant
   }
 
   const headerList = await headers();
-  const tenantSlug = headerList.get("x-tenant-slug");
-  const customHost = headerList.get("x-custom-host");
+  const tenantSlug = headerList.get("x-tenant") || headerList.get("x-tenant-slug");
+  const customHost = headerList.get("x-custom-host") || headerList.get("x-clean-host");
 
   return getTenantContext(tenantSlug, customHost);
 }
