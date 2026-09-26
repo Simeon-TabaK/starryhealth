@@ -1,14 +1,27 @@
 version: "3.9"
+
 services:
   web:
     build: .
     container_name: starryhealth-web
-    ports:
-      - "3000:3000"
+    restart: always
     environment:
       DATABASE_URL: "postgresql://postgres:password@db:5432/starryhealth"
+      NODE_ENV: production
+      PORT: 3000
     depends_on:
       - db
+    networks:
+      - default
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      # Route sboxx.site et tous ses sous-domaines vers Next.js
+      - "traefik.http.routers.starry-web.rule=Host(`sboxx.site`) || HostRegexp(`^[a-z0-9-]+\\.sboxx\\.site$`)"
+      - "traefik.http.routers.starry-web.entrypoints=web,websecure"
+      - "traefik.http.services.starry-web.loadbalancer.server.port=3000"
+      - "traefik.http.routers.starry-web.tls=true"
+      - "traefik.http.routers.starry-web.tls.certresolver=letsencrypt"
 
   db:
     image: postgres:16-alpine
@@ -18,10 +31,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: starryhealth
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
 
 volumes:
   postgres_data:
+
+networks:
+  coolify:
+    external: true
