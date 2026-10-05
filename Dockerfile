@@ -1,71 +1,63 @@
-# ─── Starry Vitrine – Dockerfile multi-stage pour Coolify ───────────────────
+# ─── Starry Vitrine – Dockerfile pour Coolify ───────────────────────────────
 
-# ─── Stage 1: Dépendances ─────────────────────────────────────────────────────
-FROM node:22-alpine AS deps
-RUN apk add --no-cache libc6-compat openssl
+# Étape 1 : Builder
+FROM node:22-alpine AS builder
+RUN apk add --no-cache curl
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+# Copie des définitions de dépendances et des fichiers Prisma
+COPY package*.json ./
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
 
-# --ignore-scripts évite que postinstall lance "prisma generate" sans DB
-RUN npm ci --ignore-scripts
+ENV NODE_ENV=development
 
-# ─── Stage 2: Builder ─────────────────────────────────────────────────────────
-FROM node:22-alpine AS builder
-RUN apk add --no-cache libc6-compat openssl
-WORKDIR /app
+# Installation de toutes les dépendances (y compris devDependencies pour le build)
+RUN npm install --include=dev
 
-COPY --from=deps /app/node_modules ./node_modules
+# Copie du reste du code source
 COPY . .
 
-# Générer le client Prisma avec les binaires Alpine (musl)
+# Génération du client Prisma (output: src/generated/prisma)
 RUN npx prisma generate
 
-ENV NEXT_TELEMETRY_DISABLED=1
+# Build Next.js en mode production
 ENV NODE_ENV=production
-
-# Build Next.js standalone
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# ─── Stage 3: Runner ──────────────────────────────────────────────────────────
+
+# Étape 2 : Runner
 FROM node:22-alpine AS runner
-# curl nécessaire pour le HEALTHCHECK
-RUN apk add --no-cache libc6-compat openssl curl
+RUN apk add --no-cache curl
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Utilisateur non-root pour la sécurité
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+# 1. Copier standalone EN PREMIER (inclut server.js + node_modules minimal)
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Fichiers statiques publics
+# 2. Copier les fichiers supplémentaires
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 
-# Build standalone Next.js
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# 3. Copier node_modules COMPLET (contient .prisma, @prisma, pg, etc.)
+COPY --from=builder /app/node_modules ./node_modules
 
-# Prisma : client généré dans src/generated/prisma (pas node_modules/.prisma)
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./
-COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# 4. Copier le client Prisma généré (output custom: src/generated/prisma)
+COPY --from=builder /app/src/generated ./src/generated
 
-USER nextjs
-
+# Exposer le port
 EXPOSE 3000
 
-# ─── Health Check pour Coolify ────────────────────────────────────────────────
-# Vérifie toutes les 30s, timeout 10s, 3 retries, délai initial 20s
+# Health Check pour Coolify — toujours 200
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Lancer le serveur Next.js standalone
-# Les migrations sont gérées séparément (Coolify job ou manuellement)
-CMD ["node", "server.js"]
+# Migrations + démarrage
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
