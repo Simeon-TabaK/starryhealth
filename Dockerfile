@@ -51,10 +51,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Prisma : binaires + client générés
+# Prisma : client généré dans src/generated/prisma (pas node_modules/.prisma)
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 USER nextjs
