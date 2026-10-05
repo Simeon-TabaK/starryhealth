@@ -59,5 +59,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Migrations + démarrage
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Migrations (non-bloquantes) puis démarrage
+# Le "|| true" permet au serveur de démarrer même si la migration échoue
+CMD ["sh", "-c", "npx prisma migrate deploy || true && node server.js"]
