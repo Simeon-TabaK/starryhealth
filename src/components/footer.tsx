@@ -25,7 +25,10 @@ export function Footer({ tenant, services = [] }: FooterProps) {
   const vendorName = tenant?.config?.orgName || tenant?.user?.name || tenant?.slug;
   const primaryColor = tenant?.user?.primaryColor || "#0f766e";
 
-  const phone = tenant?.user?.contactPhone || "+243 810 000 000";
+  const phone =
+    tenant?.user?.contactPhone ||
+    process.env.NEXT_PUBLIC_CONTACT_PHONE ||
+    "+243 969 131 138";
   const email = tenant?.user?.contactEmail || "contact@starryhealth.com";
   const address = tenant?.user?.contactAddress || "Kinshasa, RDC & International";
   const website = tenant?.user?.contactWebsite || "www.starryhealth.com";
@@ -37,7 +40,9 @@ export function Footer({ tenant, services = [] }: FooterProps) {
   const li = tenant?.user?.linkedin;
   const tt = tenant?.user?.tiktok;
   const ig = tenant?.user?.instagram;
-  const wa = tenant?.user?.whatsapp;
+  const wa =
+    tenant?.user?.whatsapp ||
+    (!isTenant ? (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138") : undefined);
 
   const hasSocials = fb || li || tt || ig || wa;
 
@@ -202,7 +207,12 @@ export function Footer({ tenant, services = [] }: FooterProps) {
               {phone && (
                 <li className="flex items-center gap-2.5">
                   <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>{phone}</span>
+                  <a
+                    href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
+                    className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  >
+                    {phone}
+                  </a>
                 </li>
               )}
               {email && (

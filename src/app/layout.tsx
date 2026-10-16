@@ -78,7 +78,7 @@ export default async function RootLayout({
             <ScrollToTop />
             {/* Cart drawer — available on all pages, opened via NavbarCartButton */}
             <Cart
-              whatsapp={tenant?.user?.whatsapp}
+              whatsapp={tenant?.user?.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138"}
               primaryColor={primaryColor}
               vendorName={tenant?.config?.orgName || tenant?.user?.name || "Starry Health"}
             />

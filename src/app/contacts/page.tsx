@@ -14,7 +14,11 @@ export default async function ContactsPage({ searchParams }: PageProps) {
   const user = tenant?.user;
   const primaryColor = user?.primaryColor || "#0f766e";
 
-  const phone = isTenant ? user?.contactPhone || "+243 990 123 456" : "+243 810 000 000";
+  const defaultPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE || "+243 969 131 138";
+  const defaultWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138";
+
+  const phone = isTenant ? user?.contactPhone || defaultPhone : defaultPhone;
+  const whatsapp = isTenant ? user?.whatsapp || defaultWhatsApp : defaultWhatsApp;
   const email = isTenant ? user?.contactEmail || user?.email || "vendeur@starryhealth.com" : "contact@starryhealth.com";
 
   return (
@@ -64,7 +68,12 @@ export default async function ContactsPage({ searchParams }: PageProps) {
                   </div>
                   <div>
                     <span className="text-slate-500 dark:text-slate-400 block">Téléphone / WhatsApp</span>
-                    <strong className="text-slate-900 dark:text-white text-sm">{phone}</strong>
+                    <a
+                      href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
+                      className="text-slate-900 dark:text-white text-sm font-bold hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                    >
+                      {phone}
+                    </a>
                   </div>
                 </div>
 
@@ -89,9 +98,9 @@ export default async function ContactsPage({ searchParams }: PageProps) {
                 </div>
               </div>
 
-              {isTenant && user?.whatsapp && (
+              {whatsapp && (
                 <a
-                  href={`https://wa.me/${user.whatsapp.replace(/[^0-9]/g, "")}`}
+                  href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center gap-2 text-xs transition-colors shadow-md"

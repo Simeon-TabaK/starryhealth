@@ -149,24 +149,34 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 </div>
               </div>
 
-              {tenant?.isTenant && tenant?.user && (
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-emerald-500/30 text-xs text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    Conseiller: <strong>{tenant.user.name}</strong>
-                  </span>
-                  {tenant.user.whatsapp && (
+              {/* Direct Advisor / Service client WhatsApp contact */}
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-emerald-500/30 text-xs text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  {tenant?.isTenant && tenant?.user ? (
+                    <span>Conseiller: <strong>{tenant.user.name}</strong></span>
+                  ) : (
+                    <span>Service Client: <strong>Starry Health</strong></span>
+                  )}
+                </span>
+                {(() => {
+                  const waNumber =
+                    tenant?.user?.whatsapp ||
+                    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||
+                    "+243969131138";
+                  const contactName = tenant?.user?.name || "Starry Health";
+                  return (
                     <a
-                      href={`https://wa.me/${tenant.user.whatsapp.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Bonjour ${tenant.user.name}, je souhaite des informations sur ${product.name}`)}`}
+                      href={`https://wa.me/${waNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Bonjour ${contactName}, je souhaite des informations sur le produit "${product.name}".`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center gap-1"
                     >
                       <Phone className="w-3.5 h-3.5" /> WhatsApp Direct
                     </a>
-                  )}
-                </div>
-              )}
+                  );
+                })()}
+              </div>
 
               {/* Add to cart action button */}
               <div className="flex gap-4">
@@ -187,7 +197,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
       {/* Floating Cart */}
       <Cart
-        whatsapp={tenant?.user?.whatsapp}
+        whatsapp={tenant?.user?.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138"}
         primaryColor={primaryColor}
         vendorName={vendorName}
       />

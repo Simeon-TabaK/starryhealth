@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ShoppingBag, Tag, Percent } from "lucide-react";
 import { motion } from "framer-motion";
 import { dispatchAddToCart } from "./cart";
@@ -31,6 +32,9 @@ export function ProductCard({
   primaryColor = "#0f766e",
   onAddToCart,
 }: ProductCardProps) {
+  const router = useRouter();
+  const detailUrl = `/produits/${product.id}${tenantQuery}`;
+
   const imageList = product.images ? product.images.split(",") : [];
   const mainImage =
     imageList[0] ||
@@ -40,7 +44,8 @@ export function ProductCard({
   const hasOriginalPrice =
     product.originalPrice && product.originalPrice > product.effectivePrice;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (onAddToCart) {
       onAddToCart(product);
     } else {
@@ -53,13 +58,25 @@ export function ProductCard({
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a")) {
+      return;
+    }
+    router.push(detailUrl);
+  };
+
   return (
     <motion.div
       whileHover={{ y: -6, transition: { duration: 0.25 } }}
-      className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col h-full group shadow-sm hover:shadow-xl transition-all duration-300"
+      onClick={handleCardClick}
+      className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col h-full group shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
     >
       {/* Image Container */}
-      <div className="relative h-56 w-full overflow-hidden bg-slate-100 dark:bg-slate-950">
+      <Link
+        href={detailUrl}
+        className="block relative h-56 w-full overflow-hidden bg-slate-100 dark:bg-slate-950 focus:outline-none"
+      >
         <img
           src={mainImage}
           alt={product.name}
@@ -84,13 +101,15 @@ export function ProductCard({
             <Tag className="w-3 h-3" /> Tarif Membre VIP
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Body */}
       <div className="p-6 flex flex-col flex-1">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-          {product.name}
-        </h3>
+        <Link href={detailUrl} className="block group/title focus:outline-none">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover/title:text-emerald-600 dark:group-hover/title:text-emerald-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            {product.name}
+          </h3>
+        </Link>
 
         <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-3 leading-relaxed mb-6 flex-1">
           {product.description}
@@ -125,7 +144,7 @@ export function ProductCard({
               Commander
             </button>
             <Link
-              href={`/produits/${product.id}${tenantQuery}`}
+              href={detailUrl}
               className="px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
             >
               Détails

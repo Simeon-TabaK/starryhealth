@@ -65,7 +65,12 @@ export default async function AboutPage({ searchParams }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-slate-100 dark:border-slate-800 text-xs">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <strong className="text-slate-900 dark:text-white block mb-1">Téléphone Direct</strong>
-                <span className="text-slate-600 dark:text-slate-300">{user.contactPhone || "+243 990 123 456"}</span>
+                <a
+                  href={`tel:${(user.contactPhone || "+243 969 131 138").replace(/[^0-9+]/g, "")}`}
+                  className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+                >
+                  {user.contactPhone || "+243 969 131 138"}
+                </a>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <strong className="text-slate-900 dark:text-white block mb-1">Email Professionnel</strong>
@@ -73,7 +78,14 @@ export default async function AboutPage({ searchParams }: PageProps) {
               </div>
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <strong className="text-slate-900 dark:text-white block mb-1">WhatsApp</strong>
-                <span className="text-slate-600 dark:text-slate-300">{user.whatsapp || "Non renseigné"}</span>
+                <a
+                  href={`https://wa.me/${(user.whatsapp || "+243969131138").replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+                >
+                  {user.whatsapp || "+243 969 131 138"}
+                </a>
               </div>
             </div>
           </section>

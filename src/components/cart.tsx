@@ -101,9 +101,12 @@ export function Cart({ whatsapp, primaryColor = "#0f766e", vendorName }: CartPro
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce((s, i) => s + i.effectivePrice * i.quantity, 0);
 
+  const effectiveWhatsApp =
+    whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138";
+
   const sendWhatsApp = () => {
-    if (!whatsapp) return;
-    const phone = whatsapp.replace(/[^0-9]/g, "");
+    if (!effectiveWhatsApp) return;
+    const phone = effectiveWhatsApp.replace(/[^0-9]/g, "");
     const lines = items
       .map((i) => `• ${i.name} x${i.quantity} — $${(i.effectivePrice * i.quantity).toFixed(2)}`)
       .join("\n");
@@ -238,10 +241,10 @@ export function Cart({ whatsapp, primaryColor = "#0f766e", vendorName }: CartPro
                     ${totalPrice.toFixed(2)}
                   </span>
                 </div>
-                {whatsapp ? (
+                {effectiveWhatsApp ? (
                   <button
                     onClick={sendWhatsApp}
-                    className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-white shadow-xl transition-transform hover:scale-[1.02] active:scale-95"
+                    className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-white shadow-xl transition-transform hover:scale-[1.02] active:scale-95 cursor-pointer"
                     style={{ backgroundColor: "#25D366" }}
                   >
                     <MessageCircle className="w-5 h-5" />
@@ -249,7 +252,7 @@ export function Cart({ whatsapp, primaryColor = "#0f766e", vendorName }: CartPro
                   </button>
                 ) : (
                   <p className="text-xs text-center text-slate-400 italic">
-                    Aucun numéro WhatsApp vendeur configuré.
+                    Aucun numéro WhatsApp configuré.
                   </p>
                 )}
               </div>

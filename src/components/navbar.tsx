@@ -112,17 +112,23 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
             {/* Cart button in header */}
             <NavbarCartButton primaryColor={primaryColor} />
 
-            {isTenant && tenant?.user?.whatsapp && (
-              <a
-                href={`https://wa.me/${tenant.user.whatsapp.replace(/[^0-9]/g, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 transition-colors"
-              >
-                <Phone className="w-3.5 h-3.5" />
-                Contact
-              </a>
-            )}
+            {(() => {
+              const waNumber =
+                tenant?.user?.whatsapp ||
+                (!isTenant ? (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138") : undefined);
+              if (!waNumber) return null;
+              return (
+                <a
+                  href={`https://wa.me/${waNumber.replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  Contact
+                </a>
+              );
+            })()}
           </div>
 
           {/* Mobile Right Bar */}
@@ -168,20 +174,26 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
               {link.label}
             </Link>
           ))}
-          {isTenant && tenant?.user?.whatsapp && (
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-              <a
-                href={`https://wa.me/${tenant.user.whatsapp.replace(/[^0-9]/g, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white"
-              >
-                <Phone className="w-4 h-4" />
-                Contacter {vendorName}
-              </a>
-            </div>
-          )}
+          {(() => {
+            const waNumber =
+              tenant?.user?.whatsapp ||
+              (!isTenant ? (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138") : undefined);
+            if (!waNumber) return null;
+            return (
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                <a
+                  href={`https://wa.me/${waNumber.replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white"
+                >
+                  <Phone className="w-4 h-4" />
+                  Contacter {isTenant ? vendorName : "Starry Health"}
+                </a>
+              </div>
+            );
+          })()}
         </div>
       )}
     </header>
