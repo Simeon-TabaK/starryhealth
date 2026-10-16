@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Phone, Mail, MapPin, Globe, ShieldCheck } from "lucide-react";
+import { sanitizePhone, sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 import type { TenantContext } from "@/lib/tenant";
 
 interface FooterProps {
@@ -25,10 +26,7 @@ export function Footer({ tenant, services = [] }: FooterProps) {
   const vendorName = tenant?.config?.orgName || tenant?.user?.name || tenant?.slug;
   const primaryColor = tenant?.user?.primaryColor || "#0f766e";
 
-  const phone =
-    tenant?.user?.contactPhone ||
-    process.env.NEXT_PUBLIC_CONTACT_PHONE ||
-    "+243 969 131 138";
+  const phone = sanitizePhone(tenant?.user?.contactPhone);
   const email = tenant?.user?.contactEmail || "contact@starryhealth.com";
   const address = tenant?.user?.contactAddress || "Kinshasa, RDC & International";
   const website = tenant?.user?.contactWebsite || "www.starryhealth.com";
@@ -40,9 +38,7 @@ export function Footer({ tenant, services = [] }: FooterProps) {
   const li = tenant?.user?.linkedin;
   const tt = tenant?.user?.tiktok;
   const ig = tenant?.user?.instagram;
-  const wa =
-    tenant?.user?.whatsapp ||
-    (!isTenant ? (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138") : undefined);
+  const wa = sanitizeWhatsApp(tenant?.user?.whatsapp);
 
   const hasSocials = fb || li || tt || ig || wa;
 
@@ -136,7 +132,7 @@ export function Footer({ tenant, services = [] }: FooterProps) {
                 )}
                 {wa && (
                   <a
-                    href={`https://wa.me/${wa.replace(/[^0-9]/g, "")}`}
+                    href={formatWhatsAppUrl(wa)}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="WhatsApp"

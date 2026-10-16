@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { headers } from "next/headers";
+import { sanitizePhone, sanitizeWhatsApp } from "./constants";
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -118,6 +119,8 @@ export async function getTenantContext(
           slug: null,
           user: {
             ...admin,
+            whatsapp: sanitizeWhatsApp(admin.whatsapp),
+            contactPhone: sanitizePhone(admin.contactPhone),
             subscriptionStatus: admin.subscriptionStatus as "FREE" | "ACTIVE",
             subscriptionPlan: admin.subscriptionPlan as "STANDARD" | "SMART" | "PREMIUM" | null,
           },
@@ -174,6 +177,8 @@ export async function getTenantContext(
       slug: user.slug,
       user: {
         ...user,
+        whatsapp: sanitizeWhatsApp(user.whatsapp),
+        contactPhone: sanitizePhone(user.contactPhone),
         subscriptionStatus: user.subscriptionStatus as "FREE" | "ACTIVE",
         subscriptionPlan: user.subscriptionPlan as "STANDARD" | "SMART" | "PREMIUM" | null,
       },

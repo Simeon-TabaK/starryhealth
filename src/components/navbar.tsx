@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Menu, X, ShieldCheck, Phone } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NavbarCartButton } from "@/components/cart";
+import { sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 import type { TenantContext } from "@/lib/tenant";
 
 interface NavbarProps {
@@ -113,13 +114,10 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
             <NavbarCartButton primaryColor={primaryColor} />
 
             {(() => {
-              const waNumber =
-                tenant?.user?.whatsapp ||
-                (!isTenant ? (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138") : undefined);
-              if (!waNumber) return null;
+              const waNumber = sanitizeWhatsApp(tenant?.user?.whatsapp);
               return (
                 <a
-                  href={`https://wa.me/${waNumber.replace(/[^0-9]/g, "")}`}
+                  href={formatWhatsAppUrl(waNumber)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 transition-colors"
@@ -175,14 +173,11 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
             </Link>
           ))}
           {(() => {
-            const waNumber =
-              tenant?.user?.whatsapp ||
-              (!isTenant ? (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138") : undefined);
-            if (!waNumber) return null;
+            const waNumber = sanitizeWhatsApp(tenant?.user?.whatsapp);
             return (
               <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
                 <a
-                  href={`https://wa.me/${waNumber.replace(/[^0-9]/g, "")}`}
+                  href={formatWhatsAppUrl(waNumber)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setMobileMenuOpen(false)}

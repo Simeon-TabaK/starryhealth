@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ShoppingCart, X, Plus, Minus, Trash2, MessageCircle, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { sanitizeWhatsApp } from "@/lib/constants";
 
 export interface CartItem {
   id: number;
@@ -101,8 +102,7 @@ export function Cart({ whatsapp, primaryColor = "#0f766e", vendorName }: CartPro
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce((s, i) => s + i.effectivePrice * i.quantity, 0);
 
-  const effectiveWhatsApp =
-    whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138";
+  const effectiveWhatsApp = sanitizeWhatsApp(whatsapp);
 
   const sendWhatsApp = () => {
     if (!effectiveWhatsApp) return;

@@ -6,6 +6,7 @@ import { ArrowLeft, Check, ShieldCheck, Tag, Phone, Percent } from "lucide-react
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { Cart } from "@/components/cart";
+import { sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -160,14 +161,14 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                   )}
                 </span>
                 {(() => {
-                  const waNumber =
-                    tenant?.user?.whatsapp ||
-                    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||
-                    "+243969131138";
+                  const waNumber = sanitizeWhatsApp(tenant?.user?.whatsapp);
                   const contactName = tenant?.user?.name || "Starry Health";
                   return (
                     <a
-                      href={`https://wa.me/${waNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Bonjour ${contactName}, je souhaite des informations sur le produit "${product.name}".`)}`}
+                      href={formatWhatsAppUrl(
+                        waNumber,
+                        `Bonjour ${contactName}, je souhaite des informations sur le produit "${product.name}".`
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold flex items-center gap-1"

@@ -1,6 +1,7 @@
 import { getCurrentTenant } from "@/lib/get-current-tenant";
 import { Sparkles, Layers, Globe, CheckCircle2, UserCheck, Heart } from "lucide-react";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
+import { sanitizePhone, sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 
 interface PageProps {
   searchParams?: Promise<{ tenant?: string }>;
@@ -66,10 +67,10 @@ export default async function AboutPage({ searchParams }: PageProps) {
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <strong className="text-slate-900 dark:text-white block mb-1">Téléphone Direct</strong>
                 <a
-                  href={`tel:${(user.contactPhone || "+243 969 131 138").replace(/[^0-9+]/g, "")}`}
+                  href={`tel:${sanitizePhone(user.contactPhone).replace(/[^0-9+]/g, "")}`}
                   className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
                 >
-                  {user.contactPhone || "+243 969 131 138"}
+                  {sanitizePhone(user.contactPhone)}
                 </a>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
@@ -79,12 +80,12 @@ export default async function AboutPage({ searchParams }: PageProps) {
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <strong className="text-slate-900 dark:text-white block mb-1">WhatsApp</strong>
                 <a
-                  href={`https://wa.me/${(user.whatsapp || "+243969131138").replace(/[^0-9]/g, "")}`}
+                  href={formatWhatsAppUrl(user.whatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
                 >
-                  {user.whatsapp || "+243 969 131 138"}
+                  {sanitizeWhatsApp(user.whatsapp)}
                 </a>
               </div>
             </div>

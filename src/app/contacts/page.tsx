@@ -1,6 +1,7 @@
 import { getCurrentTenant } from "@/lib/get-current-tenant";
 import { Phone, Mail, MapPin, Send, MessageSquare, ShieldCheck, Sparkles } from "lucide-react";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { sanitizePhone, sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 
 interface PageProps {
   searchParams?: Promise<{ tenant?: string }>;
@@ -14,11 +15,8 @@ export default async function ContactsPage({ searchParams }: PageProps) {
   const user = tenant?.user;
   const primaryColor = user?.primaryColor || "#0f766e";
 
-  const defaultPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE || "+243 969 131 138";
-  const defaultWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138";
-
-  const phone = isTenant ? user?.contactPhone || defaultPhone : defaultPhone;
-  const whatsapp = isTenant ? user?.whatsapp || defaultWhatsApp : defaultWhatsApp;
+  const phone = sanitizePhone(user?.contactPhone);
+  const whatsapp = sanitizeWhatsApp(user?.whatsapp);
   const email = isTenant ? user?.contactEmail || user?.email || "vendeur@starryhealth.com" : "contact@starryhealth.com";
 
   return (
@@ -100,7 +98,7 @@ export default async function ContactsPage({ searchParams }: PageProps) {
 
               {whatsapp && (
                 <a
-                  href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`}
+                  href={formatWhatsAppUrl(whatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center gap-2 text-xs transition-colors shadow-md"
