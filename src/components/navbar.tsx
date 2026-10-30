@@ -56,8 +56,8 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
         <div className="flex items-center justify-between h-20">
 
           {/* Brand & Logo */}
-          <Link href={`/${tenantQuery}`} className="flex items-center gap-3 group">
-            <div className="w-16 h-16 flex items-center justify-center transition-transform group-hover:scale-105 overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl">
+          <Link href={`/${tenantQuery}`} className="flex items-center gap-2 sm:gap-3 group">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center transition-transform group-hover:scale-105 bg-transparent dark:bg-transparent">
               <img
                 className="w-full h-full object-contain"
                 src={logoSrc}
@@ -67,7 +67,7 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
               />
             </div>
             <div>
-              <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
                 {tenant?.config?.orgName ? (
                   displayName
                 ) : (
