@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, ShieldCheck, Phone } from "lucide-react";
+import { Menu, X, ShieldCheck, Phone, User } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NavbarCartButton } from "@/components/cart";
 import { sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
@@ -41,7 +41,8 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
   if (
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/dashboard") ||
-    pathname === "/auth/signin"
+    pathname === "/auth/signin" ||
+    pathname === "/auth/register"
   ) {
     return null;
   }
@@ -56,14 +57,13 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
 
           {/* Brand & Logo */}
           <Link href={`/${tenantQuery}`} className="flex items-center gap-3 group">
-            {/* Logo card — size increased */}
-            <div className="w-18 h-18  flex items-center justify-center transition-transform group-hover:scale-105 overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+            <div className="w-16 h-16 flex items-center justify-center transition-transform group-hover:scale-105 overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl">
               <img
-                className="w-full h-full object-contain "
+                className="w-full h-full object-contain"
                 src={logoSrc}
-                alt="Logo"
-                width={100}
-                height={100}
+                alt="Logo Starry Health"
+                width={64}
+                height={64}
               />
             </div>
             <div>
@@ -76,14 +76,14 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
                   </>
                 )}
               </span>
-              {/* "by StarryHealth" intentionally removed */}
             </div>
           </Link>
 
-          {/* Tenant Badge — icon only + vendor name, no "Boutique Partenaire:" label */}
+          {/* Tenant Badge */}
           {isTenant && (
             <div className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-slate-900 border border-emerald-500/30 text-xs font-medium text-slate-700 dark:text-slate-200">
               <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>{vendorName}</span>
             </div>
           )}
 
@@ -113,6 +113,15 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
             {/* Cart button in header */}
             <NavbarCartButton primaryColor={primaryColor} />
 
+            {/* Connexion / Espace Partenaire */}
+            <Link
+              href="/auth/signin"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <User className="w-3.5 h-3.5" />
+              Connexion
+            </Link>
+
             {(() => {
               const waNumber = sanitizeWhatsApp(tenant?.user?.whatsapp);
               return (
@@ -132,11 +141,11 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
           {/* Mobile Right Bar */}
           <div className="flex md:hidden items-center gap-2">
             <ThemeToggle />
-            {/* Cart button visible on mobile too */}
             <NavbarCartButton primaryColor={primaryColor} />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none"
+              aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
             >
               {mobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -172,6 +181,14 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/auth/signin"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-base font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <User className="w-4 h-4" />
+            Espace Partenaire (Connexion / Inscription)
+          </Link>
           {(() => {
             const waNumber = sanitizeWhatsApp(tenant?.user?.whatsapp);
             return (
@@ -181,7 +198,7 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium bg-emerald-700 text-white hover:bg-emerald-600 transition-colors"
                 >
                   <Phone className="w-4 h-4" />
                   Contacter {isTenant ? vendorName : "Starry Health"}
