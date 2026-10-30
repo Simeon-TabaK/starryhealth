@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface TenantFaviconProps {
   faviconUrl?: string | null;
@@ -9,51 +10,105 @@ interface TenantFaviconProps {
 }
 
 export function TenantFavicon({
-  faviconUrl,
+  faviconUrl: initialFaviconUrl,
   defaultIcon = "/assets/logo.png",
   defaultAppleIcon = "/assets/logo.png",
 }: TenantFaviconProps) {
+  const { data: session, status } = useSession();
+  const [activeFavicon, setActiveFavicon] = useState<string | null>(initialFaviconUrl || null);
+
+  // Sync if initial props change
   useEffect(() => {
-    const updateFaviconLinks = (iconSrc: string, appleSrc?: string) => {
+    if (initialFaviconUrl) {
+      setActiveFavicon(initialFaviconUrl);
+    }
+  }, [initialFaviconUrl]);
+
+  // Si pas de favicon fourni par les props mais que l'utilisateur est connecté
+  useEffect(() => {
+    if (!activeFavicon && status === "authenticated") {
+      const sessionFavicon = (session?.user as any)?.favicon;
+      if (sessionFavicon) {
+        setActiveFavicon(sessionFavicon);
+      } else {
+        // Interroger l'API pour récupérer le favicon de la config tenant de l'utilisateur connecté
+        fetch("/api/users/me")
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data?.favicon) {
+              setActiveFavicon(data.favicon);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [status, session, activeFavicon]);
+
+  // Écouter les mises à jour directes du favicon (ex: après upload/sauvegarde dans le Dashboard)
+  useEffect(() => {
+    const handleFaviconChange = (e: any) => {
+      const newUrl = e.detail;
+      if (typeof newUrl === "string") {
+        setActiveFavicon(newUrl);
+      }
+    };
+
+    window.addEventListener("tenant-favicon-change", handleFaviconChange);
+    return () => {
+      window.removeEventListener("tenant-favicon-change", handleFaviconChange);
+    };
+  }, []);
+
+  // Application dynamique dans l'en-tête du document
+  useEffect(() => {
+    const updateFaviconDOM = (iconSrc: string, appleSrc?: string) => {
       if (!iconSrc || typeof document === "undefined") return;
 
-      const linkDefs: { rel: string; href: string }[] = [
+      const linkTypes = [
         { rel: "icon", href: iconSrc },
         { rel: "shortcut icon", href: iconSrc },
         { rel: "apple-touch-icon", href: appleSrc || iconSrc },
       ];
 
-      linkDefs.forEach(({ rel, href }) => {
-        let link = document.querySelector(`link[rel='${rel}']`) as HTMLLinkElement | null;
-        if (!link) {
-          link = document.createElement("link");
-          link.rel = rel;
-          document.head.appendChild(link);
-        }
+      // Supprimer les anciens liens pour forcer le navigateur à recharger l'icône
+      document
+        .querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon']")
+        .forEach((el) => el.remove());
+
+      // Créer et attacher les nouveaux liens
+      linkTypes.forEach(({ rel, href }) => {
+        const link = document.createElement("link");
+        link.rel = rel;
         link.href = href;
+        if (href.endsWith(".svg")) {
+          link.type = "image/svg+xml";
+        } else if (href.endsWith(".png")) {
+          link.type = "image/png";
+        }
+        document.head.appendChild(link);
       });
     };
 
-    // If no custom favicon URL is provided, ensure default is applied cleanly
-    if (!faviconUrl || !faviconUrl.trim()) {
-      updateFaviconLinks(defaultIcon, defaultAppleIcon);
+    // Si aucun favicon personnalisé n'est configuré, réinitialiser sur le logo par défaut
+    if (!activeFavicon || !activeFavicon.trim()) {
+      updateFaviconDOM(defaultIcon, defaultAppleIcon);
       return;
     }
 
-    const trimmedUrl = faviconUrl.trim();
+    const trimmedUrl = activeFavicon.trim();
 
-    // Validate URL syntax
+    // Validation du format d'URL
     const isValidUrl =
       trimmedUrl.startsWith("http://") ||
       trimmedUrl.startsWith("https://") ||
       trimmedUrl.startsWith("/");
 
     if (!isValidUrl) {
-      updateFaviconLinks(defaultIcon, defaultAppleIcon);
+      updateFaviconDOM(defaultIcon, defaultAppleIcon);
       return;
     }
 
-    // Cache-busting parameter based on asset identifier to bust browser favicon cache
+    // Cache-busting avec identifiant pour forcer la prise en compte immédiate par le navigateur
     const cacheKey = encodeURIComponent(
       trimmedUrl.length > 12 ? trimmedUrl.slice(-10).replace(/[^a-zA-Z0-9]/g, "") : "t1"
     );
@@ -61,18 +116,18 @@ export function TenantFavicon({
       ? `${trimmedUrl}&v=${cacheKey}`
       : `${trimmedUrl}?v=${cacheKey}`;
 
-    // Robust validation: check that the custom favicon image loads successfully before swapping
+    // Tester le chargement de l'image avant l'injection dans le DOM pour éviter tout favicon cassé
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      updateFaviconLinks(finalUrl, finalUrl);
+      updateFaviconDOM(finalUrl, finalUrl);
     };
     img.onerror = () => {
-      console.warn("Tenant favicon image inaccessible, falling back to default icon:", trimmedUrl);
-      updateFaviconLinks(defaultIcon, defaultAppleIcon);
+      console.warn("Favicon tenant inaccessible, repli sur le favicon par défaut :", trimmedUrl);
+      updateFaviconDOM(defaultIcon, defaultAppleIcon);
     };
     img.src = finalUrl;
-  }, [faviconUrl, defaultIcon, defaultAppleIcon]);
+  }, [activeFavicon, defaultIcon, defaultAppleIcon]);
 
   return null;
 }

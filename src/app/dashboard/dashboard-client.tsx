@@ -224,6 +224,9 @@ export function DashboardClient({
     if (avatarUrl) formData.set("avatar", avatarUrl);
     try {
       await updateUserProfile(user.id, formData);
+      if (typeof window !== "undefined" && faviconUrl) {
+        window.dispatchEvent(new CustomEvent("tenant-favicon-change", { detail: faviconUrl }));
+      }
       showToast("Profil et organisation enregistrés !", "success", "Vos informations personnelles et vitrine ont été mises à jour.");
     } catch (err: any) {
       showToast("Erreur de sauvegarde", "error", err.message || "Impossible de sauvegarder votre profil.");
@@ -2333,7 +2336,12 @@ export function DashboardClient({
                       <CloudinaryUpload
                         folder="starryhealth/favicons"
                         cropAspect="1:1"
-                        onUpload={(url) => setFaviconUrl(url)}
+                        onUpload={(url) => {
+                          setFaviconUrl(url);
+                          if (typeof window !== "undefined" && url) {
+                            window.dispatchEvent(new CustomEvent("tenant-favicon-change", { detail: url }));
+                          }
+                        }}
                         currentUrl={faviconUrl}
                         label="Uploader le favicon d'onglet (Carré 1:1)"
                         primaryColor={user.primaryColor || "#0f766e"}

@@ -5,6 +5,47 @@ import { prisma } from "@/lib/prisma";
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{3,28}[a-z0-9]$/;
 
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ authenticated: false, favicon: null }, { status: 200 });
+    }
+
+    const userId = parseInt((session.user as any).id, 10);
+    if (isNaN(userId)) {
+      return NextResponse.json({ authenticated: false, favicon: null }, { status: 200 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        slug: true,
+        username: true,
+        role: true,
+        tenantConfig: {
+          select: {
+            orgName: true,
+            orgLogo: true,
+            favicon: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      authenticated: true,
+      user,
+      favicon: user?.tenantConfig?.favicon || null,
+      orgName: user?.tenantConfig?.orgName || null,
+    });
+  } catch (error) {
+    console.error("[GET_ME_ERROR]", error);
+    return NextResponse.json({ authenticated: false, favicon: null }, { status: 500 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);

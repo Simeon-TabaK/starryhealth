@@ -30,6 +30,9 @@ export const authOptions: NextAuthOptions = {
               { slug: credentials.identifier.toLowerCase() },
             ],
           },
+          include: {
+            tenantConfig: true,
+          },
         });
 
         if (!user || !user.password) {
@@ -51,6 +54,7 @@ export const authOptions: NextAuthOptions = {
           subscriptionStatus: user.subscriptionStatus,
           subscriptionPlan: user.subscriptionPlan,
           primaryColor: user.primaryColor,
+          favicon: user.tenantConfig?.favicon || null,
         };
       },
     }),
@@ -65,6 +69,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const existing = await prisma.user.findUnique({
             where: { email: user.email.toLowerCase() },
+            include: { tenantConfig: true },
           });
 
           if (!existing) {
@@ -114,6 +119,7 @@ export const authOptions: NextAuthOptions = {
             (user as any).subscriptionStatus = existing.subscriptionStatus;
             (user as any).subscriptionPlan = existing.subscriptionPlan;
             (user as any).primaryColor = existing.primaryColor;
+            (user as any).favicon = existing.tenantConfig?.favicon || null;
             // Existing user: no need to re-complete profile
             (user as any).needsUsername = false;
           }
@@ -133,6 +139,7 @@ export const authOptions: NextAuthOptions = {
         token.subscriptionStatus = (user as any).subscriptionStatus;
         token.subscriptionPlan = (user as any).subscriptionPlan;
         token.primaryColor = (user as any).primaryColor;
+        token.favicon = (user as any).favicon || null;
         token.needsUsername = (user as any).needsUsername ?? false;
       }
       if (trigger === "update" && session) {
@@ -142,6 +149,7 @@ export const authOptions: NextAuthOptions = {
         }
         if (session.slug) token.slug = session.slug;
         if (session.username) token.username = session.username;
+        if (session.favicon !== undefined) token.favicon = session.favicon;
         token = { ...token, ...session };
       }
       return token;
@@ -155,6 +163,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).subscriptionStatus = token.subscriptionStatus;
         (session.user as any).subscriptionPlan = token.subscriptionPlan;
         (session.user as any).primaryColor = token.primaryColor;
+        (session.user as any).favicon = token.favicon || null;
         (session.user as any).needsUsername = token.needsUsername ?? false;
       }
       return session;

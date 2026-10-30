@@ -1,5 +1,7 @@
 import { prisma } from "./prisma";
 import { headers } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./auth";
 import { sanitizePhone, sanitizeWhatsApp } from "./constants";
 
 // ─────────────────────────────────────────────
@@ -210,6 +212,40 @@ export async function getCurrentTenant(searchParamSlug?: string): Promise<Tenant
   const headerList = await headers();
   const tenantSlug = headerList.get("x-tenant") || headerList.get("x-tenant-slug");
   const customHost = headerList.get("x-custom-host") || headerList.get("x-clean-host");
+
+  // 1. Si un sous-domaine ou nom d'hôte personnalisé explicite est fourni
+  if (tenantSlug || customHost) {
+    const ctx = await getTenantContext(tenantSlug, customHost);
+    if (ctx.isTenant && ctx.user) {
+      return ctx;
+    }
+  }
+
+  // 2. Si aucun sous-domaine direct, identifier via le contexte de l'utilisateur / tenant connecté
+  try {
+    const session = await getServerSession(authOptions);
+    const sessionUser = session?.user as any;
+    const sessionSlug = sessionUser?.slug || sessionUser?.username;
+    if (sessionSlug) {
+      const ctx = await getTenantContext(sessionSlug);
+      if (ctx && ctx.user) {
+        return ctx;
+      }
+    } else if (sessionUser?.id) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: parseInt(sessionUser.id, 10) },
+        select: { slug: true },
+      });
+      if (dbUser?.slug) {
+        const ctx = await getTenantContext(dbUser.slug);
+        if (ctx && ctx.user) {
+          return ctx;
+        }
+      }
+    }
+  } catch {
+    // Si pas de session active ou contexte statique
+  }
 
   return getTenantContext(tenantSlug, customHost);
 }

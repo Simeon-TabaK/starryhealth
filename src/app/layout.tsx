@@ -114,8 +114,8 @@ export default async function RootLayout({
       </head>
       <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
         <ThemeProvider>
-          <TenantFavicon faviconUrl={tenant?.config?.favicon} />
           <SessionProvider>
+            <TenantFavicon faviconUrl={tenant?.config?.favicon} />
             <Navbar tenant={tenant} primaryColor={primaryColor} />
             <main className="flex-1">{children}</main>
             <Footer tenant={tenant} services={services} />
