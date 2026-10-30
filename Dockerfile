@@ -1,8 +1,8 @@
-# ─── Starry Vitrine – Dockerfile pour Coolify ───────────────────────────────
+# ─── Starry Vitrine ─ Dockerfile pour Coolify ───────────────────────────────────
 
 # Étape 1 : Builder
 FROM node:22-alpine AS builder
-RUN apk add --no-cache curl
+RUN apk add --no-cache libc6-compat openssl curl
 WORKDIR /app
 
 # Copie des définitions de dépendances et des fichiers Prisma
@@ -12,8 +12,8 @@ COPY prisma.config.ts ./
 
 ENV NODE_ENV=development
 
-# Installation de toutes les dépendances (y compris devDependencies pour le build)
-RUN npm install --include=dev
+# Installation de toutes les dépendances avec --ignore-scripts pour éviter les erreurs de spawnSync sur overlayfs (esbuild ETXTBSY)
+RUN npm install --include=dev --ignore-scripts
 
 # Copie du reste du code source
 COPY . .
@@ -33,7 +33,7 @@ RUN npm run build
 
 # Étape 2 : Runner
 FROM node:22-alpine AS runner
-RUN apk add --no-cache curl
+RUN apk add --no-cache libc6-compat openssl curl
 WORKDIR /app
 
 ENV NODE_ENV=production

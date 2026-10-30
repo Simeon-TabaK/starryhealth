@@ -153,7 +153,7 @@ async function main() {
       contactEmail: "dr.sarah@starryhealth.com",
       contactAddress: "Avenue de la Paix, Kinshasa",
       contactWebsite: "sarahlukusa.com",
-      whatsapp: "+243890000111",
+      whatsapp: "243890000111",
       facebook: "https://facebook.com/drsarahlukusa",
       instagram: "https://instagram.com/dr.sarah_nutrition",
       copyright: `© ${new Date().getFullYear()} Dr. Sarah Lukusa Clinic. Tous droits réservés.`,
