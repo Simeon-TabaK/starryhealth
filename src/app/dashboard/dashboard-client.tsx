@@ -166,6 +166,7 @@ export function DashboardClient({
   const [domainInput, setDomainInput] = useState(user.customDomain?.domain || "");
 
   const [orgLogoUrl, setOrgLogoUrl] = useState<string>(user.tenantConfig?.orgLogo || "");
+  const [faviconUrl, setFaviconUrl] = useState<string>((user.tenantConfig as any)?.favicon || "");
   const [avatarUrl, setAvatarUrl] = useState<string>(user.avatar || "");
 
   // Super Admin manual activation modal state
@@ -219,6 +220,7 @@ export function DashboardClient({
     setSaving(true);
     const formData = new FormData(e.currentTarget);
     if (orgLogoUrl) formData.set("orgLogo", orgLogoUrl);
+    if (faviconUrl) formData.set("favicon", faviconUrl);
     if (avatarUrl) formData.set("avatar", avatarUrl);
     try {
       await updateUserProfile(user.id, formData);
@@ -2321,6 +2323,25 @@ export function DashboardClient({
                         primaryColor={user.primaryColor || "#0f766e"}
                       />
                       <input type="hidden" name="orgLogo" value={orgLogoUrl} />
+                    </div>
+
+                    {/* Favicon personnalisé d'onglet */}
+                    <div>
+                      <label className="text-xs font-semibold block mb-1">
+                        Favicon personnalisé (Onglet navigateur)
+                      </label>
+                      <CloudinaryUpload
+                        folder="starryhealth/favicons"
+                        cropAspect="1:1"
+                        onUpload={(url) => setFaviconUrl(url)}
+                        currentUrl={faviconUrl}
+                        label="Uploader le favicon d'onglet (Carré 1:1)"
+                        primaryColor={user.primaryColor || "#0f766e"}
+                      />
+                      <input type="hidden" name="favicon" value={faviconUrl} />
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Icône affichée dans l'onglet du navigateur pour votre vitrine / sous-domaine (fallback automatique sur StarryHealth si vide).
+                      </p>
                     </div>
 
                     <div className="space-y-4">

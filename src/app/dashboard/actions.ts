@@ -29,6 +29,7 @@ export async function updateUserProfile(userId: number, formData: FormData) {
   const orgName = formData.get("orgName") as string;
   const orgDescription = formData.get("orgDescription") as string;
   const orgLogo = formData.get("orgLogo") as string;
+  const favicon = formData.get("favicon") as string;
   const secondaryColor = formData.get("secondaryColor") as string;
   const headerColor = formData.get("headerColor") as string;
   const accentColor = formData.get("accentColor") as string;
@@ -80,6 +81,7 @@ export async function updateUserProfile(userId: number, formData: FormData) {
       orgName: orgName || undefined,
       orgDescription: orgDescription || undefined,
       orgLogo: orgLogo || undefined,
+      favicon: favicon !== null && favicon !== undefined ? (favicon || null) : undefined,
       secondaryColor: canCustomColors ? secondaryColor : undefined,
       headerColor: canCustomColors ? headerColor : undefined,
       accentColor: canCustomColors ? accentColor : undefined,
@@ -95,6 +97,7 @@ export async function updateUserProfile(userId: number, formData: FormData) {
       orgName,
       orgDescription,
       orgLogo,
+      favicon: favicon || undefined,
       secondaryColor: canCustomColors ? secondaryColor : undefined,
       headerColor: canCustomColors ? headerColor : undefined,
       accentColor: canCustomColors ? accentColor : undefined,

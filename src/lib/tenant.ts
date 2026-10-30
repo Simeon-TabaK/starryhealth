@@ -33,6 +33,7 @@ export interface TenantConfig {
   orgName: string | null;
   orgDescription: string | null;
   orgLogo: string | null;
+  favicon: string | null;
   secondaryColor: string | null;
   headerColor: string | null;
   fontFamily: string | null;
@@ -129,6 +130,7 @@ export async function getTenantContext(
                 orgName: admin.tenantConfig.orgName,
                 orgDescription: admin.tenantConfig.orgDescription,
                 orgLogo: admin.tenantConfig.orgLogo,
+                favicon: (admin.tenantConfig as any).favicon || null,
                 secondaryColor: admin.tenantConfig.secondaryColor,
                 headerColor: admin.tenantConfig.headerColor,
                 fontFamily: admin.tenantConfig.fontFamily,
@@ -187,6 +189,7 @@ export async function getTenantContext(
             orgName: user.tenantConfig.orgName,
             orgDescription: user.tenantConfig.orgDescription,
             orgLogo: user.tenantConfig.orgLogo,
+            favicon: (user.tenantConfig as any).favicon || null,
             secondaryColor: user.tenantConfig.secondaryColor,
             headerColor: user.tenantConfig.headerColor,
             fontFamily: user.tenantConfig.fontFamily,

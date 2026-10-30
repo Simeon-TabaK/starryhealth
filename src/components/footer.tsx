@@ -68,15 +68,6 @@ export function Footer({ tenant, services = [] }: FooterProps) {
                 "Leader global dans la promotion de la santé et du bien-être de l'humanité grâce aux produits lisses, testés et approuvés scientifiquement."}
             </p>
 
-            {isTenant && (
-              <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-emerald-500/30 text-xs text-slate-800 dark:text-slate-300 shadow-sm">
-                <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold mb-1">
-                  <ShieldCheck className="w-4 h-4" /> Partenaire Agréé
-                </span>
-                Distributeur: {vendorName}
-              </div>
-            )}
-
             {/* Social links with inline SVGs */}
             {hasSocials && (
               <div className="flex items-center gap-2.5 pt-1">

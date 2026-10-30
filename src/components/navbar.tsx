@@ -79,13 +79,7 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
             </div>
           </Link>
 
-          {/* Tenant Badge */}
-          {isTenant && (
-            <div className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-slate-900 border border-emerald-500/30 text-xs font-medium text-slate-700 dark:text-slate-200">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>{vendorName}</span>
-            </div>
-          )}
+
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-1">
@@ -137,17 +131,7 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 pt-3 pb-6 space-y-2">
-          {isTenant && (
-            <div className="p-3 mb-3 rounded-lg bg-emerald-50 dark:bg-slate-900 border border-emerald-500/30 text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>
-                Distributeur Agréé:{" "}
-                <strong className="text-emerald-700 dark:text-emerald-300">
-                  {vendorName}
-                </strong>
-              </span>
-            </div>
-          )}
+
           {navLinks.map((link) => (
             <Link
               key={link.label}

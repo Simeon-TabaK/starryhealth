@@ -119,6 +119,7 @@ model TenantConfig {
   orgName          String?
   orgDescription   String?
   orgLogo          String?
+  favicon          String?
   secondaryColor   String?
   headerColor      String?
   accentColor      String?
