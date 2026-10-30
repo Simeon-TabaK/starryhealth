@@ -95,10 +95,20 @@ export default async function RootLayout({
   const buttonColor = config?.buttonColor || primaryColor;
   const fontFamily = config?.fontFamily;
   const services = await getServicesForTenant(tenant?.user?.id);
+  const customFavicon = config?.favicon?.trim() || null;
+  const cacheKey = customFavicon
+    ? encodeURIComponent(customFavicon.slice(-8).replace(/[^a-zA-Z0-9]/g, ""))
+    : "";
+  const versionedFavicon = customFavicon
+    ? (customFavicon.includes("?") ? `${customFavicon}&v=${cacheKey}` : `${customFavicon}?v=${cacheKey}`)
+    : "/assets/logo.png";
 
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
+        <link rel="icon" href={versionedFavicon} type="image/png" sizes="any" />
+        <link rel="shortcut icon" href={versionedFavicon} />
+        <link rel="apple-touch-icon" href={versionedFavicon} />
         <style>{`
           :root {
             --tenant-primary: ${primaryColor};

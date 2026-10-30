@@ -13,11 +13,13 @@ export function proxy(request: NextRequest) {
   // 2. Nettoyage du port (ex: "sboxx.site:3000" -> "sboxx.site")
   const hostname = rawHost.split(":")[0].toLowerCase().trim();
 
-  // 3. Ignorer les fichiers statiques, images et routes internes
+  // 3. Ignorer les fichiers statiques, images et routes internes (sauf favicon.ico et icon.png qui sont dynamiques par tenant)
+  const isDynamicIcon = pathname === "/favicon.ico" || pathname === "/icon.png";
   if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.includes(".")
+    !isDynamicIcon &&
+    (pathname.startsWith("/_next") ||
+      pathname.startsWith("/api") ||
+      pathname.includes("."))
   ) {
     return NextResponse.next();
   }
@@ -129,12 +131,8 @@ export const middleware = proxy;
 export const config = {
   matcher: [
     /*
-     * Match toutes les routes sauf :
-     * - api (API routes)
-     * - _next/static (fichiers statiques)
-     * - _next/image (optimisation d'images)
-     * - favicon.ico (icône)
+     * Match toutes les routes sauf _next/static et _next/image
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image).*)",
   ],
 };

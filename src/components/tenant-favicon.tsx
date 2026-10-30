@@ -80,9 +80,11 @@ export function TenantFavicon({
         const link = document.createElement("link");
         link.rel = rel;
         link.href = href;
-        if (href.endsWith(".svg")) {
+        if (href.includes(".svg")) {
           link.type = "image/svg+xml";
-        } else if (href.endsWith(".png")) {
+        } else if (href.includes(".ico")) {
+          link.type = "image/x-icon";
+        } else {
           link.type = "image/png";
         }
         document.head.appendChild(link);

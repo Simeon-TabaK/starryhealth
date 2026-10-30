@@ -56,7 +56,7 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
         <div className="flex items-center justify-between h-20">
 
           {/* Brand & Logo */}
-          <Link href={`/${tenantQuery}`} className="flex items-center gap-2 sm:gap-3 group">
+          <Link href={`/${tenantQuery}`} className="flex items-center gap-2 sm:gap-3 group ">
             <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center transition-transform group-hover:scale-105 bg-transparent dark:bg-transparent">
               <img
                 className="w-full h-full object-contain"
