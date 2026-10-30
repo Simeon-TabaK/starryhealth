@@ -310,10 +310,10 @@ export function AdminPlanManagement({ adminId, plans: initialPlans, onNotify }: 
                 {/* Price */}
                 <div className="text-right flex-shrink-0">
                   <div className="font-bold text-slate-800 dark:text-slate-100">
-                    {plan.monthlyPrice === 0 ? "Gratuit" : `${plan.monthlyPrice.toFixed(2)} €/mois`}
+                    {plan.monthlyPrice === 0 ? "Gratuit" : `$${plan.monthlyPrice.toFixed(2)}/mois`}
                   </div>
                   {plan.annualPrice && (
-                    <div className="text-xs text-slate-500">{plan.annualPrice.toFixed(2)} €/an</div>
+                    <div className="text-xs text-slate-500">${plan.annualPrice.toFixed(2)}/an</div>
                   )}
                 </div>
 
@@ -366,25 +366,25 @@ export function AdminPlanManagement({ adminId, plans: initialPlans, onNotify }: 
                         <div className="flex justify-between">
                           <span className="text-slate-500">Mensuel</span>
                           <span className="font-medium text-slate-800 dark:text-slate-200">
-                            {plan.monthlyPrice === 0 ? "Gratuit" : `${plan.monthlyPrice.toFixed(2)} €`}
+                            {plan.monthlyPrice === 0 ? "Gratuit" : `$${plan.monthlyPrice.toFixed(2)}`}
                           </span>
                         </div>
                         {plan.quarterlyPrice && (
                           <div className="flex justify-between">
                             <span className="text-slate-500">Trimestriel</span>
-                            <span className="font-medium text-slate-800 dark:text-slate-200">{plan.quarterlyPrice.toFixed(2)} €</span>
+                            <span className="font-medium text-slate-800 dark:text-slate-200">${plan.quarterlyPrice.toFixed(2)}</span>
                           </div>
                         )}
                         {plan.semiAnnualPrice && (
                           <div className="flex justify-between">
                             <span className="text-slate-500">Semi-annuel</span>
-                            <span className="font-medium text-slate-800 dark:text-slate-200">{plan.semiAnnualPrice.toFixed(2)} €</span>
+                            <span className="font-medium text-slate-800 dark:text-slate-200">${plan.semiAnnualPrice.toFixed(2)}</span>
                           </div>
                         )}
                         {plan.annualPrice && (
                           <div className="flex justify-between">
                             <span className="text-slate-500">Annuel</span>
-                            <span className="font-medium text-slate-800 dark:text-slate-200">{plan.annualPrice.toFixed(2)} €</span>
+                            <span className="font-medium text-slate-800 dark:text-slate-200">${plan.annualPrice.toFixed(2)}</span>
                           </div>
                         )}
                       </div>
@@ -515,7 +515,7 @@ export function AdminPlanManagement({ adminId, plans: initialPlans, onNotify }: 
               {/* Pricing */}
               <div>
                 <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" /> Tarification (€)
+                  <DollarSign className="w-4 h-4" /> Tarification ($)
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                   {[

@@ -130,6 +130,11 @@ export default async function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('starry-theme')||'light';if(t==='system'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`,
+          }}
+        />
         <link rel="icon" href={versionedFavicon} type="image/png" sizes="any" />
         <link rel="shortcut icon" href={versionedFavicon} />
         <link rel="apple-touch-icon" href={versionedFavicon} />

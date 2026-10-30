@@ -435,6 +435,39 @@ export async function deleteUserService(serviceId: number, userId: number) {
 }
 
 
+export async function updateUserService(serviceId: number, userId: number, formData: FormData) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { subscriptionPlan: true, role: true },
+  });
+
+  if (user?.role !== "SUPER_ADMIN" && user?.subscriptionPlan === "STANDARD") {
+    throw new Error("La modification d'offres et services est réservée aux forfaits SMART et PREMIUM.");
+  }
+
+  const service = await prisma.service.findUnique({ where: { id: serviceId } });
+  if (!service || service.userId !== userId) throw new Error("Action non autorisée.");
+
+  const name = (formData.get("name") as string) || "";
+  const url = (formData.get("url") as string) || "";
+  const order = parseInt((formData.get("order") as string) || "0", 10);
+
+  const updated = await prisma.service.update({
+    where: { id: serviceId },
+    data: {
+      name: name.trim(),
+      url: url.trim() ? url.trim() : null,
+      order,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/dashboard");
+  return { success: true, service: updated };
+}
+
+
+
 // --- FAQ (PREMIUM) ---
 
 export async function addUserFaq(userId: number, formData: FormData) {

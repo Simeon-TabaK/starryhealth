@@ -6,22 +6,32 @@ import { useTheme } from "./theme-provider";
 
 export function ThemeUserSync() {
   const { data: session } = useSession();
-  const { theme, setTheme } = useTheme();
-  const syncedUserIdRef = useRef<string | null>(null);
+  const { setTheme } = useTheme();
+  const syncedRef = useRef(false);
 
-  // Restore theme preference from DB on login / session load
+  // Restore theme preference from DB on login / session load ONLY if no local preference exists
   useEffect(() => {
-    const userTheme = (session?.user as any)?.theme as "light" | "dark" | "system" | undefined;
+    if (syncedRef.current) return;
     const currentUserId = (session?.user as any)?.id;
+    if (!currentUserId) return;
 
-    if (currentUserId && userTheme && syncedUserIdRef.current !== currentUserId) {
-      syncedUserIdRef.current = currentUserId;
-      if (userTheme !== theme) {
-        setTheme(userTheme);
+    syncedRef.current = true;
+
+    try {
+      const stored = localStorage.getItem("starry-theme");
+      // If user has already made an explicit choice on this device, preserve it
+      if (stored && (stored === "dark" || stored === "light" || stored === "system")) {
+        return;
       }
+    } catch {
+      // ignore
     }
-  }, [session, theme, setTheme]);
+
+    const userTheme = (session?.user as any)?.theme as "light" | "dark" | "system" | undefined;
+    if (userTheme && ["light", "dark", "system"].includes(userTheme)) {
+      setTheme(userTheme);
+    }
+  }, [session, setTheme]);
 
   return null;
 }
-

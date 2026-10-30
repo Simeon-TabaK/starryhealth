@@ -16,6 +16,17 @@ const ThemeContext = React.createContext<ThemeContextType>({
   resolvedTheme: "light",
 });
 
+function getStoredTheme(storageKey: string, fallback: Theme): Theme {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const val = localStorage.getItem(storageKey);
+    if (val === "light" || val === "dark" || val === "system") {
+      return val;
+    }
+  } catch {}
+  return fallback;
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = "light",
@@ -28,20 +39,10 @@ export function ThemeProvider({
   enableSystem?: boolean;
   disableTransitionOnChange?: boolean;
 }) {
-  const [theme, setThemeState] = React.useState<Theme>(defaultTheme);
+  const [theme, setThemeState] = React.useState<Theme>(() => getStoredTheme(storageKey, defaultTheme));
   const [resolvedTheme, setResolvedTheme] = React.useState<"light" | "dark">("light");
 
-  React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem(storageKey) as Theme | null;
-      if (stored) {
-        setThemeState(stored);
-      }
-    } catch {
-      // ignore
-    }
-  }, [storageKey]);
-
+  // Keep DOM class in sync whenever theme changes
   React.useEffect(() => {
     const root = document.documentElement;
     let effectiveTheme: "light" | "dark" = "light";
@@ -59,15 +60,42 @@ export function ThemeProvider({
     } else {
       root.classList.remove("dark");
     }
-  }, [theme]);
+
+    try {
+      localStorage.setItem(storageKey, theme);
+    } catch {}
+  }, [theme, storageKey]);
+
+  // Listen for storage events (sync across tabs in the same browser)
+  React.useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === storageKey && e.newValue && ["light", "dark", "system"].includes(e.newValue)) {
+        setThemeState(e.newValue as Theme);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [storageKey]);
 
   const setTheme = React.useCallback(
     (newTheme: Theme) => {
       setThemeState(newTheme);
       try {
         localStorage.setItem(storageKey, newTheme);
-      } catch {
-        // ignore
+      } catch {}
+
+      // Apply to documentElement immediately for zero-delay responsiveness
+      const root = document.documentElement;
+      let effectiveTheme: "light" | "dark" = "light";
+      if (newTheme === "system") {
+        effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      } else {
+        effectiveTheme = newTheme === "dark" ? "dark" : "light";
+      }
+      if (effectiveTheme === "dark") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
       }
 
       // Automatically persist to DB if authenticated
@@ -76,12 +104,8 @@ export function ThemeProvider({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ theme: newTheme }),
-        }).catch(() => {
-          // Ignore offline / unauthenticated errors
-        });
-      } catch {
-        // ignore
-      }
+        }).catch(() => {});
+      } catch {}
     },
     [storageKey]
   );

@@ -83,6 +83,7 @@ import { AdminPlanManagement } from "@/components/admin-plan-management";
 import { AdminUserManagement } from "@/components/admin-user-management";
 import { AdminTenantManagement } from "@/components/admin-tenant-management";
 import { CategoryManagement } from "@/components/category-management";
+import { ServicesManagement } from "@/components/services-management";
 
 interface DashboardClientProps {
   user: any;
@@ -494,6 +495,13 @@ export function DashboardClient({
           label: "Catégories",
           icon: FolderTree,
           badge: categories.length || null,
+          locked: !hasPremiumFeatures,
+        },
+        {
+          id: "services",
+          label: "Services & Offres",
+          icon: Layers,
+          badge: services.length || null,
           locked: !hasPremiumFeatures,
         },
       ],
@@ -1150,6 +1158,20 @@ export function DashboardClient({
             canManageCategories={hasPremiumFeatures}
             categories={categories}
             onNotify={showToast}
+          />
+        )}
+
+        {/* ─────────────────────────────────────────────
+            TAB: SERVICES & OFFRES (PREMIUM)
+            ───────────────────────────────────────────── */}
+        {activeTab === "services" && (
+          <ServicesManagement
+            userId={user.id}
+            isSuperAdmin={isSuperAdmin}
+            canManageServices={hasPremiumFeatures}
+            initialServices={services}
+            onNotify={showToast}
+            onUpgradeClick={() => setActiveTab("users")}
           />
         )}
 
