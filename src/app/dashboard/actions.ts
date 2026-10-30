@@ -75,40 +75,89 @@ export async function updateUserProfile(userId: number, formData: FormData) {
     data: dataToUpdate,
   });
 
-  await prisma.tenantConfig.upsert({
-    where: { userId },
-    update: {
-      orgName: orgName || undefined,
-      orgDescription: orgDescription || undefined,
-      orgLogo: orgLogo || undefined,
-      favicon: favicon !== null && favicon !== undefined ? (favicon || null) : undefined,
-      secondaryColor: canCustomColors ? secondaryColor : undefined,
-      headerColor: canCustomColors ? headerColor : undefined,
-      accentColor: canCustomColors ? accentColor : undefined,
-      sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
-      sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
-      footerColor: canCustomColors ? footerColor : undefined,
-      dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
-      buttonColor: canCustomColors ? buttonColor : undefined,
-      fontFamily: canCustomFont ? fontFamily : undefined,
-    },
-    create: {
-      userId,
-      orgName,
-      orgDescription,
-      orgLogo,
-      favicon: favicon || undefined,
-      secondaryColor: canCustomColors ? secondaryColor : undefined,
-      headerColor: canCustomColors ? headerColor : undefined,
-      accentColor: canCustomColors ? accentColor : undefined,
-      sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
-      sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
-      footerColor: canCustomColors ? footerColor : undefined,
-      dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
-      buttonColor: canCustomColors ? buttonColor : undefined,
-      fontFamily: canCustomFont ? fontFamily : undefined,
-    },
-  });
+  try {
+    await prisma.tenantConfig.upsert({
+      where: { userId },
+      update: {
+        orgName: orgName || undefined,
+        orgDescription: orgDescription || undefined,
+        orgLogo: orgLogo || undefined,
+        favicon: favicon !== null && favicon !== undefined ? (favicon || null) : undefined,
+        secondaryColor: canCustomColors ? secondaryColor : undefined,
+        headerColor: canCustomColors ? headerColor : undefined,
+        accentColor: canCustomColors ? accentColor : undefined,
+        sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
+        sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
+        footerColor: canCustomColors ? footerColor : undefined,
+        dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
+        buttonColor: canCustomColors ? buttonColor : undefined,
+        fontFamily: canCustomFont ? fontFamily : undefined,
+      },
+      create: {
+        userId,
+        orgName,
+        orgDescription,
+        orgLogo,
+        favicon: favicon || undefined,
+        secondaryColor: canCustomColors ? secondaryColor : undefined,
+        headerColor: canCustomColors ? headerColor : undefined,
+        accentColor: canCustomColors ? accentColor : undefined,
+        sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
+        sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
+        footerColor: canCustomColors ? footerColor : undefined,
+        dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
+        buttonColor: canCustomColors ? buttonColor : undefined,
+        fontFamily: canCustomFont ? fontFamily : undefined,
+      },
+    });
+  } catch (err: any) {
+    if (err?.message?.includes("favicon")) {
+      // Fallback si le client Prisma en mémoire (cache dev server / globalThis) n'a pas encore rechargé le champ
+      await prisma.tenantConfig.upsert({
+        where: { userId },
+        update: {
+          orgName: orgName || undefined,
+          orgDescription: orgDescription || undefined,
+          orgLogo: orgLogo || undefined,
+          secondaryColor: canCustomColors ? secondaryColor : undefined,
+          headerColor: canCustomColors ? headerColor : undefined,
+          accentColor: canCustomColors ? accentColor : undefined,
+          sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
+          sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
+          footerColor: canCustomColors ? footerColor : undefined,
+          dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
+          buttonColor: canCustomColors ? buttonColor : undefined,
+          fontFamily: canCustomFont ? fontFamily : undefined,
+        },
+        create: {
+          userId,
+          orgName,
+          orgDescription,
+          orgLogo,
+          secondaryColor: canCustomColors ? secondaryColor : undefined,
+          headerColor: canCustomColors ? headerColor : undefined,
+          accentColor: canCustomColors ? accentColor : undefined,
+          sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
+          sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
+          footerColor: canCustomColors ? footerColor : undefined,
+          dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
+          buttonColor: canCustomColors ? buttonColor : undefined,
+          fontFamily: canCustomFont ? fontFamily : undefined,
+        },
+      });
+
+      // Mettre à jour directement le champ favicon via SQL pour contourner la validation du client en mémoire
+      if (favicon !== undefined) {
+        await prisma.$executeRawUnsafe(
+          `UPDATE "TenantConfig" SET "favicon" = $1 WHERE "userId" = $2;`,
+          favicon || null,
+          userId
+        );
+      }
+    } else {
+      throw err;
+    }
+  }
 
   revalidatePath("/");
   revalidatePath("/dashboard");

@@ -6,13 +6,25 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Cart } from "@/components/cart";
 import { getCurrentTenant, getServicesForTenant } from "@/lib/tenant";
+import { prisma } from "@/lib/prisma";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { TenantFavicon } from "@/components/tenant-favicon";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getCurrentTenant();
   const config = tenant?.config as any;
-  const customFavicon = config?.favicon?.trim() || null;
+  let customFavicon = config?.favicon?.trim() || config?.orgLogo?.trim() || null;
+  if (!customFavicon && tenant?.user?.id) {
+    try {
+      const rows: any = await prisma.$queryRawUnsafe(
+        `SELECT "favicon", "orgLogo" FROM "TenantConfig" WHERE "userId" = $1 LIMIT 1;`,
+        tenant.user.id
+      );
+      if (rows && rows[0]) {
+        customFavicon = rows[0].favicon || rows[0].orgLogo || null;
+      }
+    } catch {}
+  }
   const orgName = config?.orgName || tenant?.user?.name || null;
   const title = orgName
     ? `${orgName} | Vitrine Santé & Bien-être`
@@ -95,7 +107,18 @@ export default async function RootLayout({
   const buttonColor = config?.buttonColor || primaryColor;
   const fontFamily = config?.fontFamily;
   const services = await getServicesForTenant(tenant?.user?.id);
-  const customFavicon = config?.favicon?.trim() || null;
+  let customFavicon = config?.favicon?.trim() || config?.orgLogo?.trim() || null;
+  if (!customFavicon && tenant?.user?.id) {
+    try {
+      const rows: any = await prisma.$queryRawUnsafe(
+        `SELECT "favicon", "orgLogo" FROM "TenantConfig" WHERE "userId" = $1 LIMIT 1;`,
+        tenant.user.id
+      );
+      if (rows && rows[0]) {
+        customFavicon = rows[0].favicon || rows[0].orgLogo || null;
+      }
+    } catch {}
+  }
   const cacheKey = customFavicon
     ? encodeURIComponent(customFavicon.slice(-8).replace(/[^a-zA-Z0-9]/g, ""))
     : "";
@@ -125,7 +148,7 @@ export default async function RootLayout({
       <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
         <ThemeProvider>
           <SessionProvider>
-            <TenantFavicon faviconUrl={tenant?.config?.favicon} />
+            <TenantFavicon faviconUrl={customFavicon} />
             <Navbar tenant={tenant} primaryColor={primaryColor} />
             <main className="flex-1">{children}</main>
             <Footer tenant={tenant} services={services} />

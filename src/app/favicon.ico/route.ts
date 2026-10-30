@@ -1,10 +1,24 @@
 import { getCurrentTenant } from "@/lib/tenant";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const tenant = await getCurrentTenant();
-    const customFavicon = tenant?.config?.favicon?.trim();
+    let customFavicon =
+      tenant?.config?.favicon?.trim() || tenant?.config?.orgLogo?.trim() || null;
+
+    if (!customFavicon && tenant?.user?.id) {
+      try {
+        const rows: any = await prisma.$queryRawUnsafe(
+          `SELECT "favicon", "orgLogo" FROM "TenantConfig" WHERE "userId" = $1 LIMIT 1;`,
+          tenant.user.id
+        );
+        if (rows && rows[0]) {
+          customFavicon = rows[0].favicon || rows[0].orgLogo || null;
+        }
+      } catch {}
+    }
 
     if (customFavicon) {
       try {
@@ -42,3 +56,4 @@ export async function GET() {
     );
   }
 }
+

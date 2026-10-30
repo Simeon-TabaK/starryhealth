@@ -54,7 +54,7 @@ export const authOptions: NextAuthOptions = {
           subscriptionStatus: user.subscriptionStatus,
           subscriptionPlan: user.subscriptionPlan,
           primaryColor: user.primaryColor,
-          favicon: user.tenantConfig?.favicon || null,
+          favicon: user.tenantConfig?.favicon || user.tenantConfig?.orgLogo || null,
         };
       },
     }),
@@ -119,7 +119,7 @@ export const authOptions: NextAuthOptions = {
             (user as any).subscriptionStatus = existing.subscriptionStatus;
             (user as any).subscriptionPlan = existing.subscriptionPlan;
             (user as any).primaryColor = existing.primaryColor;
-            (user as any).favicon = existing.tenantConfig?.favicon || null;
+            (user as any).favicon = existing.tenantConfig?.favicon || existing.tenantConfig?.orgLogo || null;
             // Existing user: no need to re-complete profile
             (user as any).needsUsername = false;
           }

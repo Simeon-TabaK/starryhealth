@@ -24,20 +24,31 @@ export async function GET() {
         slug: true,
         username: true,
         role: true,
-        tenantConfig: {
-          select: {
-            orgName: true,
-            orgLogo: true,
-            favicon: true,
-          },
-        },
+        tenantConfig: true,
       },
     });
+
+    let favicon =
+      (user?.tenantConfig as any)?.favicon ||
+      (user?.tenantConfig as any)?.orgLogo ||
+      null;
+
+    if (!favicon) {
+      try {
+        const rows: any = await prisma.$queryRawUnsafe(
+          `SELECT "favicon", "orgLogo" FROM "TenantConfig" WHERE "userId" = $1 LIMIT 1;`,
+          userId
+        );
+        if (rows && rows[0]) {
+          favicon = rows[0].favicon || rows[0].orgLogo || null;
+        }
+      } catch {}
+    }
 
     return NextResponse.json({
       authenticated: true,
       user,
-      favicon: user?.tenantConfig?.favicon || null,
+      favicon,
       orgName: user?.tenantConfig?.orgName || null,
     });
   } catch (error) {
