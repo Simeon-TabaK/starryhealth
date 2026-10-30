@@ -54,6 +54,7 @@ export const authOptions: NextAuthOptions = {
           subscriptionStatus: user.subscriptionStatus,
           subscriptionPlan: user.subscriptionPlan,
           primaryColor: user.primaryColor,
+          theme: user.theme || "system",
           favicon: user.tenantConfig?.favicon || user.tenantConfig?.orgLogo || null,
         };
       },
@@ -109,6 +110,7 @@ export const authOptions: NextAuthOptions = {
             (user as any).subscriptionStatus = created.subscriptionStatus;
             (user as any).subscriptionPlan = created.subscriptionPlan;
             (user as any).primaryColor = created.primaryColor;
+            (user as any).theme = created.theme || "system";
             // New user via Google → must choose their own username
             (user as any).needsUsername = true;
           } else {
@@ -119,6 +121,7 @@ export const authOptions: NextAuthOptions = {
             (user as any).subscriptionStatus = existing.subscriptionStatus;
             (user as any).subscriptionPlan = existing.subscriptionPlan;
             (user as any).primaryColor = existing.primaryColor;
+            (user as any).theme = existing.theme || "system";
             (user as any).favicon = existing.tenantConfig?.favicon || existing.tenantConfig?.orgLogo || null;
             // Existing user: no need to re-complete profile
             (user as any).needsUsername = false;
@@ -139,6 +142,7 @@ export const authOptions: NextAuthOptions = {
         token.subscriptionStatus = (user as any).subscriptionStatus;
         token.subscriptionPlan = (user as any).subscriptionPlan;
         token.primaryColor = (user as any).primaryColor;
+        token.theme = (user as any).theme || "system";
         token.favicon = (user as any).favicon || null;
         token.needsUsername = (user as any).needsUsername ?? false;
       }
@@ -150,6 +154,7 @@ export const authOptions: NextAuthOptions = {
         if (session.slug) token.slug = session.slug;
         if (session.username) token.username = session.username;
         if (session.favicon !== undefined) token.favicon = session.favicon;
+        if (session.theme !== undefined) token.theme = session.theme;
         token = { ...token, ...session };
       }
       return token;
@@ -163,6 +168,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).subscriptionStatus = token.subscriptionStatus;
         (session.user as any).subscriptionPlan = token.subscriptionPlan;
         (session.user as any).primaryColor = token.primaryColor;
+        (session.user as any).theme = token.theme || "system";
         (session.user as any).favicon = token.favicon || null;
         (session.user as any).needsUsername = token.needsUsername ?? false;
       }

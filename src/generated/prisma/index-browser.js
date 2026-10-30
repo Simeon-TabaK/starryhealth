@@ -144,6 +144,7 @@ exports.Prisma.UserScalarFieldEnum = {
   tiktok: 'tiktok',
   instagram: 'instagram',
   copyright: 'copyright',
+  theme: 'theme',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -163,7 +164,31 @@ exports.Prisma.TenantConfigScalarFieldEnum = {
   footerColor: 'footerColor',
   dashboardBgColor: 'dashboardBgColor',
   buttonColor: 'buttonColor',
-  fontFamily: 'fontFamily'
+  fontFamily: 'fontFamily',
+  status: 'status',
+  validatedAt: 'validatedAt',
+  validatedBy: 'validatedBy',
+  rejectionReason: 'rejectionReason'
+};
+
+exports.Prisma.SubscriptionPlanConfigScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  displayName: 'displayName',
+  description: 'description',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  monthlyPrice: 'monthlyPrice',
+  quarterlyPrice: 'quarterlyPrice',
+  semiAnnualPrice: 'semiAnnualPrice',
+  annualPrice: 'annualPrice',
+  features: 'features',
+  limits: 'limits',
+  badge: 'badge',
+  color: 'color',
+  icon: 'icon',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SubscriptionScalarFieldEnum = {
@@ -171,8 +196,29 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   userId: 'userId',
   plan: 'plan',
   status: 'status',
+  durationMonths: 'durationMonths',
+  requestedAt: 'requestedAt',
   startDate: 'startDate',
   expiresAt: 'expiresAt',
+  validatedAt: 'validatedAt',
+  validatedBy: 'validatedBy',
+  adminNotes: 'adminNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionHistoryScalarFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  userId: 'userId',
+  plan: 'plan',
+  status: 'status',
+  action: 'action',
+  notes: 'notes',
+  performedBy: 'performedBy',
+  startDate: 'startDate',
+  expiresAt: 'expiresAt',
+  durationMonths: 'durationMonths',
   createdAt: 'createdAt'
 };
 
@@ -184,16 +230,39 @@ exports.Prisma.SubscriptionPlanPricingScalarFieldEnum = {
   totalBilled: 'totalBilled'
 };
 
+exports.Prisma.ProductCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  parentId: 'parentId',
+  sortOrder: 'sortOrder',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.ProductScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   name: 'name',
   description: 'description',
+  shortDescription: 'shortDescription',
   defaultPrice: 'defaultPrice',
   originalPrice: 'originalPrice',
   images: 'images',
   category: 'category',
+  categoryId: 'categoryId',
   isVisible: 'isVisible',
+  ingredients: 'ingredients',
+  benefits: 'benefits',
+  usage: 'usage',
+  contraindications: 'contraindications',
+  certifications: 'certifications',
+  origin: 'origin',
+  packaging: 'packaging',
+  metaTitle: 'metaTitle',
+  metaDescription: 'metaDescription',
+  seoSlug: 'seoSlug',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -304,6 +373,10 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -312,6 +385,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.Role = exports.$Enums.Role = {
   SUPER_ADMIN: 'SUPER_ADMIN',
@@ -322,7 +401,9 @@ exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
   FREE: 'FREE',
   ACTIVE: 'ACTIVE',
   PENDING: 'PENDING',
-  EXPIRED: 'EXPIRED'
+  EXPIRED: 'EXPIRED',
+  REFUSED: 'REFUSED',
+  SUSPENDED: 'SUSPENDED'
 };
 
 exports.SubscriptionPlan = exports.$Enums.SubscriptionPlan = {
@@ -354,8 +435,11 @@ exports.UsernameChangeStatus = exports.$Enums.UsernameChangeStatus = {
 exports.Prisma.ModelName = {
   User: 'User',
   TenantConfig: 'TenantConfig',
+  SubscriptionPlanConfig: 'SubscriptionPlanConfig',
   Subscription: 'Subscription',
+  SubscriptionHistory: 'SubscriptionHistory',
   SubscriptionPlanPricing: 'SubscriptionPlanPricing',
+  ProductCategory: 'ProductCategory',
   Product: 'Product',
   UserProductPrice: 'UserProductPrice',
   Service: 'Service',

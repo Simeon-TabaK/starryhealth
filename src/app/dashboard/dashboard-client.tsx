@@ -42,6 +42,8 @@ import {
   AlertTriangle,
   User,
   Building,
+  FolderTree,
+  Crown,
 } from "lucide-react";
 import Link from "next/link";
 import { ToastContainer, ToastItem, ToastType } from "@/components/toast";
@@ -75,6 +77,12 @@ import {
 import { getProductLimit, planHasFeature } from "@/lib/plans";
 import { CloudinaryUpload } from "@/components/cloudinary-upload";
 import { ThemeModule } from "@/components/theme-module";
+import { SubscriptionManagement } from "@/components/subscription-management";
+import { ThemeSelector } from "@/components/theme-selector";
+import { AdminPlanManagement } from "@/components/admin-plan-management";
+import { AdminUserManagement } from "@/components/admin-user-management";
+import { AdminTenantManagement } from "@/components/admin-tenant-management";
+import { CategoryManagement } from "@/components/category-management";
 
 interface DashboardClientProps {
   user: any;
@@ -95,6 +103,10 @@ interface DashboardClientProps {
   planPricings?: any[];
   allUsers?: any[];
   tenantChangeRequests?: any[];
+  planConfigs?: any[];
+  userSubscriptions?: any[];
+  allSubscriptionHistory?: any[];
+  categories?: any[];
   initialTab?: string;
 }
 
@@ -117,6 +129,10 @@ export function DashboardClient({
   planPricings = [],
   allUsers = [],
   tenantChangeRequests = [],
+  planConfigs = [],
+  userSubscriptions = [],
+  allSubscriptionHistory = [],
+  categories = [],
   initialTab,
 }: DashboardClientProps) {
   const isSuperAdmin = user.role === "SUPER_ADMIN";
@@ -473,6 +489,13 @@ export function DashboardClient({
           badge: null,
           locked: !hasPremiumFeatures,
         },
+        {
+          id: "categories",
+          label: "Catégories",
+          icon: FolderTree,
+          badge: categories.length || null,
+          locked: !hasPremiumFeatures,
+        },
       ],
     },
     {
@@ -527,6 +550,20 @@ export function DashboardClient({
               label: "Utilisateurs & Abonnements",
               icon: Users,
               badge: totalSubscribers || null,
+              locked: false,
+            },
+            {
+              id: "admin-tenants",
+              label: "Gestion Tenants",
+              icon: Building,
+              badge: null,
+              locked: false,
+            },
+            {
+              id: "admin-plans",
+              label: "Gestion des Plans",
+              icon: CreditCard,
+              badge: planConfigs.length || null,
               locked: false,
             },
           ],
@@ -1270,6 +1307,20 @@ export function DashboardClient({
           </div>
         )}
 
+        
+        {/* ─────────────────────────────────────────────
+            TAB: CATEGORIES (PREMIUM)
+            ───────────────────────────────────────────── */}
+        {activeTab === "categories" && (
+          <CategoryManagement
+            userId={user.id}
+            isSuperAdmin={isSuperAdmin}
+            canManageCategories={hasPremiumFeatures}
+            categories={categories}
+            onNotify={showToast}
+          />
+        )}
+
         {/* ─────────────────────────────────────────────
             TAB 3: PRODUITS & PRIX
             ───────────────────────────────────────────── */}
@@ -1358,7 +1409,75 @@ export function DashboardClient({
                     </div>
                     <div>
                       <label className="text-xs font-semibold block mb-1">Catégorie</label>
-                      <input type="text" name="category" defaultValue="Santé & Bien-être" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] text-slate-500 mb-1 block">Catégorie (texte)</label>
+                          <input type="text" name="category" defaultValue="Santé & Bien-être" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-slate-500 mb-1 block">Rayon / Arborescence</label>
+                          <select name="categoryId" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800">
+                            <option value="">-- Aucun rayon rattaché --</option>
+                            {categories.map((c) => (
+                              <option key={c.id} value={c.id}>{c.parentId ? '  ↳ ' : ''}{c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Advanced PREMIUM Fields */}
+                      {hasPremiumFeatures && (
+                        <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 space-y-3">
+                          <div className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-300">
+                            <Crown className="w-4 h-4 text-amber-500" />
+                            Fiche Produit Détaillée (PREMIUM)
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Description courte (résumé)</label>
+                            <input type="text" name="shortDescription" placeholder="Accroche en une phrase pour la liste..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">Origine / Fabrication</label>
+                              <input type="text" name="origin" placeholder="Ex: France, Bio..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">Format / Packaging</label>
+                              <input type="text" name="packaging" placeholder="Ex: Flacon 60 gélules..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Ingrédients & Composition</label>
+                            <textarea name="ingredients" rows={2} placeholder="Liste des principes actifs..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Bienfaits & Avantages</label>
+                            <textarea name="benefits" rows={2} placeholder="Effets constatés, bénéfices santé..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Conseils d'utilisation & Posologie</label>
+                            <textarea name="usage" rows={2} placeholder="2 gélules par jour avec un grand verre d'eau..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Contre-indications & Mises en garde</label>
+                            <textarea name="contraindications" rows={2} placeholder="Déconseillé aux femmes enceintes..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">Titre SEO (Meta title)</label>
+                              <input type="text" name="metaTitle" placeholder="Titre pour Google..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">URL personnalisée (Slug)</label>
+                              <input type="text" name="seoSlug" placeholder="nom-du-produit" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 font-mono text-xs" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Description SEO (Meta description)</label>
+                            <textarea name="metaDescription" rows={2} placeholder="Description affichée dans les moteurs de recherche..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Image Upload with Crop Section */}
@@ -1443,10 +1562,75 @@ export function DashboardClient({
                         <input type="number" step="0.01" name="originalPrice" defaultValue={editingProduct.originalPrice || ""} placeholder="Optionnel" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
                       </div>
                     </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Catégorie</label>
-                      <input type="text" name="category" defaultValue={editingProduct.category || "Santé & Bien-être"} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] text-slate-500 mb-1 block">Catégorie (texte)</label>
+                          <input type="text" name="category" defaultValue={editingProduct.category || "Santé & Bien-être"} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-slate-500 mb-1 block">Rayon / Arborescence</label>
+                          <select name="categoryId" defaultValue={editingProduct.categoryId || ""} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800">
+                            <option value="">-- Aucun rayon rattaché --</option>
+                            {categories.map((c) => (
+                              <option key={c.id} value={c.id}>{c.parentId ? '  ↳ ' : ''}{c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Advanced PREMIUM Fields */}
+                      {hasPremiumFeatures && (
+                        <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 space-y-3">
+                          <div className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-300">
+                            <Crown className="w-4 h-4 text-amber-500" />
+                            Fiche Produit Détaillée (PREMIUM)
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Description courte (résumé)</label>
+                            <input type="text" name="shortDescription" defaultValue={editingProduct.shortDescription || ""} placeholder="Accroche en une phrase pour la liste..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">Origine / Fabrication</label>
+                              <input type="text" name="origin" defaultValue={editingProduct.origin || ""} placeholder="Ex: France, Bio..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">Format / Packaging</label>
+                              <input type="text" name="packaging" defaultValue={editingProduct.packaging || ""} placeholder="Ex: Flacon 60 gélules..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Ingrédients & Composition</label>
+                            <textarea name="ingredients" rows={2} defaultValue={editingProduct.ingredients || ""} placeholder="Liste des principes actifs..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Bienfaits & Avantages</label>
+                            <textarea name="benefits" rows={2} defaultValue={editingProduct.benefits || ""} placeholder="Effets constatés, bénéfices santé..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Conseils d'utilisation & Posologie</label>
+                            <textarea name="usage" rows={2} defaultValue={editingProduct.usage || ""} placeholder="2 gélules par jour avec un grand verre d'eau..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Contre-indications & Mises en garde</label>
+                            <textarea name="contraindications" rows={2} defaultValue={editingProduct.contraindications || ""} placeholder="Déconseillé aux femmes enceintes..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">Titre SEO (Meta title)</label>
+                              <input type="text" name="metaTitle" defaultValue={editingProduct.metaTitle || ""} placeholder="Titre pour Google..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-semibold block mb-1">URL personnalisée (Slug)</label>
+                              <input type="text" name="seoSlug" defaultValue={editingProduct.seoSlug || ""} placeholder="nom-du-produit" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 font-mono text-xs" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-semibold block mb-1">Description SEO (Meta description)</label>
+                            <textarea name="metaDescription" rows={2} defaultValue={editingProduct.metaDescription || ""} placeholder="Description affichée dans les moteurs de recherche..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
+                          </div>
+                        </div>
+                      )}
 
                     {/* Image Upload with Crop Section */}
                     <div>
@@ -2215,6 +2399,11 @@ export function DashboardClient({
             {/* Condition 2: Profil & Organisation */}
             {settingsSubTab === "profile" && (
               <form onSubmit={handleProfileSubmit} className="space-y-8">
+                {/* 0. MODE D'AFFICHAGE & THÈME */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <ThemeSelector />
+                </div>
+
                 {/* 1. INFORMATIONS PERSONNELLES DU COMPTE */}
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                   <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">

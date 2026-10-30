@@ -62,6 +62,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     planPricings,
     allUsers,
     tenantChangeRequests,
+    planConfigs,
+    userSubscriptions,
+    allSubscriptionHistory,
+    categories,
   ] = await Promise.all([
     prisma.subscription.findFirst({
       where: { userId: currentUser.id },
@@ -164,6 +168,33 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           where: { userId: currentUser.id },
           orderBy: { createdAt: "desc" },
         }),
+    ((prisma as any).subscriptionPlanConfig?.findMany
+      ? (prisma as any).subscriptionPlanConfig.findMany({
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        })
+      : Promise.resolve([])),
+    prisma.subscription.findMany({
+      where: { userId: currentUser.id },
+      orderBy: { createdAt: "desc" },
+    }),
+    isSuperAdmin
+      ? prisma.subscriptionHistory.findMany({
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 200,
+        })
+      : prisma.subscriptionHistory.findMany({
+          where: { userId: currentUser.id },
+          orderBy: { createdAt: "desc" },
+        }),
+    ((prisma as any).productCategory?.findMany
+      ? (prisma as any).productCategory.findMany({
+          where: isSuperAdmin ? {} : { OR: [{ userId: currentUser.id }, { userId: null }] },
+          orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+        })
+      : Promise.resolve([])),
   ]);
 
   return (
@@ -186,6 +217,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       planPricings={planPricings}
       allUsers={allUsers}
       tenantChangeRequests={tenantChangeRequests}
+      planConfigs={planConfigs}
+      userSubscriptions={userSubscriptions}
+      allSubscriptionHistory={allSubscriptionHistory}
+      categories={categories}
       initialTab={initialTab}
     />
   );

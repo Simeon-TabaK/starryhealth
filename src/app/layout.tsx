@@ -9,6 +9,7 @@ import { getCurrentTenant, getServicesForTenant } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { TenantFavicon } from "@/components/tenant-favicon";
+import { ThemeUserSync } from "@/components/theme-user-sync";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getCurrentTenant();
@@ -149,6 +150,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <SessionProvider>
             <TenantFavicon faviconUrl={customFavicon} />
+            <ThemeUserSync />
             <Navbar tenant={tenant} primaryColor={primaryColor} />
             <main className="flex-1">{children}</main>
             <Footer tenant={tenant} services={services} />

@@ -11,7 +11,7 @@ export function getProductLimit(plan: string | null | undefined): number {
 
 export function planHasFeature(
   plan: string | null | undefined,
-  feature: "services" | "colors" | "faq" | "gallery" | "font" | "customDomain"
+  feature: "services" | "colors" | "faq" | "gallery" | "font" | "customDomain" | "categories" | "advancedProduct"
 ): boolean {
   const tier = (plan as SubscriptionPlanTier) ?? "STANDARD";
   const tiers: Record<SubscriptionPlanTier, number> = {
@@ -26,6 +26,8 @@ export function planHasFeature(
     gallery: 3,    // PREMIUM
     font: 3,       // PREMIUM
     customDomain: 3, // PREMIUM
+    categories: 3, // PREMIUM
+    advancedProduct: 3, // PREMIUM
   };
   return (tiers[tier] ?? 1) >= (required[feature] ?? 1);
 }

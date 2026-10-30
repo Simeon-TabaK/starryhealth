@@ -24,6 +24,7 @@ export async function updateUserProfile(userId: number, formData: FormData) {
   const instagram = formData.get("instagram") as string;
   const copyright = formData.get("copyright") as string;
   const primaryColor = formData.get("primaryColor") as string;
+  const theme = formData.get("theme") as string;
 
   // TenantConfig fields
   const orgName = formData.get("orgName") as string;
@@ -68,6 +69,7 @@ export async function updateUserProfile(userId: number, formData: FormData) {
   if (tiktok !== null && tiktok !== undefined) dataToUpdate.tiktok = tiktok;
   if (instagram !== null && instagram !== undefined) dataToUpdate.instagram = instagram;
   if (copyright !== null && copyright !== undefined) dataToUpdate.copyright = copyright;
+  if (theme && ["light", "dark", "system"].includes(theme)) dataToUpdate.theme = theme;
   if (canCustomColors && primaryColor) dataToUpdate.primaryColor = primaryColor;
 
   await prisma.user.update({
@@ -164,6 +166,7 @@ export async function updateUserProfile(userId: number, formData: FormData) {
   return { success: true };
 }
 
+
 // --- PRODUCT MANAGEMENT WITH SUBSCRIPTION QUOTA ENFORCEMENT ---
 
 export async function createUserProduct(userId: number, formData: FormData) {
@@ -214,16 +217,41 @@ export async function createUserProduct(userId: number, formData: FormData) {
     throw new Error("Une image principale est obligatoire pour créer ce produit.");
   }
 
+  // Advanced fields (PREMIUM)
+  const shortDescription = (formData.get("shortDescription") as string)?.trim() || null;
+  const ingredients = (formData.get("ingredients") as string)?.trim() || null;
+  const benefits = (formData.get("benefits") as string)?.trim() || null;
+  const usage = (formData.get("usage") as string)?.trim() || null;
+  const contraindications = (formData.get("contraindications") as string)?.trim() || null;
+  const origin = (formData.get("origin") as string)?.trim() || null;
+  const packaging = (formData.get("packaging") as string)?.trim() || null;
+  const metaTitle = (formData.get("metaTitle") as string)?.trim() || null;
+  const metaDescription = (formData.get("metaDescription") as string)?.trim() || null;
+  const seoSlug = (formData.get("seoSlug") as string)?.trim() || null;
+  const categoryIdRaw = formData.get("categoryId") as string;
+  const categoryId = categoryIdRaw ? parseInt(categoryIdRaw) : null;
+
   await prisma.product.create({
     data: {
       userId: isSuperAdmin ? null : userId,
       name,
       description,
+      shortDescription,
       defaultPrice,
       originalPrice,
       category,
+      categoryId,
       images,
       isVisible,
+      ingredients,
+      benefits,
+      usage,
+      contraindications,
+      origin,
+      packaging,
+      metaTitle,
+      metaDescription,
+      seoSlug,
     },
   });
 
@@ -272,16 +300,41 @@ export async function updateUserProduct(
     throw new Error("Une image principale est obligatoire pour enregistrer ce produit.");
   }
 
+  // Advanced fields (PREMIUM)
+  const shortDescription = (formData.get("shortDescription") as string)?.trim() || null;
+  const ingredients = (formData.get("ingredients") as string)?.trim() || null;
+  const benefits = (formData.get("benefits") as string)?.trim() || null;
+  const usage = (formData.get("usage") as string)?.trim() || null;
+  const contraindications = (formData.get("contraindications") as string)?.trim() || null;
+  const origin = (formData.get("origin") as string)?.trim() || null;
+  const packaging = (formData.get("packaging") as string)?.trim() || null;
+  const metaTitle = (formData.get("metaTitle") as string)?.trim() || null;
+  const metaDescription = (formData.get("metaDescription") as string)?.trim() || null;
+  const seoSlug = (formData.get("seoSlug") as string)?.trim() || null;
+  const categoryIdRaw = formData.get("categoryId") as string;
+  const categoryId = categoryIdRaw ? parseInt(categoryIdRaw) : null;
+
   await prisma.product.update({
     where: { id: productId },
     data: {
       name,
       description,
+      shortDescription,
       defaultPrice,
       originalPrice,
       category,
+      categoryId,
       images,
       isVisible,
+      ingredients,
+      benefits,
+      usage,
+      contraindications,
+      origin,
+      packaging,
+      metaTitle,
+      metaDescription,
+      seoSlug,
     },
   });
 
@@ -370,6 +423,7 @@ export async function addUserService(userId: number, formData: FormData) {
   return { success: true };
 }
 
+
 export async function deleteUserService(serviceId: number, userId: number) {
   const service = await prisma.service.findUnique({ where: { id: serviceId } });
   if (!service || service.userId !== userId) throw new Error("Action non autorisée.");
@@ -379,6 +433,7 @@ export async function deleteUserService(serviceId: number, userId: number) {
   revalidatePath("/dashboard");
   return { success: true };
 }
+
 
 // --- FAQ (PREMIUM) ---
 
@@ -410,6 +465,7 @@ export async function addUserFaq(userId: number, formData: FormData) {
   return { success: true };
 }
 
+
 export async function deleteUserFaq(faqId: number, userId: number) {
   const faq = await prisma.fAQ.findUnique({ where: { id: faqId } });
   if (!faq || faq.userId !== userId) throw new Error("Action non autorisée.");
@@ -419,6 +475,7 @@ export async function deleteUserFaq(faqId: number, userId: number) {
   revalidatePath("/dashboard");
   return { success: true };
 }
+
 
 // --- GALLERY (PREMIUM) ---
 
@@ -450,6 +507,7 @@ export async function addUserGalleryImage(userId: number, formData: FormData) {
   return { success: true };
 }
 
+
 export async function deleteUserGalleryImage(imageId: number, userId: number) {
   const img = await prisma.galleryImage.findUnique({ where: { id: imageId } });
   if (!img || img.userId !== userId) throw new Error("Action non autorisée.");
@@ -459,6 +517,7 @@ export async function deleteUserGalleryImage(imageId: number, userId: number) {
   revalidatePath("/dashboard");
   return { success: true };
 }
+
 
 export async function updateUserGalleryImage(
   imageId: number,
@@ -495,6 +554,7 @@ export async function updateUserGalleryImage(
   return { success: true };
 }
 
+
 // --- CAROUSEL ACTIONS ---
 
 export async function addUserCarouselItem(userId: number | null, formData: FormData) {
@@ -518,12 +578,14 @@ export async function addUserCarouselItem(userId: number | null, formData: FormD
   return { success: true };
 }
 
+
 export async function deleteCarouselItem(itemId: number) {
   await prisma.carouselItem.delete({ where: { id: itemId } });
   revalidatePath("/");
   revalidatePath("/dashboard");
   return { success: true };
 }
+
 
 // --- TESTIMONIAL ACTIONS ---
 
@@ -580,12 +642,14 @@ export async function addUserPartner(userId: number | null, formData: FormData) 
   return { success: true };
 }
 
+
 export async function deletePartner(partnerId: number) {
   await prisma.partner.delete({ where: { id: partnerId } });
   revalidatePath("/");
   revalidatePath("/dashboard");
   return { success: true };
 }
+
 
 // --- CUSTOM DOMAIN (PREMIUM) ---
 
@@ -804,6 +868,7 @@ export async function adminApproveUsernameChange(requestId: number) {
   return { success: true };
 }
 
+
 export async function adminRejectUsernameChange(requestId: number, adminNote?: string) {
   const request = await (prisma as any).usernameChangeRequest.findUnique({
     where: { id: requestId },
@@ -840,3 +905,530 @@ export async function updateAdminSuggestionStatus(
   revalidatePath("/dashboard");
   return { success: true };
 }
+
+
+// ─────────────────────────────────────────────
+// THEME PREFERENCE ACTION
+// ─────────────────────────────────────────────
+
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION ACTIONS (USER-FACING)
+// ─────────────────────────────────────────────
+
+/**
+ * Utilisateur soumet une demande d'abonnement (Statut: PENDING / En attente)
+ */
+export async function requestUserSubscription(
+  userId: number,
+  plan: "STANDARD" | "SMART" | "PREMIUM",
+  durationMonths: number = 1,
+  notes?: string
+) {
+  const planEnum = SubscriptionPlan[plan];
+
+  const sub = await prisma.subscription.create({
+    data: {
+      userId,
+      plan: planEnum,
+      status: "PENDING",
+      durationMonths,
+      requestedAt: new Date(),
+      startDate: null,
+      expiresAt: null,
+      adminNotes: notes || null,
+    },
+  });
+
+  // Mettre à jour l'utilisateur
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      subscriptionStatus: "PENDING" as any,
+    },
+  });
+
+  // Enregistrer dans l'historique
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId: sub.id,
+      userId,
+      plan: planEnum,
+      status: "PENDING",
+      action: "REQUESTED",
+      notes: notes || "Demande d'abonnement soumise par l'utilisateur",
+      durationMonths,
+      performedBy: userId,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  return { success: true, subscription: sub };
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION ACTIONS (ADMIN-FACING)
+// ─────────────────────────────────────────────
+
+/**
+ * Valider une demande d'abonnement en attente
+ */
+export async function adminValidateSubscription(
+  subscriptionId: number,
+  adminId: number,
+  durationMonths?: number,
+  adminNotes?: string
+) {
+  const admin = await prisma.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+  if (admin?.role !== "SUPER_ADMIN") {
+    throw new Error("Action réservée aux administrateurs.");
+  }
+
+  const sub = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+  });
+  if (!sub) throw new Error("Abonnement introuvable.");
+
+  const months = durationMonths || sub.durationMonths || 1;
+  const startDate = new Date();
+  const expiresAt = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000);
+
+  const updatedSub = await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      status: "ACTIVE",
+      durationMonths: months,
+      startDate,
+      expiresAt,
+      validatedAt: new Date(),
+      validatedBy: adminId,
+      adminNotes: adminNotes || sub.adminNotes || "Validé par l'administrateur",
+    },
+  });
+
+  // Activer l'utilisateur
+  await prisma.user.update({
+    where: { id: sub.userId },
+    data: {
+      subscriptionStatus: "ACTIVE",
+      subscriptionPlan: sub.plan,
+    },
+  });
+
+  // Historique
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId,
+      userId: sub.userId,
+      plan: sub.plan,
+      status: "ACTIVE",
+      action: "VALIDATED",
+      notes: adminNotes || `Validé pour ${months} mois par l'administrateur`,
+      performedBy: adminId,
+      startDate,
+      expiresAt,
+      durationMonths: months,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/users");
+  return { success: true, subscription: updatedSub };
+}
+
+/**
+ * Refuser une demande d'abonnement
+ */
+export async function adminRefuseSubscription(
+  subscriptionId: number,
+  adminId: number,
+  reason: string
+) {
+  const admin = await prisma.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+  if (admin?.role !== "SUPER_ADMIN") {
+    throw new Error("Action réservée aux administrateurs.");
+  }
+
+  const sub = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+  });
+  if (!sub) throw new Error("Abonnement introuvable.");
+
+  const updatedSub = await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      status: "REFUSED",
+      validatedAt: new Date(),
+      validatedBy: adminId,
+      adminNotes: reason,
+    },
+  });
+
+  // Vérifier si l'utilisateur a un autre abonnement actif
+  const otherActive = await prisma.subscription.findFirst({
+    where: { userId: sub.userId, status: "ACTIVE" },
+  });
+
+  if (!otherActive) {
+    await prisma.user.update({
+      where: { id: sub.userId },
+      data: {
+        subscriptionStatus: "REFUSED" as any,
+      },
+    });
+  }
+
+  // Historique
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId,
+      userId: sub.userId,
+      plan: sub.plan,
+      status: "REFUSED",
+      action: "REFUSED",
+      notes: reason || "Demande refusée par l'administrateur",
+      performedBy: adminId,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/users");
+  return { success: true, subscription: updatedSub };
+}
+
+/**
+ * Suspendre un abonnement actif
+ */
+export async function adminSuspendSubscription(
+  subscriptionId: number,
+  adminId: number,
+  reason?: string
+) {
+  const admin = await prisma.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+  if (admin?.role !== "SUPER_ADMIN") {
+    throw new Error("Action réservée aux administrateurs.");
+  }
+
+  const sub = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+  });
+  if (!sub) throw new Error("Abonnement introuvable.");
+
+  const updatedSub = await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      status: "SUSPENDED",
+      adminNotes: reason || sub.adminNotes,
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: sub.userId },
+    data: {
+      subscriptionStatus: "SUSPENDED" as any,
+    },
+  });
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId,
+      userId: sub.userId,
+      plan: sub.plan,
+      status: "SUSPENDED",
+      action: "SUSPENDED",
+      notes: reason || "Abonnement suspendu par l'administrateur",
+      performedBy: adminId,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/users");
+  return { success: true, subscription: updatedSub };
+}
+
+/**
+ * Réactiver un abonnement suspendu ou expiré
+ */
+export async function adminReactivateSubscription(
+  subscriptionId: number,
+  adminId: number
+) {
+  const admin = await prisma.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+  if (admin?.role !== "SUPER_ADMIN") {
+    throw new Error("Action réservée aux administrateurs.");
+  }
+
+  const sub = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+  });
+  if (!sub) throw new Error("Abonnement introuvable.");
+
+  // Si expiré, renouveler la date de fin à partir de maintenant
+  let expiresAt = sub.expiresAt;
+  if (!expiresAt || expiresAt < new Date()) {
+    const months = sub.durationMonths || 1;
+    expiresAt = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000);
+  }
+
+  const updatedSub = await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      status: "ACTIVE",
+      expiresAt,
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: sub.userId },
+    data: {
+      subscriptionStatus: "ACTIVE",
+      subscriptionPlan: sub.plan,
+    },
+  });
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId,
+      userId: sub.userId,
+      plan: sub.plan,
+      status: "ACTIVE",
+      action: "ACTIVATED",
+      notes: "Abonnement réactivé par l'administrateur",
+      performedBy: adminId,
+      expiresAt,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/users");
+  return { success: true, subscription: updatedSub };
+}
+
+/**
+ * Prolonger un abonnement
+ */
+export async function adminExtendSubscription(
+  subscriptionId: number,
+  adminId: number,
+  extraMonths: number = 1,
+  notes?: string
+) {
+  const admin = await prisma.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+  if (admin?.role !== "SUPER_ADMIN") {
+    throw new Error("Action réservée aux administrateurs.");
+  }
+
+  const sub = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+  });
+  if (!sub) throw new Error("Abonnement introuvable.");
+
+  const currentExpires = sub.expiresAt && sub.expiresAt > new Date() ? sub.expiresAt : new Date();
+  const newExpires = new Date(currentExpires.getTime() + extraMonths * 30 * 24 * 60 * 60 * 1000);
+  const newDuration = (sub.durationMonths || 1) + extraMonths;
+
+  const updatedSub = await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      status: "ACTIVE",
+      expiresAt: newExpires,
+      durationMonths: newDuration,
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: sub.userId },
+    data: {
+      subscriptionStatus: "ACTIVE",
+      subscriptionPlan: sub.plan,
+    },
+  });
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId,
+      userId: sub.userId,
+      plan: sub.plan,
+      status: "ACTIVE",
+      action: "EXTENDED",
+      notes: notes || `Prolongé de ${extraMonths} mois par l'administrateur`,
+      performedBy: adminId,
+      expiresAt: newExpires,
+      durationMonths: extraMonths,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/users");
+  return { success: true, subscription: updatedSub };
+}
+
+/**
+ * Attribuer ou créer directement un abonnement pour un utilisateur (Admin)
+ */
+export async function adminDirectAssignSubscription(
+  adminId: number,
+  targetUserId: number,
+  plan: "STANDARD" | "SMART" | "PREMIUM",
+  durationMonths: number = 1,
+  status: "ACTIVE" | "PENDING" = "ACTIVE",
+  notes?: string
+) {
+  const admin = await prisma.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+  if (admin?.role !== "SUPER_ADMIN") {
+    throw new Error("Action réservée aux administrateurs.");
+  }
+
+  const planEnum = SubscriptionPlan[plan];
+  const startDate = status === "ACTIVE" ? new Date() : null;
+  const expiresAt = status === "ACTIVE" ? new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000) : null;
+
+  const sub = await prisma.subscription.create({
+    data: {
+      userId: targetUserId,
+      plan: planEnum,
+      status,
+      durationMonths,
+      requestedAt: new Date(),
+      startDate,
+      expiresAt,
+      validatedAt: status === "ACTIVE" ? new Date() : null,
+      validatedBy: status === "ACTIVE" ? adminId : null,
+      adminNotes: notes || "Attribution directe par l'administrateur",
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: targetUserId },
+    data: {
+      subscriptionStatus: status as any,
+      subscriptionPlan: status === "ACTIVE" ? planEnum : null,
+    },
+  });
+
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId: sub.id,
+      userId: targetUserId,
+      plan: planEnum,
+      status,
+      action: status === "ACTIVE" ? "VALIDATED" : "REQUESTED",
+      notes: notes || "Attribution directe par l'administrateur",
+      performedBy: adminId,
+      startDate,
+      expiresAt,
+      durationMonths,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/users");
+  return { success: true, subscription: sub };
+}
+
+/**
+ * Modifier un abonnement (Admin)
+ */
+export async function adminUpdateSubscription(
+  subscriptionId: number,
+  adminId: number,
+  data: {
+    plan?: "STANDARD" | "SMART" | "PREMIUM";
+    status?: string;
+    durationMonths?: number;
+    expiresAtStr?: string;
+    adminNotes?: string;
+  }
+) {
+  const admin = await prisma.user.findUnique({
+    where: { id: adminId },
+    select: { role: true },
+  });
+  if (admin?.role !== "SUPER_ADMIN") {
+    throw new Error("Action réservée aux administrateurs.");
+  }
+
+  const sub = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+  });
+  if (!sub) throw new Error("Abonnement introuvable.");
+
+  const updateData: any = {};
+  if (data.plan) updateData.plan = SubscriptionPlan[data.plan];
+  if (data.status) updateData.status = data.status;
+  if (data.durationMonths !== undefined) updateData.durationMonths = data.durationMonths;
+  if (data.expiresAtStr) updateData.expiresAt = new Date(data.expiresAtStr);
+  if (data.adminNotes !== undefined) updateData.adminNotes = data.adminNotes;
+
+  const updatedSub = await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: updateData,
+  });
+
+  // Mettre à jour le statut utilisateur si le statut ou plan change
+  if (data.status || data.plan) {
+    await prisma.user.update({
+      where: { id: sub.userId },
+      data: {
+        subscriptionStatus: (data.status || sub.status) as any,
+        subscriptionPlan: data.status === "ACTIVE" || (!data.status && sub.status === "ACTIVE")
+          ? (data.plan ? SubscriptionPlan[data.plan] : sub.plan)
+          : null,
+      },
+    });
+  }
+
+  // Historique
+  await prisma.subscriptionHistory.create({
+    data: {
+      subscriptionId,
+      userId: sub.userId,
+      plan: data.plan ? SubscriptionPlan[data.plan] : sub.plan,
+      status: data.status || sub.status,
+      action: "MODIFIED",
+      notes: data.adminNotes || "Abonnement modifié manuellement par l'administrateur",
+      performedBy: adminId,
+      expiresAt: updateData.expiresAt || sub.expiresAt,
+      durationMonths: data.durationMonths || sub.durationMonths,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/users");
+  return { success: true, subscription: updatedSub };
+}
+
+// ─────────────────────────────────────────────
+// THEME PREFERENCE ACTION
+// ─────────────────────────────────────────────
+
+export async function updateUserTheme(userId: number, theme: "light" | "dark" | "system") {
+  if (!["light", "dark", "system"].includes(theme)) {
+    throw new Error("Thème invalide.");
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { theme },
+  });
+  revalidatePath("/dashboard");
+  return { success: true, theme };
+}
+

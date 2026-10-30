@@ -7,7 +7,11 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function getPrismaClient(): PrismaClient {
-  if (globalForPrisma.prisma) {
+  if (
+    globalForPrisma.prisma &&
+    "subscriptionPlanConfig" in globalForPrisma.prisma &&
+    "productCategory" in globalForPrisma.prisma
+  ) {
     return globalForPrisma.prisma;
   }
 
@@ -27,4 +31,13 @@ function getPrismaClient(): PrismaClient {
   return client;
 }
 
-export const prisma = getPrismaClient();
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getPrismaClient();
+    const val = (client as any)[prop];
+    if (typeof val === "function") {
+      return val.bind(client);
+    }
+    return val;
+  },
+});

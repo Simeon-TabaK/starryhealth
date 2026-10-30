@@ -69,6 +69,19 @@ export function ThemeProvider({
       } catch {
         // ignore
       }
+
+      // Automatically persist to DB if authenticated
+      try {
+        fetch("/api/user/theme", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ theme: newTheme }),
+        }).catch(() => {
+          // Ignore offline / unauthenticated errors
+        });
+      } catch {
+        // ignore
+      }
     },
     [storageKey]
   );

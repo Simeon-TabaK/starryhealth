@@ -24,6 +24,8 @@ enum SubscriptionStatus {
   ACTIVE
   PENDING
   EXPIRED
+  REFUSED
+  SUSPENDED
 }
 
 enum SubscriptionPlan {
@@ -89,11 +91,15 @@ model User {
   // Custom copyright text
   copyright          String?
 
+  // UI Theme preference ("light", "dark", "system")
+  theme              String?            @default("system")
+
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
   // Relations
   subscriptions          Subscription[]
+  subscriptionHistory    SubscriptionHistory[]
   userProductPrices      UserProductPrice[]
   carouselItems          CarouselItem[]
   testimonials           Testimonial[]
@@ -105,6 +111,7 @@ model User {
   suggestions            Suggestion[]       // Suggestions received by this user from visitors
   adminSuggestions       AdminSuggestion[]  // Suggestions sent by this user to Starry Health admin
   usernameChangeRequests UsernameChangeRequest[]
+  productCategories      ProductCategory[]  // User's own product categories (PREMIUM)
   tenantConfig           TenantConfig?
   customDomain           CustomDomain?
 }
@@ -114,8 +121,8 @@ model User {
 // ─────────────────────────────────────────────
 
 model TenantConfig {
-  id               Int     @id @default(autoincrement())
-  userId           Int     @unique
+  id               Int       @id @default(autoincrement())
+  userId           Int       @unique
   orgName          String?
   orgDescription   String?
   orgLogo          String?
@@ -128,9 +135,39 @@ model TenantConfig {
   footerColor      String?
   dashboardBgColor String?
   buttonColor      String?
-  fontFamily       String? // e.g. "Inter", "Outfit", "Roboto"
+  fontFamily       String?   // e.g. "Inter", "Outfit", "Roboto"
+
+  // Tenant lifecycle
+  status          String    @default("ACTIVE") // PENDING, ACTIVE, SUSPENDED, REJECTED
+  validatedAt     DateTime?
+  validatedBy     Int?
+  rejectionReason String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION PLAN CONFIG (Dynamic admin-managed plans)
+// ─────────────────────────────────────────────
+
+model SubscriptionPlanConfig {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique // "STANDARD", "SMART", "PREMIUM", or custom
+  displayName     String
+  description     String?
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  monthlyPrice    Float    @default(0)
+  quarterlyPrice  Float?
+  semiAnnualPrice Float?
+  annualPrice     Float?
+  features        Json     @default("[]") // Array of feature strings
+  limits          Json     @default("{}") // { maxProducts: 5, hasGallery: false, ... }
+  badge           String?  // "Populaire", "Recommandé"
+  color           String?  // "#0ea5e9"
+  icon            String?  // "Shield", "Zap", "Crown"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 // ─────────────────────────────────────────────
@@ -138,15 +175,44 @@ model TenantConfig {
 // ─────────────────────────────────────────────
 
 model Subscription {
-  id        Int              @id @default(autoincrement())
-  userId    Int
-  plan      SubscriptionPlan @default(STANDARD)
-  status    String           @default("ACTIVE") // ACTIVE, CANCELLED, EXPIRED, PENDING
-  startDate DateTime?        @default(now())
-  expiresAt DateTime?
-  createdAt DateTime         @default(now())
+  id             Int              @id @default(autoincrement())
+  userId         Int
+  plan           SubscriptionPlan @default(STANDARD)
+  status         String           @default("PENDING") // PENDING, ACTIVE, EXPIRED, REFUSED, SUSPENDED
+  durationMonths Int?             @default(1)
+  requestedAt    DateTime?        @default(now())
+  startDate      DateTime?
+  expiresAt      DateTime?
+  validatedAt    DateTime?
+  validatedBy    Int?
+  adminNotes     String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  history        SubscriptionHistory[]
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION HISTORY (Audit & timeline)
+// ─────────────────────────────────────────────
+
+model SubscriptionHistory {
+  id             Int              @id @default(autoincrement())
+  subscriptionId Int?
+  userId         Int
+  plan           SubscriptionPlan
+  status         String
+  action         String           // "REQUESTED", "VALIDATED", "REFUSED", "ACTIVATED", "SUSPENDED", "EXTENDED", "MODIFIED", "EXPIRED"
+  notes          String?
+  performedBy    Int?             // User ID of admin who performed action (null for self-request)
+  startDate      DateTime?
+  expiresAt      DateTime?
+  durationMonths Int?
+  createdAt      DateTime         @default(now())
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription   Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 }
 
 // ─────────────────────────────────────────────
@@ -164,23 +230,61 @@ model SubscriptionPlanPricing {
 }
 
 // ─────────────────────────────────────────────
+// PRODUCT CATEGORY (PREMIUM — parent/child hierarchy)
+// ─────────────────────────────────────────────
+
+model ProductCategory {
+  id          Int               @id @default(autoincrement())
+  name        String
+  slug        String
+  description String?
+  parentId    Int?
+  sortOrder   Int               @default(0)
+  userId      Int?              // null = global admin category
+  createdAt   DateTime          @default(now())
+
+  parent      ProductCategory?  @relation("CategoryChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children    ProductCategory[] @relation("CategoryChildren")
+  user        User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products    Product[]
+
+  @@unique([slug, userId])
+}
+
+// ─────────────────────────────────────────────
 // PRODUCT
 // ─────────────────────────────────────────────
 
 model Product {
-  id            Int      @id @default(autoincrement())
-  userId        Int?     // null = global product (admin), set = user's own product
-  name          String
-  description   String
-  defaultPrice  Float
-  originalPrice Float?   // Original price before discount (if set, shows strikethrough + %)
-  images        String   // Comma-separated URLs or JSON string array
-  category      String   @default("Santé & Bien-être")
-  isVisible     Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               Int      @id @default(autoincrement())
+  userId           Int?     // null = global product (admin), set = user's own product
+  name             String
+  description      String
+  shortDescription String?
+  defaultPrice     Float
+  originalPrice    Float?   // Original price before discount (if set, shows strikethrough + %)
+  images           String   // Comma-separated URLs or JSON string array
+  category         String   @default("Santé & Bien-être")
+  categoryId       Int?     // FK to ProductCategory (PREMIUM)
+  isVisible        Boolean  @default(true)
+
+  // Advanced fields (PREMIUM)
+  ingredients       String?  @db.Text
+  benefits          String?  @db.Text
+  usage             String?  @db.Text
+  contraindications String?  @db.Text
+  certifications    String[] @default([])
+  origin            String?
+  packaging         String?
+  metaTitle         String?
+  metaDescription   String?
+  seoSlug           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user         User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productCat   ProductCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   userPrices   UserProductPrice[]
   testimonials Testimonial[]
 }
