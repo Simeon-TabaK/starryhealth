@@ -547,14 +547,21 @@ export function DashboardClient({
           items: [
             {
               id: "users",
-              label: "Utilisateurs & Abonnements",
+              label: "Comptes Utilisateurs",
               icon: Users,
               badge: totalSubscribers || null,
               locked: false,
             },
             {
+              id: "admin-subscriptions",
+              label: "Abonnements & Demandes",
+              icon: CreditCard,
+              badge: pendingSubscribers || null,
+              locked: false,
+            },
+            {
               id: "admin-tenants",
-              label: "Gestion Tenants",
+              label: "Gestion des Tenants",
               icon: Building,
               badge: null,
               locked: false,
@@ -562,7 +569,7 @@ export function DashboardClient({
             {
               id: "admin-plans",
               label: "Gestion des Plans",
-              icon: CreditCard,
+              icon: Sparkles,
               badge: planConfigs.length || null,
               locked: false,
             },
@@ -575,7 +582,7 @@ export function DashboardClient({
           items: [
             {
               id: "users",
-              label: "Forfaits & Abonnements",
+              label: "Mon Abonnement",
               icon: CreditCard,
               badge: null,
               locked: false,
@@ -1066,248 +1073,73 @@ export function DashboardClient({
           </div>
         )}
 
-        {/* ─────────────────────────────────────────────
-            TAB 2: UTILISATEURS & GESTION ABONNEMENTS
+                {/* ─────────────────────────────────────────────
+            TAB: UTILISATEURS (ADMIN) / MON ABONNEMENT (USER)
             ───────────────────────────────────────────── */}
         {activeTab === "users" && (
           <div className="space-y-6">
             {isSuperAdmin ? (
-              <>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Gestion des Abonnés & Activation Manuelle
-                    </h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Visualisez tous les comptes et activez manuellement les abonnements avec choix des dates et forfaits.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Users Table */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-800">
-                        <tr>
-                          <th className="p-4">Utilisateur / Nom</th>
-                          <th className="p-4">Email & Slug</th>
-                          <th className="p-4">Plan Actuel</th>
-                          <th className="p-4">Statut</th>
-                          <th className="p-4">Période d'abonnement</th>
-                          <th className="p-4 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {allUsers.map((u) => {
-                          const sub = u.subscriptions?.[0];
-                          return (
-                            <tr key={u.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                              <td className="p-4 font-bold text-slate-900 dark:text-white">
-                                {u.name || u.username}
-                                {u.role === "SUPER_ADMIN" && (
-                                  <span className="ml-2 text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">Admin</span>
-                                )}
-                              </td>
-                              <td className="p-4">
-                                <div>{u.email}</div>
-                                <a
-                                  href={`/?tenant=${u.slug}`}
-                                  target="_blank"
-                                  className="text-[11px] text-emerald-600 hover:underline font-mono"
-                                >
-                                  {u.slug}.sboxx.site
-                                </a>
-                              </td>
-                              <td className="p-4">
-                                <span className="font-semibold uppercase text-[11px]">
-                                  {u.subscriptionPlan || "Standard"}
-                                </span>
-                              </td>
-                              <td className="p-4">
-                                <span
-                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${u.subscriptionStatus === "ACTIVE"
-                                    ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300"
-                                    : u.subscriptionStatus === "PENDING"
-                                      ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300"
-                                      : "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300"
-                                    }`}
-                                >
-                                  {u.subscriptionStatus}
-                                </span>
-                              </td>
-                              <td className="p-4 text-slate-500 text-[11px]">
-                                {sub?.expiresAt ? (
-                                  <>
-                                    <span>Du: {sub.startDate ? new Date(sub.startDate).toLocaleDateString("fr-FR") : "N/A"}</span>
-                                    <br />
-                                    <span>Au: {new Date(sub.expiresAt).toLocaleDateString("fr-FR")}</span>
-                                  </>
-                                ) : (
-                                  <span className="italic text-slate-400">Aucun abonnement actif</span>
-                                )}
-                              </td>
-                              <td className="p-4 text-right">
-                                <button
-                                  onClick={() => handleOpenSubModal(u)}
-                                  className="px-3 py-1.5 rounded-lg font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-transform hover:scale-105"
-                                >
-                                  Activer / Modifier
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Modal Manual Activation */}
-                {selectedUserForSub && (
-                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 max-w-md w-full rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                        <h3 className="font-bold text-base">
-                          Valider l'abonnement : {selectedUserForSub.name || selectedUserForSub.email}
-                        </h3>
-                        <button onClick={() => setSelectedUserForSub(null)} className="text-slate-400 hover:text-slate-600">
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-
-                      <form onSubmit={handleSaveSubscription} className="space-y-4 pt-4">
-                        <div>
-                          <label className="text-xs font-semibold block mb-1">Choix du Plan</label>
-                          <select
-                            value={subForm.plan}
-                            onChange={(e) => setSubForm({ ...subForm, plan: e.target.value as any })}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800"
-                          >
-                            <option value="STANDARD">STANDARD (5 produits max)</option>
-                            <option value="SMART">SMART (10 produits max + services)</option>
-                            <option value="PREMIUM">PREMIUM (Produits illimités + FAQ + Galerie + Domaine)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-semibold block mb-1">Statut de l'abonnement</label>
-                          <select
-                            value={subForm.status}
-                            onChange={(e) => setSubForm({ ...subForm, status: e.target.value as any })}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800"
-                          >
-                            <option value="ACTIVE">ACTIVE (Abonnement valide)</option>
-                            <option value="PENDING">PENDING (En attente de paiement)</option>
-                            <option value="EXPIRED">EXPIRED (Expiré)</option>
-                            <option value="FREE">FREE (Désactivé / Gratuit)</option>
-                          </select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-xs font-semibold block mb-1">Date de début</label>
-                            <input
-                              type="date"
-                              value={subForm.startDate}
-                              onChange={(e) => setSubForm({ ...subForm, startDate: e.target.value })}
-                              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs font-semibold block mb-1">Date de fin / expiration</label>
-                            <input
-                              type="date"
-                              value={subForm.expiresAt}
-                              onChange={(e) => setSubForm({ ...subForm, expiresAt: e.target.value })}
-                              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex justify-end gap-2 pt-2">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedUserForSub(null)}
-                            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500"
-                          >
-                            Annuler
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={saving}
-                            className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md"
-                          >
-                            Valider l'abonnement
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                )}
-              </>
+              <AdminUserManagement
+                adminId={user.id}
+                users={allUsers}
+                onNotify={showToast}
+              />
             ) : (
-              /* Subscriber Plans View */
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Nos Forfaits d'Abonnement</h2>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Choisissez le forfait adapté à votre activité pour étendre vos quotas de produits et fonctionnalités exclusives.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* STANDARD */}
-                  <div className={`p-6 rounded-3xl border bg-white dark:bg-slate-900 shadow-sm ${plan === "STANDARD" ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-200 dark:border-slate-800"}`}>
-                    <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">STANDARD</h3>
-                    <div className="my-3">
-                      <span className="text-3xl font-extrabold">$2.99</span>
-                      <span className="text-xs text-slate-500"> / mois</span>
-                    </div>
-                    <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Jusqu'à 5 produits</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Personnalisation Organisation</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Partenaires & Témoignages</li>
-                    </ul>
-                  </div>
-
-                  {/* SMART */}
-                  <div className={`p-6 rounded-3xl border bg-white dark:bg-slate-900 shadow-md ${plan === "SMART" ? "border-sky-500 ring-2 ring-sky-500/20" : "border-slate-200 dark:border-slate-800"}`}>
-                    <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">SMART</h3>
-                    <div className="my-3">
-                      <span className="text-3xl font-extrabold text-sky-600">$4.19</span>
-                      <span className="text-xs text-slate-500"> / mois</span>
-                    </div>
-                    <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                      <li className="flex items-center gap-2 font-bold"><Check className="w-4 h-4 text-sky-500 shrink-0" /> Jusqu'à 10 produits</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500 shrink-0" /> Offres & Services avec liens</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500 shrink-0" /> Couleurs du thème personnalisables</li>
-                    </ul>
-                  </div>
-
-                  {/* PREMIUM */}
-                  <div className={`p-6 rounded-3xl border bg-white dark:bg-slate-900 shadow-xl ${plan === "PREMIUM" ? "border-amber-500 ring-2 ring-amber-500/20" : "border-slate-200 dark:border-slate-800"}`}>
-                    <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">PREMIUM</h3>
-                    <div className="my-3">
-                      <span className="text-3xl font-extrabold text-amber-600">$5.99</span>
-                      <span className="text-xs text-slate-500"> / mois</span>
-                    </div>
-                    <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                      <li className="flex items-center gap-2 font-bold text-emerald-600"><Check className="w-4 h-4 shrink-0" /> Produits ILLIMITÉS</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500 shrink-0" /> Section FAQ dynamique</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500 shrink-0" /> Galerie "Notre univers en images"</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500 shrink-0" /> Domaine personnalisé lié</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+              <SubscriptionManagement
+                currentUser={user}
+                isSuperAdmin={false}
+                userSubscriptions={userSubscriptions}
+                userSubscriptionHistory={allSubscriptionHistory.filter((h: any) => h.userId === user.id)}
+                planPricings={planPricings}
+              />
             )}
           </div>
         )}
 
-        
+        {/* ─────────────────────────────────────────────
+            TAB: GESTION DES ABONNEMENTS (ADMIN)
+            ───────────────────────────────────────────── */}
+        {activeTab === "admin-subscriptions" && isSuperAdmin && (
+          <div className="space-y-6">
+            <SubscriptionManagement
+              currentUser={user}
+              isSuperAdmin={true}
+              userSubscriptions={userSubscriptions}
+              userSubscriptionHistory={allSubscriptionHistory.filter((h: any) => h.userId === user.id)}
+              allSubscriptions={allUsers.flatMap((u: any) => u.subscriptions || [])}
+              allSubscriptionHistory={allSubscriptionHistory}
+              allUsers={allUsers}
+              planPricings={planPricings}
+            />
+          </div>
+        )}
+
+        {/* ─────────────────────────────────────────────
+            TAB: GESTION DES TENANTS (ADMIN)
+            ───────────────────────────────────────────── */}
+        {activeTab === "admin-tenants" && isSuperAdmin && (
+          <div className="space-y-6">
+            <AdminTenantManagement
+              adminId={user.id}
+              users={allUsers}
+              onNotify={showToast}
+            />
+          </div>
+        )}
+
+        {/* ─────────────────────────────────────────────
+            TAB: GESTION DES PLANS (ADMIN)
+            ───────────────────────────────────────────── */}
+        {activeTab === "admin-plans" && isSuperAdmin && (
+          <div className="space-y-6">
+            <AdminPlanManagement
+              adminId={user.id}
+              plans={planConfigs}
+              onNotify={showToast}
+            />
+          </div>
+        )}
+
         {/* ─────────────────────────────────────────────
             TAB: CATEGORIES (PREMIUM)
             ───────────────────────────────────────────── */}
