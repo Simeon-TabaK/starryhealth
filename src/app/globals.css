@@ -135,18 +135,16 @@
 
 /* Gradients Starry */
 .starry-gradient-text {
-  background: linear-gradient(135deg, #142986 0%, #d2b102 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--tenant-primary);
+  font-weight: 700;
 }
 
 .starry-gradient-bg {
-  background: linear-gradient(135deg, #142986 0%, #0e1d5e 100%);
+  background-color: var(--tenant-primary);
 }
 
 .starry-gradient-gold {
-  background: linear-gradient(135deg, #d2b102 0%, #8c6b0c 100%);
+  background-color: var(--tenant-accent);
 }
 
 /* ─── Scrollbar Starry ───────────────────────────────────────── */

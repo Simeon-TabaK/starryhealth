@@ -39,6 +39,12 @@ enum BillingPeriod {
   ANNUAL      // 1 year
 }
 
+enum UsernameChangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ─────────────────────────────────────────────
 // USER
 // ─────────────────────────────────────────────
@@ -80,19 +86,20 @@ model User {
   updatedAt          DateTime           @updatedAt
 
   // Relations
-  subscriptions      Subscription[]
-  userProductPrices  UserProductPrice[]
-  carouselItems      CarouselItem[]
-  testimonials       Testimonial[]
-  products           Product[]          // User's own products
-  partners           Partner[]          // User's own partners
-  services           Service[]
-  faqs               FAQ[]
-  galleryImages      GalleryImage[]
-  suggestions        Suggestion[]       // Suggestions received by this user from visitors
-  adminSuggestions   AdminSuggestion[]  // Suggestions sent by this user to Starry Health admin
-  tenantConfig       TenantConfig?
-  customDomain       CustomDomain?
+  subscriptions          Subscription[]
+  userProductPrices      UserProductPrice[]
+  carouselItems          CarouselItem[]
+  testimonials           Testimonial[]
+  products               Product[]          // User's own products
+  partners               Partner[]          // User's own partners
+  services               Service[]
+  faqs                   FAQ[]
+  galleryImages          GalleryImage[]
+  suggestions            Suggestion[]       // Suggestions received by this user from visitors
+  adminSuggestions       AdminSuggestion[]  // Suggestions sent by this user to Starry Health admin
+  usernameChangeRequests UsernameChangeRequest[]
+  tenantConfig           TenantConfig?
+  customDomain           CustomDomain?
 }
 
 // ─────────────────────────────────────────────
@@ -311,6 +318,23 @@ model CustomDomain {
   domain     String    @unique // e.g. "mysite.com"
   verifiedAt DateTime?
   createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// USERNAME CHANGE REQUEST (Tenant change workflow)
+// ─────────────────────────────────────────────
+
+model UsernameChangeRequest {
+  id          Int                  @id @default(autoincrement())
+  userId      Int
+  oldUsername String
+  newUsername String
+  status      UsernameChangeStatus @default(PENDING)
+  adminNote   String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

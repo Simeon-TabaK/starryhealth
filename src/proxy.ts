@@ -22,6 +22,18 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // 3b. Protection des routes privées /dashboard
+  if (pathname.startsWith("/dashboard")) {
+    const sessionToken =
+      request.cookies.get("next-auth.session-token")?.value ||
+      request.cookies.get("__Secure-next-auth.session-token")?.value;
+    if (!sessionToken) {
+      const signInUrl = new URL("/auth/signin", request.url);
+      signInUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+  }
+
   // 4. Liste des domaines racine configurables (via env ou defaults sboxx.site, starryhealth.com, localhost)
   const envDomains = [
     process.env.ROOT_DOMAIN,

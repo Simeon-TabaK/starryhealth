@@ -47,6 +47,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role,
           slug: user.slug,
+          username: user.username || user.slug,
           subscriptionStatus: user.subscriptionStatus,
           subscriptionPlan: user.subscriptionPlan,
           primaryColor: user.primaryColor,
@@ -74,7 +75,10 @@ export const authOptions: NextAuthOptions = {
 
             let uniqueSlug = baseSlug || "user";
             let count = 1;
-            while (await prisma.user.findUnique({ where: { slug: uniqueSlug } })) {
+            while (
+              (await prisma.user.findUnique({ where: { slug: uniqueSlug } })) ||
+              (await prisma.user.findUnique({ where: { username: uniqueSlug } }))
+            ) {
               uniqueSlug = `${baseSlug}_${count++}`;
             }
 
@@ -84,6 +88,7 @@ export const authOptions: NextAuthOptions = {
                 name: user.name || user.email.split("@")[0],
                 googleId: account.providerAccountId,
                 slug: uniqueSlug,
+                username: uniqueSlug,
                 avatar: user.image,
                 role: "USER",
                 subscriptionStatus: "ACTIVE",
@@ -92,8 +97,35 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
+            // Automatically associate the 5 default products
+            const defaultProducts = await prisma.product.findMany({
+              where: { userId: null, isVisible: true },
+              orderBy: { createdAt: "asc" },
+              take: 5,
+            });
+
+            if (defaultProducts.length > 0) {
+              await Promise.all(
+                defaultProducts.map((p) =>
+                  prisma.product.create({
+                    data: {
+                      userId: created.id,
+                      name: p.name,
+                      description: p.description,
+                      defaultPrice: p.defaultPrice,
+                      originalPrice: p.originalPrice,
+                      images: p.images,
+                      category: p.category,
+                      isVisible: true,
+                    },
+                  })
+                )
+              );
+            }
+
             user.id = created.id.toString();
             (user as any).slug = created.slug;
+            (user as any).username = created.username;
             (user as any).role = created.role;
             (user as any).subscriptionStatus = created.subscriptionStatus;
             (user as any).subscriptionPlan = created.subscriptionPlan;
@@ -101,6 +133,7 @@ export const authOptions: NextAuthOptions = {
           } else {
             user.id = existing.id.toString();
             (user as any).slug = existing.slug;
+            (user as any).username = existing.username || existing.slug;
             (user as any).role = existing.role;
             (user as any).subscriptionStatus = existing.subscriptionStatus;
             (user as any).subscriptionPlan = existing.subscriptionPlan;
@@ -118,6 +151,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = (user as any).role;
         token.slug = (user as any).slug;
+        token.username = (user as any).username;
         token.subscriptionStatus = (user as any).subscriptionStatus;
         token.subscriptionPlan = (user as any).subscriptionPlan;
         token.primaryColor = (user as any).primaryColor;
@@ -132,6 +166,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
         (session.user as any).slug = token.slug;
+        (session.user as any).username = token.username;
         (session.user as any).subscriptionStatus = token.subscriptionStatus;
         (session.user as any).subscriptionPlan = token.subscriptionPlan;
         (session.user as any).primaryColor = token.primaryColor;
@@ -142,5 +177,5 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
   },
-  secret: process.env.NEXTAUTH_SECRET || "starryhealth_secret_key_123456789",
+  secret: process.env.NEXTAUTH_SECRET,
 };

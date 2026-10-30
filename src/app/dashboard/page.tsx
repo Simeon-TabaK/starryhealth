@@ -56,6 +56,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     adminSuggestions,
     planPricings,
     allUsers,
+    tenantChangeRequests,
   ] = await Promise.all([
     prisma.subscription.findFirst({
       where: { userId: currentUser.id },
@@ -139,6 +140,25 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           orderBy: { id: "asc" },
         })
       : Promise.resolve([]),
+    isSuperAdmin
+      ? (prisma as any).usernameChangeRequest.findMany({
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                slug: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        })
+      : (prisma as any).usernameChangeRequest.findMany({
+          where: { userId: currentUser.id },
+          orderBy: { createdAt: "desc" },
+        }),
   ]);
 
   return (
@@ -160,6 +180,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       adminSuggestions={adminSuggestions}
       planPricings={planPricings}
       allUsers={allUsers}
+      tenantChangeRequests={tenantChangeRequests}
       initialTab={initialTab}
     />
   );
