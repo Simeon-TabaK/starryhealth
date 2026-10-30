@@ -31,6 +31,12 @@ export async function updateUserProfile(userId: number, formData: FormData) {
   const orgLogo = formData.get("orgLogo") as string;
   const secondaryColor = formData.get("secondaryColor") as string;
   const headerColor = formData.get("headerColor") as string;
+  const accentColor = formData.get("accentColor") as string;
+  const sidebarBgColor = formData.get("sidebarBgColor") as string;
+  const sidebarTextColor = formData.get("sidebarTextColor") as string;
+  const footerColor = formData.get("footerColor") as string;
+  const dashboardBgColor = formData.get("dashboardBgColor") as string;
+  const buttonColor = formData.get("buttonColor") as string;
   const fontFamily = formData.get("fontFamily") as string;
 
   const user = await prisma.user.findUnique({
@@ -75,6 +81,12 @@ export async function updateUserProfile(userId: number, formData: FormData) {
       orgLogo: orgLogo || undefined,
       secondaryColor: canCustomColors ? secondaryColor : undefined,
       headerColor: canCustomColors ? headerColor : undefined,
+      accentColor: canCustomColors ? accentColor : undefined,
+      sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
+      sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
+      footerColor: canCustomColors ? footerColor : undefined,
+      dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
+      buttonColor: canCustomColors ? buttonColor : undefined,
       fontFamily: canCustomFont ? fontFamily : undefined,
     },
     create: {
@@ -84,6 +96,12 @@ export async function updateUserProfile(userId: number, formData: FormData) {
       orgLogo,
       secondaryColor: canCustomColors ? secondaryColor : undefined,
       headerColor: canCustomColors ? headerColor : undefined,
+      accentColor: canCustomColors ? accentColor : undefined,
+      sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
+      sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
+      footerColor: canCustomColors ? footerColor : undefined,
+      dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
+      buttonColor: canCustomColors ? buttonColor : undefined,
       fontFamily: canCustomFont ? fontFamily : undefined,
     },
   });
@@ -731,6 +749,23 @@ export async function adminRejectUsernameChange(requestId: number, adminNote?: s
     },
   });
 
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function updateAdminSuggestionStatus(
+  suggestionId: number,
+  status: "NEW" | "IN_PROGRESS" | "DONE" | "REJECTED",
+  adminReply?: string
+) {
+  await prisma.adminSuggestion.update({
+    where: { id: suggestionId },
+    data: {
+      status: status as any,
+      adminReply: adminReply || undefined,
+      isRead: true,
+    },
+  });
   revalidatePath("/dashboard");
   return { success: true };
 }

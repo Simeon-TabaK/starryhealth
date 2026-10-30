@@ -9,7 +9,7 @@ import { getCurrentTenant, getServicesForTenant } from "@/lib/tenant";
 import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://starryhealth.com"),
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://sboxx.site"),
   title: "Starry Health | Produits de Santé et Bien-être",
   description:
     "Leader global dans la promotion de la santé et le bien-être de l'humanité par l'utilisation des produits lisses, testés et approuvés scientifiquement.",
@@ -53,9 +53,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const tenant = await getCurrentTenant();
+  const config = tenant?.config as any;
   const primaryColor =
-    tenant?.config?.headerColor || tenant?.user?.primaryColor || "#0f766e";
-  const fontFamily = tenant?.config?.fontFamily;
+    tenant?.user?.primaryColor || config?.headerColor || "#0f766e";
+  const secondaryColor = config?.secondaryColor || "#134e4a";
+  const accentColor = config?.accentColor || "#10b981";
+  const headerColor = config?.headerColor || "#ffffff";
+  const footerColor = config?.footerColor || "#0f172a";
+  const buttonColor = config?.buttonColor || primaryColor;
+  const fontFamily = config?.fontFamily;
   const services = await getServicesForTenant(tenant?.user?.id);
 
   return (
@@ -64,6 +70,11 @@ export default async function RootLayout({
         <style>{`
           :root {
             --tenant-primary: ${primaryColor};
+            --tenant-secondary: ${secondaryColor};
+            --tenant-accent: ${accentColor};
+            --tenant-header: ${headerColor};
+            --tenant-footer: ${footerColor};
+            --tenant-button: ${buttonColor};
             ${fontFamily ? `--font-sans: '${fontFamily}', sans-serif;` : ""}
           }
           ${fontFamily ? `body { font-family: '${fontFamily}', sans-serif !important; }` : ""}

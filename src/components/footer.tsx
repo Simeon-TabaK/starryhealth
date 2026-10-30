@@ -27,9 +27,9 @@ export function Footer({ tenant, services = [] }: FooterProps) {
   const primaryColor = tenant?.user?.primaryColor || "#0f766e";
 
   const phone = sanitizePhone(tenant?.user?.contactPhone);
-  const email = tenant?.user?.contactEmail || "contact@starryhealth.com";
+  const email = tenant?.user?.contactEmail || "contact@sboxx.site";
   const address = tenant?.user?.contactAddress || "Kinshasa, RDC & International";
-  const website = tenant?.user?.contactWebsite || "www.starryhealth.com";
+  const website = tenant?.user?.contactWebsite || "www.sboxx.site";
   const copyright = tenant?.user?.copyright || `© ${new Date().getFullYear()} Starry Health. Tous droits réservés.`;
   const logoSrc = tenant?.config?.orgLogo || "/assets/logo.png";
 

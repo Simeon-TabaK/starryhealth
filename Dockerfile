@@ -20,6 +20,7 @@ COPY . .
 
 # Génération du client Prisma (output: src/generated/prisma)
 RUN npx prisma generate
+RUN node patch-lucide-context.js
 
 # Build Next.js en mode production
 ENV NODE_ENV=production

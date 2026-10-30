@@ -43,6 +43,69 @@ function AuthComponent() {
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
+  // Username availability check states
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
+  const [usernameDebounceTimer, setUsernameDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+
+  const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{3,28}[a-z0-9]$/;
+
+  const validateUsernameFormat = (value: string): string | null => {
+    if (!value) return null;
+    if (value.length < 5) return "Minimum 5 caractères requis.";
+    if (value.length > 30) return "Maximum 30 caractères autorisés.";
+    if (/[A-Z]/.test(value)) return "Uniquement des lettres minuscules, chiffres et tirets.";
+    if (/[^a-z0-9-]/.test(value)) return "Caractères spéciaux et espaces non autorisés.";
+    if (value.startsWith("-") || value.endsWith("-")) return "Ne peut pas commencer ou se terminer par un tiret.";
+    if (!SLUG_REGEX.test(value)) return "Format invalide pour un sous-domaine.";
+    return null;
+  };
+
+  const handleUsernameChange = (raw: string) => {
+    // Auto-clean: lowercase, replace spaces with hyphens, remove invalid chars
+    const cleaned = raw.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    setRegUsername(cleaned);
+    setUsernameSuggestions([]);
+
+    if (!cleaned) {
+      setUsernameStatus("idle");
+      setUsernameError(null);
+      return;
+    }
+
+    const formatErr = validateUsernameFormat(cleaned);
+    if (formatErr) {
+      setUsernameStatus("invalid");
+      setUsernameError(formatErr);
+      return;
+    }
+
+    // Debounce API check
+    if (usernameDebounceTimer) clearTimeout(usernameDebounceTimer);
+    setUsernameStatus("checking");
+    setUsernameError(null);
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/check-username?username=${encodeURIComponent(cleaned)}`);
+        const data = await res.json();
+        if (data.available) {
+          setUsernameStatus("available");
+          setUsernameError(null);
+        } else {
+          setUsernameStatus("taken");
+          setUsernameError(data.error || "Ce nom d'utilisateur est déjà pris.");
+          setUsernameSuggestions(data.suggestions || []);
+        }
+      } catch {
+        setUsernameStatus("idle");
+        setUsernameError(null);
+      }
+    }, 500);
+    setUsernameDebounceTimer(timer);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -91,6 +154,24 @@ function AuthComponent() {
 
     if (regPassword !== regConfirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+
+    if (!regUsername || regUsername.length < 5) {
+      setError("L'identifiant tenant (username) est obligatoire et doit comporter au moins 5 caractères.");
+      return;
+    }
+    const fmtErr = validateUsernameFormat(regUsername);
+    if (fmtErr) {
+      setError(fmtErr);
+      return;
+    }
+    if (usernameStatus === "taken" || usernameStatus === "invalid") {
+      setError("Veuillez choisir un identifiant tenant valide et disponible.");
+      return;
+    }
+    if (usernameStatus === "checking") {
+      setError("Vérification de l'identifiant en cours. Veuillez patienter.");
       return;
     }
 
@@ -149,7 +230,7 @@ function AuthComponent() {
   return (
     <div className="max-w-md mx-auto my-12 px-4">
       <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
-        
+
         {/* Header / Brand */}
         <div className="text-center space-y-3">
           <Link href="/" className="inline-block focus:outline-none">
@@ -175,11 +256,10 @@ function AuthComponent() {
               setMode("login");
               setError(null);
             }}
-            className={`py-2 text-xs font-bold rounded-xl transition-all ${
-              mode === "login"
-                ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-            }`}
+            className={`py-2 text-xs font-bold rounded-xl transition-all ${mode === "login"
+              ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
           >
             Se connecter
           </button>
@@ -189,11 +269,10 @@ function AuthComponent() {
               setMode("register");
               setError(null);
             }}
-            className={`py-2 text-xs font-bold rounded-xl transition-all ${
-              mode === "register"
-                ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-            }`}
+            className={`py-2 text-xs font-bold rounded-xl transition-all ${mode === "register"
+              ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
           >
             S'inscrire
           </button>
@@ -280,7 +359,7 @@ function AuthComponent() {
                   type="text"
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
-                  placeholder="Dr. Jean Dupont"
+                  placeholder="Dr. Jean Pierre"
                   required
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
                 />
@@ -306,21 +385,65 @@ function AuthComponent() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Identifiant unique Tenant (Username)
+                Identifiant Tenant / Sous-domaine <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <AtSign className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type="text"
                   value={regUsername}
-                  onChange={(e) => setRegUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-                  placeholder="mon_cabinet_sante"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all"
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                  placeholder="clinique-goma"
+                  required
+                  className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 transition-all ${usernameStatus === "available"
+                    ? "border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/10"
+                    : usernameStatus === "taken" || usernameStatus === "invalid"
+                      ? "border-red-400 focus:border-red-400 focus:ring-red-400/10"
+                      : "border-slate-200 dark:border-slate-800 focus:border-emerald-500 focus:ring-emerald-500/10"
+                    }`}
                 />
+                <div className="absolute right-3.5 top-3.5">
+                  {usernameStatus === "checking" && (
+                    <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                  )}
+                  {usernameStatus === "available" && (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  )}
+                  {(usernameStatus === "taken" || usernameStatus === "invalid") && (
+                    <ShieldAlert className="w-4 h-4 text-red-500" />
+                  )}
+                </div>
               </div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                Servira d'adresse personnalisée pour votre vitrine publique.
-              </p>
+
+              {/* Status message */}
+              {usernameStatus === "available" && (
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Disponible ! Votre vitrine : <span className="font-mono font-bold">{regUsername}.sboxx.site</span>
+                </p>
+              )}
+              {(usernameStatus === "taken" || usernameStatus === "invalid") && usernameError && (
+                <p className="text-[11px] text-red-500 mt-1">{usernameError}</p>
+              )}
+              {usernameSuggestions.length > 0 && (
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  <span className="text-[10px] text-slate-500">Suggestions :</span>
+                  {usernameSuggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => handleUsernameChange(s)}
+                      className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {usernameStatus === "idle" && !usernameError && (
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                  Lettres minuscules, chiffres et tirets uniquement. Ex: clinique-goma, pharma24 (5-30 caractères)
+                </p>
+              )}
             </div>
 
             <div>
@@ -417,7 +540,7 @@ function AuthComponent() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          Google OAuth
+          Google
         </button>
 
         {/* Switch Link */}

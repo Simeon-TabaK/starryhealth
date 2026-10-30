@@ -36,6 +36,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     redirect("/auth/signin");
   }
 
+  // Si l'utilisateur connecté via Google n'a pas finalisé son username / tenant
+  if ((session.user as any)?.needsUsername || !currentUser.username) {
+    redirect("/auth/complete-profile");
+  }
+
   const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
 
   // Fetch all secondary dashboard data concurrently

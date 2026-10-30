@@ -113,29 +113,6 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
             {/* Cart button in header */}
             <NavbarCartButton primaryColor={primaryColor} />
 
-            {/* Connexion / Espace Partenaire */}
-            <Link
-              href="/auth/signin"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              <User className="w-3.5 h-3.5" />
-              Connexion
-            </Link>
-
-            {(() => {
-              const waNumber = sanitizeWhatsApp(tenant?.user?.whatsapp);
-              return (
-                <a
-                  href={formatWhatsAppUrl(waNumber)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 transition-colors"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  Contact
-                </a>
-              );
-            })()}
           </div>
 
           {/* Mobile Right Bar */}
@@ -181,14 +158,6 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/auth/signin"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-base font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
-            <User className="w-4 h-4" />
-            Espace Partenaire (Connexion / Inscription)
-          </Link>
           {(() => {
             const waNumber = sanitizeWhatsApp(tenant?.user?.whatsapp);
             return (

@@ -65,7 +65,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       name: "Starry Health Siège",
-      email: "admin@starryhealth.com",
+      email: "admin@sboxx.site",
       username: "admin",
       password: adminPasswordHash,
       slug: "admin",
@@ -75,9 +75,9 @@ async function main() {
       primaryColor: "#0f766e",
       bio: "Administration Centrale Starry Health & Starry Digital.",
       contactPhone: "+243 969 131 138",
-      contactEmail: "contact@starryhealth.com",
+      contactEmail: "contact@sboxx.site",
       contactAddress: "Gombe, Kinshasa, RDC",
-      contactWebsite: "www.starryhealth.com",
+      contactWebsite: "www.sboxx.site",
       whatsapp: "+243969131138",
       facebook: "https://facebook.com/starryhealth",
       instagram: "https://instagram.com/starryhealth",
@@ -99,7 +99,7 @@ async function main() {
   const userJean = await prisma.user.create({
     data: {
       name: "Jean Dupont",
-      email: "user@starryhealth.com",
+      email: "user@sboxx.site",
       username: "user",
       password: userPasswordHash,
       slug: "user",
@@ -109,9 +109,9 @@ async function main() {
       primaryColor: "#0284c7",
       bio: "Distributeur Certifié. Spécialiste en micronutrition et vitalité.",
       contactPhone: "+243 990 123 456",
-      contactEmail: "jean.dupont@starryhealth.com",
+      contactEmail: "jean.dupont@sboxx.site",
       contactAddress: "Boulevard du 30 Juin, Kinshasa",
-      contactWebsite: "jean.starryhealth.com",
+      contactWebsite: "jean.sboxx.site",
       whatsapp: "+243990123456",
       facebook: "https://facebook.com/jeandupont",
       instagram: "https://instagram.com/jeandupont_health",
@@ -140,7 +140,7 @@ async function main() {
   const userSarah = await prisma.user.create({
     data: {
       name: "Dr. Sarah Lukusa",
-      email: "sarah@starryhealth.com",
+      email: "sarah@sboxx.site",
       username: "sarah",
       password: userPasswordHash,
       slug: "sarah",
@@ -150,7 +150,7 @@ async function main() {
       primaryColor: "#7c3aed",
       bio: "Médecin nutritionniste & Ambassadrice Starry Health.",
       contactPhone: "+243 890 000 111",
-      contactEmail: "dr.sarah@starryhealth.com",
+      contactEmail: "dr.sarah@sboxx.site",
       contactAddress: "Avenue de la Paix, Kinshasa",
       contactWebsite: "sarahlukusa.com",
       whatsapp: "243890000111",

@@ -130,6 +130,8 @@ export const authOptions: NextAuthOptions = {
             (user as any).subscriptionStatus = created.subscriptionStatus;
             (user as any).subscriptionPlan = created.subscriptionPlan;
             (user as any).primaryColor = created.primaryColor;
+            // New user via Google → must choose their own username
+            (user as any).needsUsername = true;
           } else {
             user.id = existing.id.toString();
             (user as any).slug = existing.slug;
@@ -138,6 +140,8 @@ export const authOptions: NextAuthOptions = {
             (user as any).subscriptionStatus = existing.subscriptionStatus;
             (user as any).subscriptionPlan = existing.subscriptionPlan;
             (user as any).primaryColor = existing.primaryColor;
+            // Existing user: no need to re-complete profile
+            (user as any).needsUsername = false;
           }
         } catch (error) {
           console.error("Error during Google OAuth sign-in:", error);
@@ -155,8 +159,15 @@ export const authOptions: NextAuthOptions = {
         token.subscriptionStatus = (user as any).subscriptionStatus;
         token.subscriptionPlan = (user as any).subscriptionPlan;
         token.primaryColor = (user as any).primaryColor;
+        token.needsUsername = (user as any).needsUsername ?? false;
       }
       if (trigger === "update" && session) {
+        // Allow the client to clear needsUsername after profile completion
+        if (session.needsUsername === false) {
+          token.needsUsername = false;
+        }
+        if (session.slug) token.slug = session.slug;
+        if (session.username) token.username = session.username;
         token = { ...token, ...session };
       }
       return token;
@@ -170,6 +181,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).subscriptionStatus = token.subscriptionStatus;
         (session.user as any).subscriptionPlan = token.subscriptionPlan;
         (session.user as any).primaryColor = token.primaryColor;
+        (session.user as any).needsUsername = token.needsUsername ?? false;
       }
       return session;
     },

@@ -34,7 +34,7 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // 4. Liste des domaines racine configurables (via env ou defaults sboxx.site, starryhealth.com, localhost)
+  // 4. Liste des domaines racine configurables (via env ou defaults sboxx.site, sboxx.site, localhost)
   const envDomains = [
     process.env.ROOT_DOMAIN,
     process.env.NEXT_PUBLIC_MAIN_DOMAIN,

@@ -17,11 +17,11 @@ export default async function ContactsPage({ searchParams }: PageProps) {
 
   const phone = sanitizePhone(user?.contactPhone);
   const whatsapp = sanitizeWhatsApp(user?.whatsapp);
-  const email = isTenant ? user?.contactEmail || user?.email || "vendeur@starryhealth.com" : "contact@starryhealth.com";
+  const email = isTenant ? user?.contactEmail || user?.email || "vendeur@sboxx.site" : "contact@sboxx.site";
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-      
+
       {/* Header */}
       <ScrollReveal direction="down">
         <div className="text-center max-w-3xl mx-auto space-y-4">
@@ -43,7 +43,7 @@ export default async function ContactsPage({ searchParams }: PageProps) {
 
       <ScrollReveal direction="up">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Direct Contact Info Sidebar */}
           <div className="space-y-6">
             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
