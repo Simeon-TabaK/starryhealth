@@ -50,7 +50,7 @@ export function Footer({ tenant, services = [] }: FooterProps) {
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-1">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md overflow-hidden bg-transparent dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md overflow-hidden bg-transparent">
                 <img className="w-full h-full object-contain rounded-2xl" src={logoSrc} alt="Logo" width={56} height={56} />
               </div>
               <span className="text-xl font-bold text-slate-900 dark:text-white">

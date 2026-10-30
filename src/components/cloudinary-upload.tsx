@@ -72,7 +72,9 @@ export function CloudinaryUpload({
           process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dau4wzqrr";
 
         const formData = new FormData();
-        const filename = originalFilename || `img_${Date.now()}.jpg`;
+        const filename = originalFilename
+          ? originalFilename.replace(/\.[^/.]+$/, ".png")
+          : `img_${Date.now()}.png`;
         formData.append("file", fileOrBlob, filename);
 
         let targetCloudName = defaultCloudName;
@@ -250,7 +252,11 @@ export function CloudinaryUpload({
           <img
             src={preview}
             alt="Aperçu"
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className={`absolute inset-0 w-full h-full ${
+              cropAspect === "1:1" || folder.includes("logo") || folder.includes("favicon")
+                ? "object-contain p-3"
+                : "object-cover"
+            } group-hover:scale-105 transition-transform duration-300`}
           />
         )}
 

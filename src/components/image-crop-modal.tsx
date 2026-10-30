@@ -131,8 +131,9 @@ export function ImageCropModal({
     ctx.imageSmoothingQuality = "high";
 
     // Fill background for transparent pngs
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, exportWidth, exportHeight);
+    // Conserver la transparence originale sans bande blanche
+    ctx.clearRect(0, 0, exportWidth, exportHeight);
+
 
     // Coordinate transformations
     ctx.save();
@@ -165,8 +166,8 @@ export function ImageCropModal({
           onSkipCrop();
         }
       },
-      "image/jpeg",
-      0.92
+      "image/png"
+
     );
   };
 
