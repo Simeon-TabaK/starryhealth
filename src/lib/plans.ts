@@ -1,9 +1,12 @@
 export type SubscriptionPlanTier = "STANDARD" | "SMART" | "PREMIUM";
 
+/**
+ * Quota de produits par forfait.
+ * La limitation restrictive à 5 produits a été levée pour permettre aux utilisateurs
+ * d'ajouter leurs produits librement avec gestion par pagination.
+ */
 export function getProductLimit(plan: string | null | undefined): number {
-  if (plan === "PREMIUM") return Infinity;
-  if (plan === "SMART") return 10;
-  return 5; // STANDARD
+  return Infinity;
 }
 
 export function planHasFeature(

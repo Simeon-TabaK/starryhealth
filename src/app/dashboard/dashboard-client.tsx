@@ -39,8 +39,12 @@ import {
   Eye,
   EyeOff,
   Image as ImageIcon,
+  AlertTriangle,
+  User,
+  Building,
 } from "lucide-react";
 import Link from "next/link";
+import { ToastContainer, ToastItem, ToastType } from "@/components/toast";
 import { signOut } from "next-auth/react";
 import {
   updateUserProfile,
@@ -125,7 +129,24 @@ export function DashboardClient({
   );
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  
+  // Toast notifications system (top-right)
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const showToast = (message: string, type: ToastType = "success", description?: string) => {
+    const id = Date.now().toString() + Math.random().toString(36).substring(2, 6);
+    setToasts((prev) => [...prev, { id, type, message, description }]);
+  };
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+  // Fallback alias for showNotification
+  const showNotification = (text: string, type: "success" | "error" = "success") => {
+    showToast(text, type);
+  };
+
+  // Products pagination state
+  const [productPage, setProductPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 6;
 
   // Modals & form states
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -170,11 +191,6 @@ export function DashboardClient({
   const [suggestionReplies, setSuggestionReplies] = useState<Record<number, string>>({});
   const [suggestionStatuses, setSuggestionStatuses] = useState<Record<number, string>>({});
 
-  const showNotification = (text: string, type: "success" | "error" = "success") => {
-    setMsg({ text, type });
-    setTimeout(() => setMsg(null), 5000);
-  };
-
   // Quotas
   const productQuota = getProductLimit(plan);
   const ownProductsCount = products.filter((p) => p.userId === user.id).length;
@@ -206,9 +222,9 @@ export function DashboardClient({
     if (avatarUrl) formData.set("avatar", avatarUrl);
     try {
       await updateUserProfile(user.id, formData);
-      showNotification("Paramètres et organisation mis à jour !");
+      showToast("Profil et organisation enregistrés !", "success", "Vos informations personnelles et vitrine ont été mises à jour.");
     } catch (err: any) {
-      showNotification(err.message || "Erreur lors de la sauvegarde.", "error");
+      showToast("Erreur de sauvegarde", "error", err.message || "Impossible de sauvegarder votre profil.");
     } finally {
       setSaving(false);
     }
@@ -217,7 +233,7 @@ export function DashboardClient({
   const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!createProductImageUrl) {
-      showNotification("Veuillez ajouter une photo pour le produit.", "error");
+      showToast("Photo obligatoire", "error", "Veuillez sélectionner et uploader une photo pour le produit.");
       return;
     }
     setSaving(true);
@@ -225,12 +241,12 @@ export function DashboardClient({
     formData.set("images", createProductImageUrl);
     try {
       await createUserProduct(user.id, formData);
-      showNotification("Produit créé avec succès !");
+      showToast("Produit créé avec succès !", "success", "Votre nouveau produit est enregistré dans le catalogue.");
       setShowAddProduct(false);
       setCreateProductImageUrl("");
       (e.target as HTMLFormElement).reset();
     } catch (err: any) {
-      showNotification(err.message || "Erreur de création produit.", "error");
+      showToast("Erreur de création", "error", err.message || "Impossible de créer ce produit.");
     } finally {
       setSaving(false);
     }
@@ -706,23 +722,11 @@ export function DashboardClient({
       )}
 
       {/* ─────────────────────────────────────────────
-          MAIN CONTENT AREA
+          MAIN CONTENT AREA & TOAST CONTAINER
           ───────────────────────────────────────────── */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
-        {/* Notification Banner */}
-        {msg && (
-          <div
-            className={`mb-6 p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-sm transition-all ${msg.type === "success"
-              ? "bg-emerald-500 text-white"
-              : "bg-rose-500 text-white"
-              }`}
-          >
-            <span>{msg.text}</span>
-            <button onClick={() => setMsg(null)} className="text-white/80 hover:text-white">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
 
         {/* ─────────────────────────────────────────────
             TAB 1: VUE D'ENSEMBLE (SUPER ADMIN / USER)
@@ -840,6 +844,30 @@ export function DashboardClient({
             ) : (
               /* Subscriber Overview */
               <>
+                {/* Alerte si aucun abonnement actif */}
+                {!isSubscribed && (
+                  <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-500/40 text-amber-900 dark:text-amber-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+                    <div className="flex items-start sm:items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 shrink-0">
+                        <AlertTriangle className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Votre vitrine publique est actuellement désactivée</h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                          Votre vitrine <strong>{user.slug}.sboxx.site</strong> nécessite un abonnement actif pour être visible par vos clients et visiteurs.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("users")}
+                      className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow transition-all shrink-0 flex items-center justify-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4" /> Activer un abonnement
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
@@ -849,13 +877,26 @@ export function DashboardClient({
                       Bienvenue dans votre tableau de bord Starry Health.
                     </p>
                   </div>
-                  <Link
-                    href={`/?tenant=${user.slug}`}
-                    target="_blank"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-transform hover:scale-105"
-                  >
-                    <ExternalLink className="w-4 h-4" /> Accéder à ma vitrine publique
-                  </Link>
+                  {isSubscribed ? (
+                    <Link
+                      href={`/?tenant=${user.slug}`}
+                      target="_blank"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-transform hover:scale-105"
+                    >
+                      <ExternalLink className="w-4 h-4" /> Accéder à ma vitrine publique
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        showToast("Abonnement requis", "warning", "Activez un forfait d'abonnement pour publier et ouvrir votre vitrine.");
+                        setActiveTab("users");
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 transition-colors cursor-pointer"
+                    >
+                      <Lock className="w-4 h-4 text-amber-500" /> Vitrine désactivée (Abonnement requis)
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -868,9 +909,9 @@ export function DashboardClient({
                       </div>
                     </div>
                     <h3 className={`text-2xl font-extrabold ${plan === "PREMIUM" ? "text-amber-600" : plan === "SMART" ? "text-sky-600" : "text-emerald-600"}`}>
-                      {plan || "Standard"}
+                      {plan || "Aucun forfait"}
                     </h3>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{isSubscribed ? "✅ Abonnement Actif" : "⚠️ Gratuit / Expiré"}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{isSubscribed ? "✅ Abonnement Actif" : "⚠️ Sans abonnement actif"}</p>
                   </div>
 
                   {/* Card 2: Produits */}
@@ -884,7 +925,7 @@ export function DashboardClient({
                     <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">
                       {ownProductsCount} <span className="text-sm font-normal text-slate-400">/ {isFinite(productQuota) ? productQuota : "∞"}</span>
                     </h3>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Produits dans votre vitrine</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Produits enregistrés</p>
                   </div>
 
                   {/* Card 3: Témoignages */}
@@ -905,13 +946,26 @@ export function DashboardClient({
                       <p className="text-xs font-medium text-emerald-100 mb-1">Ma Vitrine Publique</p>
                       <p className="text-sm font-bold font-mono break-all">{user.slug}.sboxx.site</p>
                     </div>
-                    <Link
-                      href={`/?tenant=${user.slug}`}
-                      target="_blank"
-                      className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors w-fit"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Voir ma vitrine
-                    </Link>
+                    {isSubscribed ? (
+                      <Link
+                        href={`/?tenant=${user.slug}`}
+                        target="_blank"
+                        className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors w-fit"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> Voir ma vitrine
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          showToast("Abonnement inactif", "warning", "Activez un forfait pour publier votre vitrine.");
+                          setActiveTab("users");
+                        }}
+                        className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors w-fit"
+                      >
+                        <Lock className="w-3.5 h-3.5" /> Activer pour ouvrir
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -1303,9 +1357,20 @@ export function DashboardClient({
 
                     {/* Image Upload with Crop Section */}
                     <div>
-                      <label className="text-xs font-semibold block mb-1.5">
-                        Photo du produit <span className="text-slate-400 font-normal">(Upload direct Cloudinary & Rognage interactif)</span>
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-semibold block">
+                          Photo du produit <span className="text-rose-500">*</span>
+                        </label>
+                        {!createProductImageUrl ? (
+                          <span className="text-[11px] text-rose-500 font-medium bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md">
+                            Image requise
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Check className="w-3 h-3" /> Image prête
+                          </span>
+                        )}
+                      </div>
                       <CloudinaryUpload
                         folder="starryhealth/products"
                         cropAspect="4:3"
@@ -1314,13 +1379,22 @@ export function DashboardClient({
                         label="Sélectionner, rogner et uploader la photo"
                         primaryColor={user.primaryColor || "#0f766e"}
                       />
+                      {!createProductImageUrl && (
+                        <p className="text-[11px] text-rose-500 mt-1">
+                          Une photo principale est indispensable pour enregistrer ce produit.
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                       <button type="button" onClick={() => setShowAddProduct(false)} className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700">
                         Annuler
                       </button>
-                      <button type="submit" disabled={saving || !createProductImageUrl} className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50">
+                      <button
+                        type="submit"
+                        disabled={saving || !createProductImageUrl}
+                        className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow"
+                      >
                         Créer le produit
                       </button>
                     </div>
@@ -1412,7 +1486,9 @@ export function DashboardClient({
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((p) => {
+              {products
+                .slice((productPage - 1) * PRODUCTS_PER_PAGE, productPage * PRODUCTS_PER_PAGE)
+                .map((p) => {
                 const isOwn = p.userId === user.id;
                 const hasDiscount = p.originalPrice && p.originalPrice > p.defaultPrice;
                 const discountPct = hasDiscount ? Math.round(((p.originalPrice - p.defaultPrice) / p.originalPrice) * 100) : 0;
@@ -1515,6 +1591,36 @@ export function DashboardClient({
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {products.length > PRODUCTS_PER_PAGE && (
+              <div className="flex items-center justify-between bg-white dark:bg-slate-900 px-6 py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="text-xs text-slate-500">
+                  Affichage de {((productPage - 1) * PRODUCTS_PER_PAGE) + 1} à {Math.min(productPage * PRODUCTS_PER_PAGE, products.length)} sur {products.length} produits
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={productPage === 1}
+                    onClick={() => setProductPage((p) => Math.max(p - 1, 1))}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Précédent
+                  </button>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 px-2">
+                    {productPage} / {Math.ceil(products.length / PRODUCTS_PER_PAGE)}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={productPage >= Math.ceil(products.length / PRODUCTS_PER_PAGE)}
+                    onClick={() => setProductPage((p) => Math.min(p + 1, Math.ceil(products.length / PRODUCTS_PER_PAGE)))}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -2103,101 +2209,190 @@ export function DashboardClient({
             {/* Condition 2: Profil & Organisation */}
             {settingsSubTab === "profile" && (
               <form onSubmit={handleProfileSubmit} className="space-y-8">
-                {/* Organisation Details */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                    <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                      Personnalisation de l'Organisation & Vitrine
-                    </h2>
+                {/* 1. INFORMATIONS PERSONNELLES DU COMPTE */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                  <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                        1. Informations Personnelles du Gestionnaire
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        Votre photo de profil personnelle et vos coordonnées de compte utilisateur.
+                      </p>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {/* Avatar personnel */}
                     <div>
-                      <label className="text-xs font-semibold block mb-1">Nom de l'organisation / Boutique</label>
-                      <input
-                        type="text"
-                        name="orgName"
-                        defaultValue={user.tenantConfig?.orgName || ""}
-                        placeholder="Cabinet Santé, Espace Nutrition..."
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm mb-4"
-                      />
-
-                      <label className="text-xs font-semibold block mb-1">Photo de profil / Avatar (1:1 Carré)</label>
+                      <label className="text-xs font-semibold block mb-1">
+                        Photo de profil personnelle (Avatar)
+                      </label>
                       <CloudinaryUpload
                         folder="starryhealth/avatars"
                         cropAspect="1:1"
                         onUpload={(url) => setAvatarUrl(url)}
                         currentUrl={avatarUrl}
-                        label="Uploader photo de profil"
+                        label="Uploader ma photo de profil"
                         primaryColor={user.primaryColor || "#0f766e"}
                       />
                       <input type="hidden" name="avatar" value={avatarUrl} />
                     </div>
 
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Logo de l'organisation / Vitrine</label>
-                      <CloudinaryUpload
-                        folder="starryhealth/logos"
-                        onUpload={(url) => setOrgLogoUrl(url)}
-                        currentUrl={orgLogoUrl}
-                        label="Uploader et rogner le logo"
-                        primaryColor={user.primaryColor || "#0f766e"}
-                      />
-                      <input type="hidden" name="orgLogo" value={orgLogoUrl} />
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">Nom complet</label>
+                        <input
+                          type="text"
+                          name="name"
+                          defaultValue={user.name || ""}
+                          placeholder="Ex: Dr. Martin Dupont"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">Adresse Email de connexion</label>
+                        <input
+                          type="email"
+                          name="email"
+                          defaultValue={user.email || ""}
+                          placeholder="votre.email@exemple.com"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">Téléphone personnel</label>
+                        <input
+                          type="text"
+                          name="contactPhone"
+                          defaultValue={user.contactPhone || ""}
+                          placeholder="+243 990 000 000"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        />
+                      </div>
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="text-xs font-semibold block mb-1">Description</label>
+                      <label className="text-xs font-semibold block mb-1">Biographie / À propos de vous</label>
                       <textarea
-                        name="orgDescription"
+                        name="bio"
                         rows={2}
-                        defaultValue={user.tenantConfig?.orgDescription || ""}
-                        placeholder="Présentation de votre activité..."
+                        defaultValue={user.bio || ""}
+                        placeholder="Présentez brièvement votre parcours ou votre rôle..."
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Contacts & Copyright */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <h2 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3">
-                    Coordonnées & Copyright
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* 2. ORGANISATION COMMERCIALE & VITRINE (TENANT) */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                  <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 flex items-center justify-center">
+                      <Building className="w-4 h-4" />
+                    </div>
                     <div>
-                      <label className="text-xs font-semibold block mb-1">Téléphone</label>
+                      <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                        2. Organisation Commerciale & Vitrine Publique
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        Le logo officiel de votre boutique et les coordonnées affichées sur votre sous-domaine.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {/* Logo d'organisation */}
+                    <div>
+                      <label className="text-xs font-semibold block mb-1">
+                        Logo officiel de l'Organisation / Boutique
+                      </label>
+                      <CloudinaryUpload
+                        folder="starryhealth/logos"
+                        cropAspect="4:3"
+                        onUpload={(url) => setOrgLogoUrl(url)}
+                        currentUrl={orgLogoUrl}
+                        label="Uploader et rogner le logo de la boutique"
+                        primaryColor={user.primaryColor || "#0f766e"}
+                      />
+                      <input type="hidden" name="orgLogo" value={orgLogoUrl} />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">Nom de l'organisation / Boutique</label>
+                        <input
+                          type="text"
+                          name="orgName"
+                          defaultValue={user.tenantConfig?.orgName || ""}
+                          placeholder="Cabinet Santé, Espace Nutrition..."
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">WhatsApp de Commande Client</label>
+                        <input
+                          type="text"
+                          name="whatsapp"
+                          defaultValue={user.whatsapp || ""}
+                          placeholder="+243990000000"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold block mb-1">Email professionnel pour la vitrine</label>
+                        <input
+                          type="email"
+                          name="contactEmail"
+                          defaultValue={user.contactEmail || ""}
+                          placeholder="contact@mondomaine.com"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="text-xs font-semibold block mb-1">Présentation de la boutique / Activité</label>
+                      <textarea
+                        name="orgDescription"
+                        rows={2}
+                        defaultValue={user.tenantConfig?.orgDescription || ""}
+                        placeholder="Présentez l'activité de votre boutique aux visiteurs..."
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold block mb-1">Adresse physique / Ville</label>
                       <input
                         type="text"
-                        name="contactPhone"
-                        defaultValue={user.contactPhone || ""}
-                        placeholder="+243 990 000 000"
+                        name="contactAddress"
+                        defaultValue={user.contactAddress || ""}
+                        placeholder="Av. du Commerce, Goma / Kinshasa"
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
                       />
                     </div>
+
                     <div>
-                      <label className="text-xs font-semibold block mb-1">WhatsApp de Commande</label>
+                      <label className="text-xs font-semibold block mb-1">Site Web externe (optionnel)</label>
                       <input
-                        type="text"
-                        name="whatsapp"
-                        defaultValue={user.whatsapp || ""}
-                        placeholder="+243990000000"
+                        type="url"
+                        name="contactWebsite"
+                        defaultValue={user.contactWebsite || ""}
+                        placeholder="https://monsite.com"
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
                       />
                     </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Email de contact</label>
-                      <input
-                        type="email"
-                        name="contactEmail"
-                        defaultValue={user.contactEmail || ""}
-                        placeholder="contact@mondomaine.com"
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Copyright personnalisé</label>
+
+                    <div className="sm:col-span-2">
+                      <label className="text-xs font-semibold block mb-1">Mention légale & Copyright</label>
                       <input
                         type="text"
                         name="copyright"
@@ -2209,10 +2404,10 @@ export function DashboardClient({
                   </div>
                 </div>
 
-                {/* Social Links */}
+                {/* 3. RÉSEAUX SOCIAUX DE L'ORGANISATION */}
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                   <h2 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3">
-                    Réseaux Sociaux
+                    Réseaux Sociaux de la Vitrine
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -2234,53 +2429,14 @@ export function DashboardClient({
                   </div>
                 </div>
 
-                {/* Thème & Typographie */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Palette className="w-5 h-5 text-emerald-600" />
-                      <h2 className="text-base font-bold text-slate-900 dark:text-white">Couleurs & Typographie</h2>
-                    </div>
-                    {!hasSmartFeatures && (
-                      <span className="text-xs text-amber-600 flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> Requis: Forfait SMART
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Couleur Principale</label>
-                      <input type="color" name="primaryColor" defaultValue={user.primaryColor || "#0f766e"} disabled={!hasSmartFeatures} className="w-10 h-10 rounded-xl cursor-pointer" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Couleur Secondaire</label>
-                      <input type="color" name="secondaryColor" defaultValue={user.tenantConfig?.secondaryColor || "#0284c7"} disabled={!hasSmartFeatures} className="w-10 h-10 rounded-xl cursor-pointer" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Couleur Header</label>
-                      <input type="color" name="headerColor" defaultValue={user.tenantConfig?.headerColor || "#0f766e"} disabled={!hasSmartFeatures} className="w-10 h-10 rounded-xl cursor-pointer" />
-                    </div>
-                    <div className="sm:col-span-3">
-                      <label className="text-xs font-semibold block mb-1">Police / Typographie</label>
-                      <select name="fontFamily" defaultValue={user.tenantConfig?.fontFamily || "Inter"} disabled={!hasPremiumFeatures} className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-                        <option value="Inter">Inter (Standard)</option>
-                        <option value="Outfit">Outfit (Moderne)</option>
-                        <option value="Roboto">Roboto (Classique)</option>
-                        <option value="Playfair Display">Playfair Display (Élégant)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="flex justify-end">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-6 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md flex items-center gap-2"
+                    className="px-6 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md flex items-center gap-2 cursor-pointer transition-transform hover:scale-102"
                   >
                     <Save className="w-4 h-4" />
-                    {saving ? "Enregistrement..." : "Enregistrer les modifications"}
+                    {saving ? "Enregistrement..." : "Enregistrer toutes les modifications"}
                   </button>
                 </div>
               </form>

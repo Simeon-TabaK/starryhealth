@@ -52,25 +52,26 @@ export async function updateUserProfile(userId: number, formData: FormData) {
   // Typography customization requires PREMIUM (or admin)
   const canCustomFont = isSuperAdmin || plan === "PREMIUM";
 
+  const dataToUpdate: any = {};
+  if (name !== null && name !== undefined) dataToUpdate.name = name;
+  if (email !== null && email !== undefined && email.trim() !== "") dataToUpdate.email = email;
+  if (avatar !== null && avatar !== undefined) dataToUpdate.avatar = avatar;
+  if (bio !== null && bio !== undefined) dataToUpdate.bio = bio;
+  if (contactPhone !== null && contactPhone !== undefined) dataToUpdate.contactPhone = contactPhone;
+  if (contactEmail !== null && contactEmail !== undefined) dataToUpdate.contactEmail = contactEmail;
+  if (contactAddress !== null && contactAddress !== undefined) dataToUpdate.contactAddress = contactAddress;
+  if (contactWebsite !== null && contactWebsite !== undefined) dataToUpdate.contactWebsite = contactWebsite;
+  if (whatsapp !== null && whatsapp !== undefined) dataToUpdate.whatsapp = whatsapp;
+  if (facebook !== null && facebook !== undefined) dataToUpdate.facebook = facebook;
+  if (linkedin !== null && linkedin !== undefined) dataToUpdate.linkedin = linkedin;
+  if (tiktok !== null && tiktok !== undefined) dataToUpdate.tiktok = tiktok;
+  if (instagram !== null && instagram !== undefined) dataToUpdate.instagram = instagram;
+  if (copyright !== null && copyright !== undefined) dataToUpdate.copyright = copyright;
+  if (canCustomColors && primaryColor) dataToUpdate.primaryColor = primaryColor;
+
   await prisma.user.update({
     where: { id: userId },
-    data: {
-      name,
-      email,
-      avatar,
-      bio,
-      contactPhone,
-      contactEmail,
-      contactAddress,
-      contactWebsite,
-      whatsapp,
-      facebook,
-      linkedin,
-      tiktok,
-      instagram,
-      copyright,
-      primaryColor: canCustomColors && primaryColor ? primaryColor : undefined,
-    },
+    data: dataToUpdate,
   });
 
   await prisma.tenantConfig.upsert({
@@ -127,29 +128,39 @@ export async function createUserProduct(userId: number, formData: FormData) {
 
   const isSuperAdmin = user.role === "SUPER_ADMIN";
 
-  // Check quota for regular users
+  // Check quota for regular users if finite quota
   if (!isSuperAdmin) {
     const quota = getProductLimit(user.subscriptionPlan);
-    const existingCount = await prisma.product.count({
-      where: { userId },
-    });
+    if (isFinite(quota)) {
+      const existingCount = await prisma.product.count({
+        where: { userId },
+      });
 
-    if (existingCount >= quota) {
-      throw new Error(
-        `Limite atteinte ! Votre forfait (${user.subscriptionPlan || "STANDARD"}) vous autorise un maximum de ${quota} produit(s). Passez à l'abonnement supérieur pour débloquer plus de produits.`
-      );
+      if (existingCount >= quota) {
+        throw new Error(
+          `Limite atteinte ! Votre forfait (${user.subscriptionPlan || "STANDARD"}) vous autorise un maximum de ${quota} produit(s). Passez à l'abonnement supérieur pour débloquer plus de produits.`
+        );
+      }
     }
   }
 
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
+  const name = (formData.get("name") as string)?.trim();
+  const description = (formData.get("description") as string)?.trim();
   const defaultPrice = parseFloat((formData.get("defaultPrice") as string) || "0");
   const originalPriceRaw = formData.get("originalPrice") as string;
   const originalPrice = originalPriceRaw ? parseFloat(originalPriceRaw) : null;
-  const category = (formData.get("category") as string) || "Santé & Bien-être";
-  const images = (formData.get("images") as string) || "";
+  const category = ((formData.get("category") as string) || "Santé & Bien-être").trim();
+  const images = ((formData.get("images") as string) || "").trim();
   const isVisibleRaw = formData.get("isVisible") as string;
   const isVisible = isVisibleRaw === "false" || isVisibleRaw === "0" ? false : true;
+
+  if (!name) {
+    throw new Error("Le nom du produit est obligatoire.");
+  }
+
+  if (!images) {
+    throw new Error("Une image principale est obligatoire pour créer ce produit.");
+  }
 
   await prisma.product.create({
     data: {
@@ -191,15 +202,23 @@ export async function updateUserProduct(
     throw new Error("Vous n'avez pas la permission de modifier ce produit.");
   }
 
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
+  const name = (formData.get("name") as string)?.trim();
+  const description = (formData.get("description") as string)?.trim();
   const defaultPrice = parseFloat((formData.get("defaultPrice") as string) || "0");
   const originalPriceRaw = formData.get("originalPrice") as string;
   const originalPrice = originalPriceRaw ? parseFloat(originalPriceRaw) : null;
-  const category = formData.get("category") as string;
-  const images = formData.get("images") as string;
+  const category = (formData.get("category") as string)?.trim() || "Santé & Bien-être";
+  const images = ((formData.get("images") as string) || "").trim();
   const isVisibleRaw = formData.get("isVisible") as string;
   const isVisible = isVisibleRaw === "false" || isVisibleRaw === "0" ? false : true;
+
+  if (!name) {
+    throw new Error("Le nom du produit est obligatoire.");
+  }
+
+  if (!images) {
+    throw new Error("Une image principale est obligatoire pour enregistrer ce produit.");
+  }
 
   await prisma.product.update({
     where: { id: productId },

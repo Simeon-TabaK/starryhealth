@@ -125,7 +125,7 @@ export async function POST(req: Request) {
     // ─── Hashage sécurisé du mot de passe ──────────────────────────────────
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // ─── Création de l'utilisateur ─────────────────────────────────────────
+    // ─── Création de l'utilisateur (Par défaut: FREE, sans abonnement actif) ───
     const user = await prisma.user.create({
       data: {
         name: name.trim(),
@@ -134,37 +134,11 @@ export async function POST(req: Request) {
         slug: finalUsername,
         username: finalUsername,
         role: "USER",
-        subscriptionStatus: "ACTIVE",
-        subscriptionPlan: "STANDARD",
+        subscriptionStatus: "FREE",
+        subscriptionPlan: null,
         primaryColor: "#0f766e",
       },
     });
-
-    // ─── Association automatique des 5 produits par défaut ─────────────────
-    const globalProducts = await prisma.product.findMany({
-      where: { userId: null, isVisible: true },
-      orderBy: { createdAt: "asc" },
-      take: 5,
-    });
-
-    if (globalProducts.length > 0) {
-      await Promise.all(
-        globalProducts.map((p) =>
-          prisma.product.create({
-            data: {
-              userId: user.id,
-              name: p.name,
-              description: p.description,
-              defaultPrice: p.defaultPrice,
-              originalPrice: p.originalPrice,
-              images: p.images,
-              category: p.category,
-              isVisible: true,
-            },
-          })
-        )
-      );
-    }
 
     return NextResponse.json(
       {

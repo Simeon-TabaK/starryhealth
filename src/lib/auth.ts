@@ -91,37 +91,11 @@ export const authOptions: NextAuthOptions = {
                 username: uniqueSlug,
                 avatar: user.image,
                 role: "USER",
-                subscriptionStatus: "ACTIVE",
-                subscriptionPlan: "STANDARD",
+                subscriptionStatus: "FREE",
+                subscriptionPlan: null,
                 primaryColor: "#0f766e",
               },
             });
-
-            // Automatically associate the 5 default products
-            const defaultProducts = await prisma.product.findMany({
-              where: { userId: null, isVisible: true },
-              orderBy: { createdAt: "asc" },
-              take: 5,
-            });
-
-            if (defaultProducts.length > 0) {
-              await Promise.all(
-                defaultProducts.map((p) =>
-                  prisma.product.create({
-                    data: {
-                      userId: created.id,
-                      name: p.name,
-                      description: p.description,
-                      defaultPrice: p.defaultPrice,
-                      originalPrice: p.originalPrice,
-                      images: p.images,
-                      category: p.category,
-                      isVisible: true,
-                    },
-                  })
-                )
-              );
-            }
 
             user.id = created.id.toString();
             (user as any).slug = created.slug;
