@@ -6,7 +6,7 @@
     "postinstall": "npx prisma generate && node patch-lucide-context.js",
     "db:seed": "npx tsx prisma/seed.ts",
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
   },
