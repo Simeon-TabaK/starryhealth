@@ -67,33 +67,46 @@ export function CloudinaryUpload({
       setProgress(0);
 
       try {
-        // 1. Récupération de la signature sécurisée SHA-1
-        const sigRes = await fetch("/api/cloudinary/sign", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ folder }),
-        });
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+        const defaultCloudName =
+          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dau4wzqrr";
 
-        if (!sigRes.ok) {
-          const errData = await sigRes.json().catch(() => ({}));
-          throw new Error(errData.error || "Impossible d'obtenir la signature Cloudinary.");
-        }
-
-        const { signature, timestamp, apiKey, cloudName } = await sigRes.json();
-
-        // 2. Préparation du FormData pour Cloudinary
         const formData = new FormData();
         const filename = originalFilename || `img_${Date.now()}.jpg`;
         formData.append("file", fileOrBlob, filename);
-        formData.append("api_key", apiKey);
-        formData.append("timestamp", String(timestamp));
-        formData.append("signature", signature);
-        formData.append("folder", folder);
 
-        // 3. Envoi direct à Cloudinary
+        let targetCloudName = defaultCloudName;
+
+        if (uploadPreset) {
+          // Mode Unsigned (avec Upload Preset) : aucun calcul de signature nécessaire
+          formData.append("upload_preset", uploadPreset);
+          if (folder) formData.append("folder", folder);
+        } else {
+          // Mode Signé : récupération de la signature SHA-1 depuis le serveur
+          const sigRes = await fetch("/api/cloudinary/sign", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ folder }),
+          });
+
+          if (!sigRes.ok) {
+            const errData = await sigRes.json().catch(() => ({}));
+            throw new Error(errData.error || "Impossible d'obtenir la signature Cloudinary.");
+          }
+
+          const { signature, timestamp, apiKey, cloudName } = await sigRes.json();
+          targetCloudName = cloudName;
+
+          formData.append("api_key", apiKey);
+          formData.append("timestamp", String(timestamp));
+          formData.append("signature", signature);
+          formData.append("folder", folder);
+        }
+
+        // Envoi direct vers Cloudinary
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
-          xhr.open("POST", CLOUDINARY_UPLOAD_URL(cloudName));
+          xhr.open("POST", CLOUDINARY_UPLOAD_URL(targetCloudName));
 
           xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) {
