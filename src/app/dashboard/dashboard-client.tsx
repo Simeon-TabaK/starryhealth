@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -33,6 +33,7 @@ import {
   HelpCircle,
   Layers,
   ChevronRight,
+  ChevronDown,
   TrendingUp,
   Edit,
   AlertCircle,
@@ -75,15 +76,20 @@ import {
   adminRejectUsernameChange,
 } from "./actions";
 import { getProductLimit, planHasFeature } from "@/lib/plans";
-import { CloudinaryUpload } from "@/components/cloudinary-upload";
-import { ThemeModule } from "@/components/theme-module";
 import { SubscriptionManagement } from "@/components/subscription-management";
-import { ThemeSelector } from "@/components/theme-selector";
 import { AdminPlanManagement } from "@/components/admin-plan-management";
 import { AdminUserManagement } from "@/components/admin-user-management";
 import { AdminTenantManagement } from "@/components/admin-tenant-management";
 import { CategoryManagement } from "@/components/category-management";
 import { ServicesManagement } from "@/components/services-management";
+import { OverviewTab } from "@/components/dashboard/overview-tab";
+import { ProductsTab } from "@/components/dashboard/products-tab";
+import { GalleryTab } from "@/components/dashboard/gallery-tab";
+import { TestimonialsTab } from "@/components/dashboard/testimonials-tab";
+import { SuggestionsTab } from "@/components/dashboard/suggestions-tab";
+import { SettingsTab } from "@/components/dashboard/settings-tab";
+import { TenantRequestsTab } from "@/components/dashboard/tenant-requests-tab";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface DashboardClientProps {
   user: any;
@@ -109,6 +115,7 @@ interface DashboardClientProps {
   allSubscriptionHistory?: any[];
   categories?: any[];
   initialTab?: string;
+  tenantAnalytics?: any;
 }
 
 export function DashboardClient({
@@ -135,17 +142,41 @@ export function DashboardClient({
   allSubscriptionHistory = [],
   categories = [],
   initialTab,
+  tenantAnalytics,
 }: DashboardClientProps) {
   const isSuperAdmin = user.role === "SUPER_ADMIN";
   const plan = user.subscriptionPlan as "STANDARD" | "SMART" | "PREMIUM" | null;
   const isSubscribed = user.subscriptionStatus === "ACTIVE";
 
-  // Sidebar navigation state
-  const [activeTab, setActiveTab] = useState<string>(
-    initialTab || (isSuperAdmin ? "overview" : "overview")
-  );
+  // Sidebar navigation state (initialisé avec l'onglet demandé ou vue d'ensemble)
+  const [activeTab, setActiveTab] = useState<string>(initialTab || "overview");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Sous-menus déroulants (collapsible/dropdown) pour la navigation par catégorie
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    "Tableau de bord": true,
+    "Mon Catalogue": true,
+    "Communication": false,
+    "Paramètres & Vitrine": false,
+    "Administration": true,
+    "Abonnement": true,
+  });
+
+  const toggleGroup = (label: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
+  const handleSelectTab = (itemId: string, groupLabel?: string) => {
+    setActiveTab(itemId);
+    setMobileNavOpen(false);
+    if (groupLabel) {
+      setOpenGroups((prev) => ({ ...prev, [groupLabel]: true }));
+    }
+  };
   
   // Toast notifications system (top-right)
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -160,54 +191,6 @@ export function DashboardClient({
   const showNotification = (text: string, type: "success" | "error" = "success") => {
     showToast(text, type);
   };
-
-  // Products pagination state
-  const [productPage, setProductPage] = useState(1);
-  const PRODUCTS_PER_PAGE = 6;
-
-  // Modals & form states
-  const [showAddProduct, setShowAddProduct] = useState(false);
-  const [createProductImageUrl, setCreateProductImageUrl] = useState<string>("");
-  const [editingProduct, setEditingProduct] = useState<any | null>(null);
-  const [editProductImageUrl, setEditProductImageUrl] = useState<string>("");
-
-  const [showAddService, setShowAddService] = useState(false);
-  const [showAddFaq, setShowAddFaq] = useState(false);
-
-  const [showAddGallery, setShowAddGallery] = useState(false);
-  const [addGalleryImageUrl, setAddGalleryImageUrl] = useState<string>("");
-  const [editingGalleryImage, setEditingGalleryImage] = useState<any | null>(null);
-  const [editGalleryImageUrl, setEditGalleryImageUrl] = useState<string>("");
-
-  const [showAddPartner, setShowAddPartner] = useState(false);
-  const [domainInput, setDomainInput] = useState(user.customDomain?.domain || "");
-
-  const [orgLogoUrl, setOrgLogoUrl] = useState<string>(user.tenantConfig?.orgLogo || "");
-  const [faviconUrl, setFaviconUrl] = useState<string>((user.tenantConfig as any)?.favicon || "");
-  const [avatarUrl, setAvatarUrl] = useState<string>(user.avatar || "");
-
-  // Super Admin manual activation modal state
-  const [selectedUserForSub, setSelectedUserForSub] = useState<any | null>(null);
-  const [subForm, setSubForm] = useState({
-    plan: "STANDARD" as "STANDARD" | "SMART" | "PREMIUM",
-    status: "ACTIVE" as "ACTIVE" | "PENDING" | "EXPIRED" | "FREE",
-    startDate: new Date().toISOString().split("T")[0],
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-  });
-
-  // Custom prices local map
-  const [pricesState, setPricesState] = useState<Record<number, number>>(() => {
-    const map: Record<number, number> = {};
-    customPrices.forEach((cp) => {
-      map[cp.productId] = cp.customPrice;
-    });
-    return map;
-  });
-
-  const [settingsSubTab, setSettingsSubTab] = useState<"profile" | "theme">("profile");
-  const [suggestionFilters, setSuggestionFilters] = useState<string>("ALL");
-  const [suggestionReplies, setSuggestionReplies] = useState<Record<number, string>>({});
-  const [suggestionStatuses, setSuggestionStatuses] = useState<Record<number, string>>({});
 
   // Quotas
   const productQuota = getProductLimit(plan);
@@ -230,240 +213,6 @@ export function DashboardClient({
 
   // Monthly revenue estimate based on active plan pricing: Standard $2.99, Smart $4.19, Premium $5.99
   const estimatedMonthlyRevenue = (countStandard * 2.99 + countSmart * 4.19 + countPremium * 5.99).toFixed(2);
-
-  // Handlers
-  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSaving(true);
-    const formData = new FormData(e.currentTarget);
-    if (orgLogoUrl) formData.set("orgLogo", orgLogoUrl);
-    if (faviconUrl) formData.set("favicon", faviconUrl);
-    if (avatarUrl) formData.set("avatar", avatarUrl);
-    try {
-      await updateUserProfile(user.id, formData);
-      const effectiveFavicon = faviconUrl || orgLogoUrl;
-      if (typeof window !== "undefined" && effectiveFavicon) {
-        window.dispatchEvent(new CustomEvent("tenant-favicon-change", { detail: effectiveFavicon }));
-      }
-      showToast("Profil et organisation enregistrés !", "success", "Vos informations personnelles et vitrine ont été mises à jour.");
-    } catch (err: any) {
-      showToast("Erreur de sauvegarde", "error", err.message || "Impossible de sauvegarder votre profil.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!createProductImageUrl) {
-      showToast("Photo obligatoire", "error", "Veuillez sélectionner et uploader une photo pour le produit.");
-      return;
-    }
-    setSaving(true);
-    const formData = new FormData(e.currentTarget);
-    formData.set("images", createProductImageUrl);
-    try {
-      await createUserProduct(user.id, formData);
-      showToast("Produit créé avec succès !", "success", "Votre nouveau produit est enregistré dans le catalogue.");
-      setShowAddProduct(false);
-      setCreateProductImageUrl("");
-      (e.target as HTMLFormElement).reset();
-    } catch (err: any) {
-      showToast("Erreur de création", "error", err.message || "Impossible de créer ce produit.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editingProduct) return;
-    setSaving(true);
-    const formData = new FormData(e.currentTarget);
-    if (editProductImageUrl) {
-      formData.set("images", editProductImageUrl);
-    }
-    try {
-      await updateUserProduct(editingProduct.id, user.id, formData);
-      showNotification("Produit modifié avec succès !");
-      setEditingProduct(null);
-    } catch (err: any) {
-      showNotification(err.message || "Erreur lors de la modification du produit.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdateGalleryImage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editingGalleryImage) return;
-    setSaving(true);
-    const formData = new FormData(e.currentTarget);
-    if (editGalleryImageUrl) {
-      formData.set("imageUrl", editGalleryImageUrl);
-    }
-    try {
-      await updateUserGalleryImage(editingGalleryImage.id, user.id, formData);
-      showNotification("Photo de la galerie mise à jour !");
-      setEditingGalleryImage(null);
-    } catch (err: any) {
-      showNotification(err.message || "Erreur de modification de la photo.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDeleteProduct = async (productId: number) => {
-    if (!confirm("Voulez-vous vraiment supprimer ce produit ?")) return;
-    setSaving(true);
-    try {
-      await deleteUserProduct(productId, user.id);
-      showNotification("Produit supprimé !");
-    } catch (err: any) {
-      showNotification(err.message || "Erreur de suppression.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handlePriceSave = async (productId: number) => {
-    const priceVal = pricesState[productId];
-    if (priceVal === undefined || isNaN(priceVal)) return;
-    setSaving(true);
-    try {
-      await updateCustomProductPrice(user.id, productId, priceVal);
-      showNotification("Prix revendeur enregistré !");
-    } catch (err: any) {
-      showNotification(err.message || "Erreur de mise à jour du prix.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Super Admin manual subscription validation
-  const handleOpenSubModal = (targetUser: any) => {
-    setSelectedUserForSub(targetUser);
-    const latestSub = targetUser.subscriptions?.[0];
-    setSubForm({
-      plan: targetUser.subscriptionPlan || "STANDARD",
-      status: targetUser.subscriptionStatus || "ACTIVE",
-      startDate: latestSub?.startDate ? new Date(latestSub.startDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-      expiresAt: latestSub?.expiresAt ? new Date(latestSub.expiresAt).toISOString().split("T")[0] : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    });
-  };
-
-  const handleSaveSubscription = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedUserForSub) return;
-    setSaving(true);
-    try {
-      await adminManualActivateSubscription(
-        selectedUserForSub.id,
-        subForm.plan,
-        subForm.status,
-        subForm.startDate,
-        subForm.expiresAt
-      );
-      showNotification(`Abonnement de ${selectedUserForSub.name || selectedUserForSub.email} mis à jour !`);
-      setSelectedUserForSub(null);
-    } catch (err: any) {
-      showNotification(err.message || "Erreur de mise à jour abonnement.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Admin Suggestion (Subscriber to Admin)
-  const handleSendAdminSuggestion = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSaving(true);
-    const formData = new FormData(e.currentTarget);
-    try {
-      await sendAdminSuggestion(user.id, formData);
-      showNotification("Votre suggestion a été transmise à l'administrateur Starry Health !");
-      (e.target as HTMLFormElement).reset();
-    } catch (err: any) {
-      showNotification(err.message || "Erreur lors de l'envoi.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleToggleAdminSuggestionRead = async (id: number, currentRead: boolean) => {
-    try {
-      await toggleAdminSuggestionRead(id, !currentRead);
-      showNotification(!currentRead ? "Marqué comme lu !" : "Marqué comme non lu !");
-    } catch {
-      showNotification("Erreur de mise à jour.", "error");
-    }
-  };
-
-  const handleDeleteAdminSuggestion = async (id: number) => {
-    if (!confirm("Supprimer cette suggestion ?")) return;
-    try {
-      await deleteAdminSuggestion(id);
-      showNotification("Suggestion supprimée !");
-    } catch {
-      showNotification("Erreur de suppression.", "error");
-    }
-  };
-
-  const handleUpdateSuggestionStatus = async (id: number) => {
-    const status = (suggestionStatuses[id] || "IN_PROGRESS") as "NEW" | "IN_PROGRESS" | "DONE" | "REJECTED";
-    const reply = suggestionReplies[id] || undefined;
-    setSaving(true);
-    try {
-      await updateAdminSuggestionStatus(id, status, reply);
-      showNotification("Suggestion mise à jour avec succès !");
-    } catch (err: any) {
-      showNotification(err.message || "Erreur de mise à jour.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-
-  const handleRequestUsernameChange = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSaving(true);
-    const formData = new FormData(e.currentTarget);
-    const newUsername = formData.get("newUsername") as string;
-    try {
-      await requestUsernameChange(user.id, newUsername);
-      showNotification("Demande de changement de tenant transmise à l'administrateur !");
-      (e.target as HTMLFormElement).reset();
-    } catch (err: any) {
-      showNotification(err.message || "Erreur lors de la demande.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleApproveUsernameChange = async (requestId: number) => {
-    if (!confirm("Voulez-vous approuver ce changement de tenant ?")) return;
-    setSaving(true);
-    try {
-      await adminApproveUsernameChange(requestId);
-      showNotification("Changement de tenant approuvé avec succès !");
-    } catch (err: any) {
-      showNotification(err.message || "Erreur lors de l'approbation.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleRejectUsernameChange = async (requestId: number) => {
-    const note = prompt("Motif du rejet (optionnel) :") || undefined;
-    setSaving(true);
-    try {
-      await adminRejectUsernameChange(requestId, note);
-      showNotification("Demande de changement de tenant rejetée.");
-    } catch (err: any) {
-      showNotification(err.message || "Erreur lors du rejet.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // ── CATEGORIES DE NAVIGATION ──
   const navGroups = [
@@ -627,13 +376,16 @@ export function DashboardClient({
           <span className="font-extrabold text-sm">Starry Health</span>
         </div>
 
-        <button
-          onClick={() => signOut({ callbackUrl: "/" })}
-          className="p-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-          title="Se déconnecter"
-        >
-          <LogOut className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="p-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+            title="Se déconnecter"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* ─────────────────────────────────────────────
@@ -701,57 +453,103 @@ export function DashboardClient({
           </div>
         </div>
 
-        {/* Navigation Links Grouped by Category */}
-        <nav className="flex-1 px-3 overflow-y-auto space-y-4 py-2">
-          {navGroups.map((group) => (
-            <div key={group.label}>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2.5 mb-1.5">
-                {group.label}
-              </p>
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setMobileNavOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${isActive
-                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-bold"
-                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
-                        }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
-                        <span>{item.label}</span>
-                      </div>
+        {/* Navigation Links Grouped by Category with Dropdown/Collapsible Submenus */}
+        <nav className="flex-1 px-3 overflow-y-auto space-y-3 py-2">
+          {navGroups.map((group) => {
+            const hasActiveChild = group.items.some((it) => it.id === activeTab);
+            const isOpen = openGroups[group.label] ?? true;
 
-                      <div className="flex items-center gap-1.5">
-                        {item.locked && <Lock className="w-3 h-3 text-amber-500" />}
-                        {item.badge !== null && item.badge !== undefined && (
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive
-                              ? "bg-white/20 text-white"
-                              : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                              }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+            // Overview is single-item top-level: render directly
+            if (group.items.length === 1 && group.label === "Tableau de bord") {
+              const item = group.items[0];
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <div key={group.label} className="pt-0.5">
+                  <button
+                    key={item.id}
+                    onClick={() => handleSelectTab(item.id, group.label)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${isActive
+                      ? "bg-[#1A1A8B] text-white shadow-md shadow-[#1A1A8B]/20 font-bold"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                      <span>{item.label}</span>
+                    </div>
+                  </button>
+                </div>
+              );
+            }
+
+            return (
+              <div key={group.label} className="border-t border-slate-100 dark:border-slate-800/60 pt-2.5 first:border-t-0 first:pt-0">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.label)}
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer group"
+                >
+                  <span className="flex items-center gap-1.5">
+                    {hasActiveChild && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#1A1A8B] dark:bg-[#CCAB00]" />
+                    )}
+                    <span>{group.label}</span>
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-0" : "-rotate-90 text-slate-400"}`}
+                  />
+                </button>
+
+                {isOpen && (
+                  <div className="space-y-1 mt-1 pl-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => handleSelectTab(item.id, group.label)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${isActive
+                            ? "bg-[#1A1A8B] text-white shadow-md shadow-[#1A1A8B]/20 font-bold"
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                            <span>{item.label}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            {item.locked && <Lock className="w-3 h-3 text-amber-500" />}
+                            {item.badge !== null && item.badge !== undefined && (
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive
+                                  ? "bg-white/20 text-white"
+                                  : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                                  }`}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Sidebar Footer Actions */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
+          {/* Controls: Thème */}
+          <div className="flex items-center justify-end pb-1">
+            <ThemeToggle />
+          </div>
+
           <Link
             href={`/?tenant=${user.slug}`}
             target="_blank"
@@ -790,295 +588,28 @@ export function DashboardClient({
             TAB 1: VUE D'ENSEMBLE (SUPER ADMIN / USER)
             ───────────────────────────────────────────── */}
         {activeTab === "overview" && (
-          <div className="space-y-8">
-            {isSuperAdmin ? (
-              <>
-                <div>
-                  <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                    Tableau de Bord Super Admin
-                  </h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Vue globale sur les abonnements, utilisateurs et performances de Starry Health.
-                  </p>
-                </div>
-
-                {/* 4 Global Stat Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Abonnés</p>
-                      <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">{totalSubscribers}</h3>
-                      <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">Distributeurs enregistrés</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 flex items-center justify-center">
-                      <Users className="w-6 h-6" />
-                    </div>
-                  </div>
-
-                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Abonnements Actifs</p>
-                      <h3 className="text-2xl font-extrabold text-emerald-600 mt-1">{activeSubscribers}</h3>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        {totalSubscribers > 0 ? `${Math.round((activeSubscribers / totalSubscribers) * 100)}% d'activation` : "0%"}
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
-                      <UserCheck className="w-6 h-6" />
-                    </div>
-                  </div>
-
-                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">En Attente / Expirés</p>
-                      <h3 className="text-2xl font-extrabold text-amber-500 mt-1">
-                        {pendingSubscribers} / {expiredSubscribers}
-                      </h3>
-                      <p className="text-[10px] text-slate-400 mt-0.5">À relancer ou activer</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
-                      <Clock className="w-6 h-6" />
-                    </div>
-                  </div>
-
-                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Revenus Mensuels Estimés</p>
-                      <h3 className="text-2xl font-extrabold text-sky-600 mt-1">${estimatedMonthlyRevenue}</h3>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Basé sur les forfaits actifs</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 flex items-center justify-center">
-                      <DollarSign className="w-6 h-6" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Subscriptions Breakdown by Tier */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Forfait Standard</span>
-                      <span className="text-xs font-bold text-slate-400">$2.99 / mois</span>
-                    </div>
-                    <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{countStandard}</p>
-                    <p className="text-xs text-slate-500 mt-1">5 produits par vitrine</p>
-                  </div>
-
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">Forfait Smart</span>
-                      <span className="text-xs font-bold text-slate-400">$4.19 / mois</span>
-                    </div>
-                    <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{countSmart}</p>
-                    <p className="text-xs text-slate-500 mt-1">10 produits + offres & services</p>
-                  </div>
-
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Forfait Premium</span>
-                      <span className="text-xs font-bold text-slate-400">$5.99 / mois</span>
-                    </div>
-                    <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{countPremium}</p>
-                    <p className="text-xs text-slate-500 mt-1">Produits illimités + FAQ + Domaine</p>
-                  </div>
-                </div>
-
-                {/* Quick action button to user subscriptions */}
-                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-500/30 p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base">Gestion & Activation Manuelle des Abonnements</h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      Consultez la liste des abonnés, validez un paiement bancaire ou activez manuellement les dates de début et fin.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab("users")}
-                    className="px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shrink-0"
-                  >
-                    Gérer les abonnés
-                  </button>
-                </div>
-              </>
-            ) : (
-              /* Subscriber Overview */
-              <>
-                {/* Alerte si aucun abonnement actif */}
-                {!isSubscribed && (
-                  <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-500/40 text-amber-900 dark:text-amber-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-                    <div className="flex items-start sm:items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 shrink-0">
-                        <AlertTriangle className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Votre vitrine publique est actuellement désactivée</h3>
-                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                          Votre vitrine <strong>{user.slug}.sboxx.site</strong> nécessite un abonnement actif pour être visible par vos clients et visiteurs.
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("users")}
-                      className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow transition-all shrink-0 flex items-center justify-center gap-2"
-                    >
-                      <Sparkles className="w-4 h-4" /> Activer un abonnement
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                      Bonjour, {user.name || user.username} 👋
-                    </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Bienvenue dans votre tableau de bord Starry Health.
-                    </p>
-                  </div>
-                  {isSubscribed ? (
-                    <Link
-                      href={`/?tenant=${user.slug}`}
-                      target="_blank"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-transform hover:scale-105"
-                    >
-                      <ExternalLink className="w-4 h-4" /> Accéder à ma vitrine publique
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        showToast("Abonnement requis", "warning", "Activez un forfait d'abonnement pour publier et ouvrir votre vitrine.");
-                        setActiveTab("users");
-                      }}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 transition-colors cursor-pointer"
-                    >
-                      <Lock className="w-4 h-4 text-amber-500" /> Vitrine désactivée (Abonnement requis)
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                  {/* Card 1: Forfait */}
-                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Mon Forfait</p>
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${plan === "PREMIUM" ? "bg-amber-50 text-amber-600" : plan === "SMART" ? "bg-sky-50 text-sky-600" : "bg-emerald-50 text-emerald-600"}`}>
-                        <Sparkles className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <h3 className={`text-2xl font-extrabold ${plan === "PREMIUM" ? "text-amber-600" : plan === "SMART" ? "text-sky-600" : "text-emerald-600"}`}>
-                      {plan || "Aucun forfait"}
-                    </h3>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{isSubscribed ? "✅ Abonnement Actif" : "⚠️ Sans abonnement actif"}</p>
-                  </div>
-
-                  {/* Card 2: Produits */}
-                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Catalogue Produits</p>
-                      <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-950/40 text-violet-600 flex items-center justify-center">
-                        <Package className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                      {ownProductsCount} <span className="text-sm font-normal text-slate-400">/ {isFinite(productQuota) ? productQuota : "∞"}</span>
-                    </h3>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Produits enregistrés</p>
-                  </div>
-
-                  {/* Card 3: Témoignages */}
-                  <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Témoignages Clients</p>
-                      <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center">
-                        <MessageSquarePlus className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">{userTestimonials.length}</h3>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Avis affichés sur votre page</p>
-                  </div>
-
-                  {/* Card 4: Vitrine Publique */}
-                  <div className="bg-gradient-to-br from-emerald-600 to-teal-700 p-5 rounded-2xl shadow-sm text-white flex flex-col justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-emerald-100 mb-1">Ma Vitrine Publique</p>
-                      <p className="text-sm font-bold font-mono break-all">{user.slug}.sboxx.site</p>
-                    </div>
-                    {isSubscribed ? (
-                      <Link
-                        href={`/?tenant=${user.slug}`}
-                        target="_blank"
-                        className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors w-fit"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" /> Voir ma vitrine
-                      </Link>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          showToast("Abonnement inactif", "warning", "Activez un forfait pour publier votre vitrine.");
-                          setActiveTab("users");
-                        }}
-                        className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition-colors w-fit"
-                      >
-                        <Lock className="w-3.5 h-3.5" /> Activer pour ouvrir
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Quick Actions Métier */}
-                <div className="space-y-3 pt-2">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">Actions Rapides</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("products")}
-                      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all flex flex-col items-center gap-2.5 text-center group"
-                    >
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 group-hover:scale-110 transition-transform">
-                        <Package className="w-5 h-5" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Gérer mes Produits</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("testimonials")}
-                      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all flex flex-col items-center gap-2.5 text-center group"
-                    >
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-50 dark:bg-rose-950/40 text-rose-600 group-hover:scale-110 transition-transform">
-                        <MessageSquarePlus className="w-5 h-5" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Gérer les Avis</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("suggestions")}
-                      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all flex flex-col items-center gap-2.5 text-center group"
-                    >
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-sky-50 dark:bg-sky-950/40 text-sky-600 group-hover:scale-110 transition-transform">
-                        <Send className="w-5 h-5" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Boîte à Suggestions</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("settings")}
-                      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all flex flex-col items-center gap-2.5 text-center group"
-                    >
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-violet-50 dark:bg-violet-950/40 text-violet-600 group-hover:scale-110 transition-transform">
-                        <Settings className="w-5 h-5" />
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Thème & Apparence</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <OverviewTab
+            user={user}
+            isSuperAdmin={isSuperAdmin}
+            plan={plan}
+            isSubscribed={isSubscribed}
+            onNavigateTab={(tab) => handleSelectTab(tab)}
+            onNotify={(msg, type, desc) => showToast(msg, (type as any) || "success", desc)}
+            tenantAnalytics={tenantAnalytics}
+            stats={{
+              totalSubscribers,
+              activeSubscribers,
+              pendingSubscribers,
+              expiredSubscribers,
+              estimatedMonthlyRevenue,
+              countStandard,
+              countSmart,
+              countPremium,
+              ownProductsCount,
+              productQuota,
+              userTestimonialsCount: userTestimonials.length,
+            }}
+          />
         )}
 
                 {/* ─────────────────────────────────────────────
@@ -1175,1593 +706,85 @@ export function DashboardClient({
           />
         )}
 
-        {/* ─────────────────────────────────────────────
-            TAB 3: PRODUITS & PRIX
-            ───────────────────────────────────────────── */}
+        {/* TAB 3: PRODUITS & PRIX */}
         {activeTab === "products" && (
-          <div className="space-y-6">
-            {/* Visibility status notice if user is not active */}
-            {!isSubscribed && !isSuperAdmin && (
-              <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <div>
-                    <strong className="block text-slate-900 dark:text-white font-semibold">Note de visibilité publique</strong>
-                    <span>Vous pouvez créer et configurer vos produits dès maintenant. Toutefois, vos produits créés restent <strong>masqués publiquement</strong> sur votre vitrine tant que vous n'avez pas souscrit à un abonnement actif.</span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("users")}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shrink-0 shadow-sm transition-colors"
-                >
-                  Activer un abonnement
-                </button>
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Mes Produits ({ownProductsCount} / {isFinite(productQuota) ? productQuota : "Illimité"})
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Créez vos produits propres avec photos rognées ou ajustez vos tarifs revendeurs privilégiés.
-                </p>
-              </div>
-
-              {canAddMoreProducts ? (
-                <button
-                  onClick={() => {
-                    setCreateProductImageUrl("");
-                    setShowAddProduct(true);
-                  }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-transform hover:scale-105"
-                >
-                  <Plus className="w-4 h-4" /> Ajouter un Produit
-                </button>
-              ) : (
-                <div className="text-xs text-rose-600 bg-rose-50 dark:bg-rose-950/50 px-3 py-2 rounded-xl border border-rose-500/30 flex items-center gap-2 font-semibold">
-                  <Lock className="w-4 h-4" /> Quota atteint ({productQuota} max)
-                </div>
-              )}
-            </div>
-
-            {/* Modal Add Product with Cloudinary Upload & Crop */}
-            {showAddProduct && (
-              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-slate-900 max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                        <Package className="w-4 h-4" />
-                      </div>
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">Nouveau Produit</h3>
-                    </div>
-                    <button onClick={() => setShowAddProduct(false)} className="text-slate-400 hover:text-slate-600">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <form onSubmit={handleCreateProduct} className="space-y-4 pt-4">
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Nom du produit</label>
-                      <input required type="text" name="name" placeholder="Ex: Spiruline Bio Pure" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Description</label>
-                      <textarea required name="description" rows={3} placeholder="Présentez les bienfaits et ingrédients..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Prix public ($)</label>
-                        <input required type="number" step="0.01" name="defaultPrice" placeholder="Ex: 39.99" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Prix barré avant réduction ($)</label>
-                        <input type="number" step="0.01" name="originalPrice" placeholder="Optionnel (ex: 49.99)" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Catégorie</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[11px] text-slate-500 mb-1 block">Catégorie (texte)</label>
-                          <input type="text" name="category" defaultValue="Santé & Bien-être" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                        </div>
-                        <div>
-                          <label className="text-[11px] text-slate-500 mb-1 block">Rayon / Arborescence</label>
-                          <select name="categoryId" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800">
-                            <option value="">-- Aucun rayon rattaché --</option>
-                            {categories.map((c) => (
-                              <option key={c.id} value={c.id}>{c.parentId ? '  ↳ ' : ''}{c.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Advanced PREMIUM Fields */}
-                      {hasPremiumFeatures && (
-                        <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 space-y-3">
-                          <div className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-300">
-                            <Crown className="w-4 h-4 text-amber-500" />
-                            Fiche Produit Détaillée (PREMIUM)
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Description courte (résumé)</label>
-                            <input type="text" name="shortDescription" placeholder="Accroche en une phrase pour la liste..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">Origine / Fabrication</label>
-                              <input type="text" name="origin" placeholder="Ex: France, Bio..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">Format / Packaging</label>
-                              <input type="text" name="packaging" placeholder="Ex: Flacon 60 gélules..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Ingrédients & Composition</label>
-                            <textarea name="ingredients" rows={2} placeholder="Liste des principes actifs..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Bienfaits & Avantages</label>
-                            <textarea name="benefits" rows={2} placeholder="Effets constatés, bénéfices santé..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Conseils d'utilisation & Posologie</label>
-                            <textarea name="usage" rows={2} placeholder="2 gélules par jour avec un grand verre d'eau..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Contre-indications & Mises en garde</label>
-                            <textarea name="contraindications" rows={2} placeholder="Déconseillé aux femmes enceintes..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">Titre SEO (Meta title)</label>
-                              <input type="text" name="metaTitle" placeholder="Titre pour Google..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">URL personnalisée (Slug)</label>
-                              <input type="text" name="seoSlug" placeholder="nom-du-produit" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 font-mono text-xs" />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Description SEO (Meta description)</label>
-                            <textarea name="metaDescription" rows={2} placeholder="Description affichée dans les moteurs de recherche..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Image Upload with Crop Section */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold block">
-                          Photo du produit <span className="text-rose-500">*</span>
-                        </label>
-                        {!createProductImageUrl ? (
-                          <span className="text-[11px] text-rose-500 font-medium bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md">
-                            Image requise
-                          </span>
-                        ) : (
-                          <span className="text-[11px] text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md flex items-center gap-1">
-                            <Check className="w-3 h-3" /> Image prête
-                          </span>
-                        )}
-                      </div>
-                      <CloudinaryUpload
-                        folder="starryhealth/products"
-                        cropAspect="4:3"
-                        onUpload={(url) => setCreateProductImageUrl(url)}
-                        currentUrl={createProductImageUrl}
-                        label="Sélectionner, rogner et uploader la photo"
-                        primaryColor={user.primaryColor || "#0f766e"}
-                      />
-                      {!createProductImageUrl && (
-                        <p className="text-[11px] text-rose-500 mt-1">
-                          Une photo principale est indispensable pour enregistrer ce produit.
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                      <button type="button" onClick={() => setShowAddProduct(false)} className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700">
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={saving || !createProductImageUrl}
-                        className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow"
-                      >
-                        Créer le produit
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* Modal Edit Product with Cloudinary Upload & Crop */}
-            {editingProduct && (
-              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-slate-900 max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 flex items-center justify-center">
-                        <Edit className="w-4 h-4" />
-                      </div>
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">Modifier le Produit</h3>
-                    </div>
-                    <button onClick={() => setEditingProduct(null)} className="text-slate-400 hover:text-slate-600">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <form onSubmit={handleUpdateProduct} className="space-y-4 pt-4">
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Nom du produit</label>
-                      <input required type="text" name="name" defaultValue={editingProduct.name} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Description</label>
-                      <textarea required name="description" rows={3} defaultValue={editingProduct.description} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Prix public ($)</label>
-                        <input required type="number" step="0.01" name="defaultPrice" defaultValue={editingProduct.defaultPrice} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Prix original barré ($)</label>
-                        <input type="number" step="0.01" name="originalPrice" defaultValue={editingProduct.originalPrice || ""} placeholder="Optionnel" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[11px] text-slate-500 mb-1 block">Catégorie (texte)</label>
-                          <input type="text" name="category" defaultValue={editingProduct.category || "Santé & Bien-être"} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800" />
-                        </div>
-                        <div>
-                          <label className="text-[11px] text-slate-500 mb-1 block">Rayon / Arborescence</label>
-                          <select name="categoryId" defaultValue={editingProduct.categoryId || ""} className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800">
-                            <option value="">-- Aucun rayon rattaché --</option>
-                            {categories.map((c) => (
-                              <option key={c.id} value={c.id}>{c.parentId ? '  ↳ ' : ''}{c.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Advanced PREMIUM Fields */}
-                      {hasPremiumFeatures && (
-                        <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 space-y-3">
-                          <div className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-300">
-                            <Crown className="w-4 h-4 text-amber-500" />
-                            Fiche Produit Détaillée (PREMIUM)
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Description courte (résumé)</label>
-                            <input type="text" name="shortDescription" defaultValue={editingProduct.shortDescription || ""} placeholder="Accroche en une phrase pour la liste..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">Origine / Fabrication</label>
-                              <input type="text" name="origin" defaultValue={editingProduct.origin || ""} placeholder="Ex: France, Bio..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">Format / Packaging</label>
-                              <input type="text" name="packaging" defaultValue={editingProduct.packaging || ""} placeholder="Ex: Flacon 60 gélules..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Ingrédients & Composition</label>
-                            <textarea name="ingredients" rows={2} defaultValue={editingProduct.ingredients || ""} placeholder="Liste des principes actifs..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Bienfaits & Avantages</label>
-                            <textarea name="benefits" rows={2} defaultValue={editingProduct.benefits || ""} placeholder="Effets constatés, bénéfices santé..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Conseils d'utilisation & Posologie</label>
-                            <textarea name="usage" rows={2} defaultValue={editingProduct.usage || ""} placeholder="2 gélules par jour avec un grand verre d'eau..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Contre-indications & Mises en garde</label>
-                            <textarea name="contraindications" rows={2} defaultValue={editingProduct.contraindications || ""} placeholder="Déconseillé aux femmes enceintes..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">Titre SEO (Meta title)</label>
-                              <input type="text" name="metaTitle" defaultValue={editingProduct.metaTitle || ""} placeholder="Titre pour Google..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900" />
-                            </div>
-                            <div>
-                              <label className="text-[11px] font-semibold block mb-1">URL personnalisée (Slug)</label>
-                              <input type="text" name="seoSlug" defaultValue={editingProduct.seoSlug || ""} placeholder="nom-du-produit" className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 font-mono text-xs" />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-[11px] font-semibold block mb-1">Description SEO (Meta description)</label>
-                            <textarea name="metaDescription" rows={2} defaultValue={editingProduct.metaDescription || ""} placeholder="Description affichée dans les moteurs de recherche..." className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 resize-none" />
-                          </div>
-                        </div>
-                      )}
-
-                    {/* Image Upload with Crop Section */}
-                    <div>
-                      <label className="text-xs font-semibold block mb-1.5">
-                        Photo du produit <span className="text-slate-400 font-normal">(Remplacer ou rogner à nouveau)</span>
-                      </label>
-                      <CloudinaryUpload
-                        folder="starryhealth/products"
-                        cropAspect="4:3"
-                        onUpload={(url) => setEditProductImageUrl(url)}
-                        currentUrl={editProductImageUrl || editingProduct.images?.split(",")[0]}
-                        label="Changer, rogner et uploader la photo"
-                        primaryColor={user.primaryColor || "#0f766e"}
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-1">
-                      <input
-                        type="checkbox"
-                        name="isVisible"
-                        value="true"
-                        defaultChecked={editingProduct.isVisible !== false}
-                        id="edit-prod-vis"
-                        className="rounded accent-emerald-600"
-                      />
-                      <label htmlFor="edit-prod-vis" className="text-xs text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
-                        Activer ce produit (visible quand l'abonnement est actif)
-                      </label>
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                      <button type="button" onClick={() => setEditingProduct(null)} className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700">
-                        Annuler
-                      </button>
-                      <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700">
-                        Enregistrer les modifications
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products
-                .slice((productPage - 1) * PRODUCTS_PER_PAGE, productPage * PRODUCTS_PER_PAGE)
-                .map((p) => {
-                const isOwn = p.userId === user.id;
-                const hasDiscount = p.originalPrice && p.originalPrice > p.defaultPrice;
-                const discountPct = hasDiscount ? Math.round(((p.originalPrice - p.defaultPrice) / p.originalPrice) * 100) : 0;
-                const mainImg = p.images?.split(",")[0] || "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80";
-
-                return (
-                  <div key={p.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between overflow-hidden">
-                    <div>
-                      {/* Product Image Thumbnail */}
-                      <div className="h-40 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 mb-3 border border-slate-100 dark:border-slate-800 relative group">
-                        <img
-                          src={mainImg}
-                          alt={p.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        {hasDiscount && (
-                          <span className="absolute top-2 right-2 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
-                            -{discountPct}%
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                          {p.category}
-                        </span>
-                        {isOwn ? (
-                          isSubscribed || isSuperAdmin ? (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                              <Eye className="w-3 h-3" /> Visible en ligne
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                              <EyeOff className="w-3 h-3" /> Masqué (Sans abonnement)
-                            </span>
-                          )
-                        ) : (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
-                            Catalogue Global
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white line-clamp-1">{p.name}</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">{p.description}</p>
-
-                      <div className="mt-3 flex items-baseline gap-2">
-                        <span className="text-xl font-extrabold text-emerald-600">${p.defaultPrice.toFixed(2)}</span>
-                        {hasDiscount && (
-                          <span className="text-xs text-slate-400 line-through">${p.originalPrice.toFixed(2)}</span>
-                        )}
-                      </div>
-
-                      {/* Custom pricing */}
-                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
-                          Votre Prix Revendeur Partenaire ($)
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={pricesState[p.id] ?? ""}
-                            onChange={(e) =>
-                              setPricesState({ ...pricesState, [p.id]: parseFloat(e.target.value) })
-                            }
-                            placeholder={p.defaultPrice.toString()}
-                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs"
-                          />
-                          <button
-                            onClick={() => handlePriceSave(p.id)}
-                            className="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold shrink-0"
-                          >
-                            Fixer
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {(isOwn || isSuperAdmin) && (
-                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
-                        <button
-                          onClick={() => {
-                            setEditingProduct(p);
-                            setEditProductImageUrl(p.images?.split(",")[0] || "");
-                          }}
-                          className="text-xs text-sky-600 hover:text-sky-700 dark:text-sky-400 font-semibold flex items-center gap-1"
-                        >
-                          <Edit className="w-3.5 h-3.5" /> Modifier
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(p.id)}
-                          className="text-xs text-rose-500 hover:text-rose-700 font-semibold flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> Supprimer
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Pagination Controls */}
-            {products.length > PRODUCTS_PER_PAGE && (
-              <div className="flex items-center justify-between bg-white dark:bg-slate-900 px-6 py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="text-xs text-slate-500">
-                  Affichage de {((productPage - 1) * PRODUCTS_PER_PAGE) + 1} à {Math.min(productPage * PRODUCTS_PER_PAGE, products.length)} sur {products.length} produits
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={productPage === 1}
-                    onClick={() => setProductPage((p) => Math.max(p - 1, 1))}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    Précédent
-                  </button>
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 px-2">
-                    {productPage} / {Math.ceil(products.length / PRODUCTS_PER_PAGE)}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={productPage >= Math.ceil(products.length / PRODUCTS_PER_PAGE)}
-                    onClick={() => setProductPage((p) => Math.min(p + 1, Math.ceil(products.length / PRODUCTS_PER_PAGE)))}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    Suivant
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <ProductsTab
+            user={user}
+            isSuperAdmin={isSuperAdmin}
+            isSubscribed={isSubscribed}
+            hasPremiumFeatures={hasPremiumFeatures}
+            plan={plan}
+            products={products}
+            categories={categories}
+            customPrices={customPrices}
+            onNavigateTab={setActiveTab}
+            onNotify={showToast}
+            onCreateProduct={(formData) => createUserProduct(user.id, formData)}
+            onUpdateProduct={(productId, formData) => updateUserProduct(productId, user.id, formData)}
+            onDeleteProduct={(productId) => deleteUserProduct(productId, user.id)}
+            onUpdateCustomPrice={(productId, price) => updateCustomProductPrice(user.id, productId, price)}
+          />
         )}
 
-        {/* ─────────────────────────────────────────────
-            TAB 4: GALERIE (NOTRE UNIVERS EN IMAGES)
-            ───────────────────────────────────────────── */}
+        {/* TAB 4: GALERIE (NOTRE UNIVERS EN IMAGES) */}
         {activeTab === "gallery" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Galerie d'Images ("Notre univers en images")</h2>
-                <p className="text-xs text-slate-500 mt-1">Carrousel de photos immersives visible sur votre vitrine avec upload et rognage.</p>
-              </div>
-
-              {hasPremiumFeatures && (
-                <button
-                  onClick={() => {
-                    setAddGalleryImageUrl("");
-                    setShowAddGallery(true);
-                  }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md"
-                >
-                  <Plus className="w-4 h-4" /> Ajouter une Photo
-                </button>
-              )}
-            </div>
-
-            {!hasPremiumFeatures ? (
-              <div className="p-8 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-500/30 rounded-3xl">
-                <Lock className="w-8 h-8 text-amber-500 mx-auto mb-3" />
-                <h3 className="font-bold text-base text-slate-900 dark:text-white">Réservé au Forfait PREMIUM</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-1 mb-4">
-                  Sur votre vitrine, une galerie de haute qualité est affichée par défaut. Passez à PREMIUM pour personnaliser et rogner vos propres clichés.
-                </p>
-                <button onClick={() => setActiveTab("users")} className="px-5 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-bold">
-                  Voir les forfaits
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Modal Add Gallery Image with Crop */}
-                {showAddGallery && (
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      if (!addGalleryImageUrl) {
-                        showNotification("Veuillez ajouter une photo.", "error");
-                        return;
-                      }
-                      setSaving(true);
-                      const formData = new FormData(e.currentTarget);
-                      formData.set("imageUrl", addGalleryImageUrl);
-                      try {
-                        await addUserGalleryImage(user.id, formData);
-                        showNotification("Image ajoutée à la galerie !");
-                        setShowAddGallery(false);
-                        setAddGalleryImageUrl("");
-                      } catch {
-                        showNotification("Erreur lors de l'ajout.", "error");
-                      } finally {
-                        setSaving(false);
-                      }
-                    }}
-                    className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl max-w-lg mx-auto"
-                  >
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                      <div className="flex items-center gap-2">
-                        <Camera className="w-4 h-4 text-amber-600" />
-                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Ajouter une photo à la galerie</h3>
-                      </div>
-                      <button type="button" onClick={() => setShowAddGallery(false)} className="text-slate-400 hover:text-slate-600">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold block mb-1.5">
-                        Photo <span className="text-slate-400 font-normal">(Upload direct Cloudinary & Rognage interactif)</span>
-                      </label>
-                      <CloudinaryUpload
-                        folder="starryhealth/gallery"
-                        cropAspect="16:9"
-                        onUpload={(url) => setAddGalleryImageUrl(url)}
-                        currentUrl={addGalleryImageUrl}
-                        label="Sélectionner, rogner et uploader la photo"
-                        primaryColor={user.primaryColor || "#0f766e"}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Légende</label>
-                      <input
-                        type="text"
-                        name="caption"
-                        placeholder="Ex: Laboratoire de contrôle qualité certifié..."
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                      <button type="button" onClick={() => setShowAddGallery(false)} className="px-4 py-2 text-xs text-slate-500">
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={saving || !addGalleryImageUrl}
-                        className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold disabled:opacity-50"
-                      >
-                        Enregistrer
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {/* Modal Edit Gallery Image with Crop */}
-                {editingGalleryImage && (
-                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 max-w-md w-full rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-2">
-                          <Edit className="w-4 h-4 text-amber-600" />
-                          <h3 className="font-bold text-sm text-slate-900 dark:text-white">Modifier la photo de galerie</h3>
-                        </div>
-                        <button onClick={() => setEditingGalleryImage(null)} className="text-slate-400 hover:text-slate-600">
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <form onSubmit={handleUpdateGalleryImage} className="space-y-4 pt-4">
-                        <div>
-                          <label className="text-xs font-semibold block mb-1.5">
-                            Photo <span className="text-slate-400 font-normal">(Remplacer ou rogner à nouveau)</span>
-                          </label>
-                          <CloudinaryUpload
-                            folder="starryhealth/gallery"
-                            cropAspect="16:9"
-                            onUpload={(url) => setEditGalleryImageUrl(url)}
-                            currentUrl={editGalleryImageUrl || editingGalleryImage.imageUrl}
-                            label="Changer, rogner et uploader"
-                            primaryColor={user.primaryColor || "#0f766e"}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-semibold block mb-1">Légende</label>
-                          <input
-                            type="text"
-                            name="caption"
-                            defaultValue={editingGalleryImage.caption || ""}
-                            placeholder="Ex: Laboratoire de recherche..."
-                            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                          <button type="button" onClick={() => setEditingGalleryImage(null)} className="px-4 py-2 text-xs text-slate-500">
-                            Annuler
-                          </button>
-                          <button type="submit" disabled={saving} className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold">
-                            Enregistrer
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {gallery.map((img) => (
-                    <div key={img.id} className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 group">
-                      <img src={img.imageUrl} alt={img.caption || ""} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
-                      <div className="p-3 bg-white dark:bg-slate-900">
-                        <p className="text-xs font-medium truncate text-slate-900 dark:text-white">{img.caption || "Sans légende"}</p>
-                      </div>
-                      <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => {
-                            setEditingGalleryImage(img);
-                            setEditGalleryImageUrl(img.imageUrl);
-                          }}
-                          className="p-1.5 rounded-lg bg-black/70 hover:bg-amber-600 text-white transition-colors shadow-md"
-                          title="Modifier la photo"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={async () => {
-                            if (!confirm("Supprimer cette photo ?")) return;
-                            await deleteUserGalleryImage(img.id, user.id);
-                            showNotification("Image supprimée !");
-                          }}
-                          className="p-1.5 rounded-lg bg-black/70 hover:bg-rose-600 text-white transition-colors shadow-md"
-                          title="Supprimer la photo"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          <GalleryTab
+            user={user}
+            hasPremiumFeatures={hasPremiumFeatures}
+            gallery={gallery}
+            onNavigateTab={setActiveTab}
+            onNotify={showToast}
+            onAddGalleryImage={(formData) => addUserGalleryImage(user.id, formData)}
+            onUpdateGalleryImage={(imageId, formData) => updateUserGalleryImage(imageId, user.id, formData)}
+            onDeleteGalleryImage={(imageId) => deleteUserGalleryImage(imageId, user.id)}
+          />
         )}
 
-        {/* ─────────────────────────────────────────────
-            TAB : TÉMOIGNAGES CLIENTS
-            ───────────────────────────────────────────── */}
+        {/* TAB : TÉMOIGNAGES CLIENTS */}
         {activeTab === "testimonials" && (
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Témoignages & Avis Clients ({userTestimonials.length})
-                </h2>
-                <p className="text-xs text-slate-500 mt-1">
-                  Consultez et gérez les avis de vos clients affichés publiquement sur votre vitrine.
-                </p>
-              </div>
-            </div>
-
-            {userTestimonials.length === 0 ? (
-              <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <MessageSquarePlus className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Aucun témoignage pour l'instant.</p>
-                <p className="text-xs text-slate-400 mt-1">Les avis soumis par vos visiteurs apparaîtront ici.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {userTestimonials.map((t: any) => (
-                  <div key={t.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center font-bold text-emerald-700 text-sm shrink-0">
-                          {t.authorName?.charAt(0)?.toUpperCase() || "?"}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{t.authorName}</p>
-                          <div className="flex gap-0.5">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <span key={i} className={`text-xs ${i < (t.rating || 5) ? "text-amber-400" : "text-slate-200 dark:text-slate-700"}`}>★</span>
-                            ))}
-                          </div>
-                        </div>
-                        <button
-                          onClick={async () => {
-                            if (confirm("Supprimer ce témoignage ?")) {
-                              await deleteTestimonial(t.id);
-                              showNotification("Témoignage supprimé !");
-                            }
-                          }}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                        "{t.content}"
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <TestimonialsTab
+            userTestimonials={userTestimonials}
+            onDeleteTestimonial={(id) => deleteTestimonial(id)}
+            onNotify={showToast}
+          />
         )}
 
-        {/* ─────────────────────────────────────────────
-            TAB 5: BOÎTE DE SUGGESTIONS (ADMIN & ABONNÉS)
-            ───────────────────────────────────────────── */}
+        {/* TAB 5: BOÎTE DE SUGGESTIONS (ADMIN & ABONNÉS) */}
         {activeTab === "suggestions" && (
-          <div className="space-y-8">
-            {isSuperAdmin ? (
-              /* SUPER ADMIN: Suggestions reçues des abonnés */
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <MessageSquarePlus className="w-5 h-5 text-emerald-600" />
-                      <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                        Boîte à Suggestions des Abonnés ({adminSuggestions.length})
-                      </h2>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Visualisez, filtrez, répondez et gérez l'état de chaque suggestion (Nouveau, En cours, Traité, Rejeté).
-                    </p>
-                  </div>
-
-                  {/* Filtres de statut */}
-                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl shrink-0 overflow-x-auto text-[11px] font-bold">
-                    {["ALL", "NEW", "IN_PROGRESS", "DONE", "REJECTED"].map((f) => (
-                      <button
-                        key={f}
-                        type="button"
-                        onClick={() => setSuggestionFilters(f)}
-                        className={`px-3 py-1.5 rounded-lg transition-all ${suggestionFilters === f
-                          ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
-                          : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                      >
-                        {f === "ALL" && "Toutes"}
-                        {f === "NEW" && "Nouveau"}
-                        {f === "IN_PROGRESS" && "En cours"}
-                        {f === "DONE" && "Traité"}
-                        {f === "REJECTED" && "Rejeté"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {adminSuggestions.filter((s: any) => suggestionFilters === "ALL" || (s.status || "NEW") === suggestionFilters).length === 0 ? (
-                  <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-400 text-sm">
-                    Aucune suggestion ne correspond à ce filtre.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {adminSuggestions
-                      .filter((s: any) => suggestionFilters === "ALL" || (s.status || "NEW") === suggestionFilters)
-                      .map((asug) => {
-                        const currentStatus = suggestionStatuses[asug.id] !== undefined ? suggestionStatuses[asug.id] : (asug.status || "NEW");
-                        const currentReply = suggestionReplies[asug.id] !== undefined ? suggestionReplies[asug.id] : (asug.adminReply || "");
-
-                        return (
-                          <div
-                            key={asug.id}
-                            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4"
-                          >
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-                              <div className="flex items-center gap-2.5">
-                                <span className="font-bold text-sm text-slate-900 dark:text-white">
-                                  {asug.subject}
-                                </span>
-                                <span
-                                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${currentStatus === "NEW"
-                                    ? "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300"
-                                    : currentStatus === "IN_PROGRESS"
-                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                                      : currentStatus === "DONE"
-                                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                        : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                                    }`}
-                                >
-                                  {currentStatus === "NEW" ? "Nouveau" : currentStatus === "IN_PROGRESS" ? "En cours" : currentStatus === "DONE" ? "Traité" : "Rejeté"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-3 text-xs text-slate-500">
-                                <span>
-                                  Abonné : <strong>{asug.user?.name || asug.user?.email}</strong> ({asug.user?.slug})
-                                </span>
-                                <span>{new Date(asug.createdAt).toLocaleDateString("fr-FR")}</span>
-                              </div>
-                            </div>
-
-                            <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                              {asug.message}
-                            </div>
-
-                            {/* Admin Management Row: Status Select + Reply Textarea */}
-                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-3">
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div>
-                                  <label className="text-[11px] font-semibold block mb-1 text-slate-600 dark:text-slate-400">
-                                    Changer le statut
-                                  </label>
-                                  <select
-                                    value={currentStatus}
-                                    onChange={(e) => setSuggestionStatuses(prev => ({ ...prev, [asug.id]: e.target.value }))}
-                                    className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                  >
-                                    <option value="NEW">Nouveau</option>
-                                    <option value="IN_PROGRESS">En cours</option>
-                                    <option value="DONE">Traité</option>
-                                    <option value="REJECTED">Rejeté</option>
-                                  </select>
-                                </div>
-                                <div className="sm:col-span-2">
-                                  <label className="text-[11px] font-semibold block mb-1 text-slate-600 dark:text-slate-400">
-                                    Réponse / Note de l'administrateur
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={currentReply}
-                                    onChange={(e) => setSuggestionReplies(prev => ({ ...prev, [asug.id]: e.target.value }))}
-                                    placeholder="Écrivez une réponse destinée à l'utilisateur..."
-                                    className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="flex items-center justify-between pt-1">
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleAdminSuggestionRead(asug.id, asug.isRead)}
-                                  className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1"
-                                >
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  {asug.isRead ? "Marquer non lu" : "Marquer lu"}
-                                </button>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteAdminSuggestion(asug.id)}
-                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                                  >
-                                    Supprimer
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleUpdateSuggestionStatus(asug.id)}
-                                    disabled={saving}
-                                    className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all"
-                                  >
-                                    Enregistrer le statut & réponse
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* SUBSCRIBER: Send suggestion to Starry Health Admin + History + Visitor suggestions */
-              <div className="space-y-8">
-                {/* Formulaire : Soumettre une suggestion */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <Send className="w-5 h-5 text-emerald-600" />
-                    <div>
-                      <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                        Soumettre une idée d'amélioration
-                      </h2>
-                      <p className="text-xs text-slate-500">
-                        Proposez une fonctionnalité ou une amélioration directement à l'équipe Starry Health.
-                      </p>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSendAdminSuggestion} className="space-y-4 max-w-2xl">
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Titre de votre suggestion</label>
-                      <input
-                        required
-                        type="text"
-                        name="subject"
-                        placeholder="Ex: Demande de nouveau produit, paiement mobile..."
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Votre message détaillé</label>
-                      <textarea
-                        required
-                        name="message"
-                        rows={3}
-                        placeholder="Décrivez votre proposition ou besoin en quelques lignes..."
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2"
-                    >
-                      <Send className="w-4 h-4" /> Envoyer ma suggestion
-                    </button>
-                  </form>
-                </div>
-
-                {/* Historique de mes suggestions envoyées à l'admin */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                    Historique de mes suggestions ({adminSuggestions.length})
-                  </h3>
-                  {adminSuggestions.length === 0 ? (
-                    <p className="text-xs text-slate-400">Vous n'avez pas encore soumis de suggestion.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {adminSuggestions.map((sug) => {
-                        const st = sug.status || "NEW";
-                        return (
-                          <div key={sug.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-xs space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-slate-900 dark:text-white text-sm">{sug.subject}</span>
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${st === "NEW"
-                                  ? "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300"
-                                  : st === "IN_PROGRESS"
-                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                                    : st === "DONE"
-                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                      : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                                  }`}
-                              >
-                                {st === "NEW" ? "Nouveau" : st === "IN_PROGRESS" ? "En cours" : st === "DONE" ? "Traité" : "Rejeté"}
-                              </span>
-                            </div>
-                            <p className="text-slate-700 dark:text-slate-300">{sug.message}</p>
-                            {sug.adminReply && (
-                              <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-900 dark:text-emerald-200 text-[11px]">
-                                <span className="font-bold block mb-0.5">Réponse de l'administrateur :</span>
-                                {sug.adminReply}
-                              </div>
-                            )}
-                            <div className="text-[10px] text-slate-400">
-                              Envoyé le {new Date(sug.createdAt).toLocaleDateString("fr-FR")}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Suggestions reçues des visiteurs de sa propre vitrine */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                    Messages des Visiteurs de ma vitrine ({suggestions.length})
-                  </h3>
-                  {suggestions.length === 0 ? (
-                    <p className="text-xs text-slate-400">Aucun message de visiteur pour le moment.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {suggestions.map((sug) => (
-                        <div key={sug.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-xs">
-                          <div className="flex justify-between font-bold mb-1">
-                            <span>{sug.authorName || "Visiteur"} {sug.email && `(${sug.email})`}</span>
-                            <span className="text-slate-400 font-normal">{new Date(sug.createdAt).toLocaleDateString("fr-FR")}</span>
-                          </div>
-                          <p className="text-slate-700 dark:text-slate-300">{sug.message}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+          <SuggestionsTab
+            user={user}
+            isSuperAdmin={isSuperAdmin}
+            adminSuggestions={adminSuggestions}
+            suggestions={suggestions}
+            onNotify={showToast}
+            onSendAdminSuggestion={(formData) => sendAdminSuggestion(user.id, formData)}
+            onToggleAdminSuggestionRead={(id, currentRead) => toggleAdminSuggestionRead(id, !currentRead)}
+            onDeleteAdminSuggestion={(id) => deleteAdminSuggestion(id)}
+            onUpdateAdminSuggestionStatus={(id, status, reply) => updateAdminSuggestionStatus(id, status, reply)}
+          />
         )}
 
-        {/* ─────────────────────────────────────────────
-            TAB 6: PARAMÈTRES / ORGANISATION & VITRINE & THÈME
-            ───────────────────────────────────────────── */}
+        {/* TAB 6: PARAMÈTRES / ORGANISATION & VITRINE & THÈME */}
         {activeTab === "settings" && (
-          <div className="space-y-6 max-w-4xl">
-            {/* Sub-tabs Selector */}
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl w-fit">
-              <button
-                type="button"
-                onClick={() => setSettingsSubTab("profile")}
-                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${settingsSubTab === "profile"
-                  ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
-                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-              >
-                Profil & Organisation
-              </button>
-              <button
-                type="button"
-                onClick={() => setSettingsSubTab("theme")}
-                className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${settingsSubTab === "theme"
-                  ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
-                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-              >
-                <Palette className="w-3.5 h-3.5" />
-                Thème & Apparence
-              </button>
-            </div>
-
-            {/* Condition 1: Thème & Apparence */}
-            {settingsSubTab === "theme" && (
-              <ThemeModule user={user} onSave={async (formData) => {
-                setSaving(true);
-                try {
-                  await updateUserProfile(user.id, formData);
-                  showNotification("Thème et couleurs sauvegardés avec succès !");
-                } catch (err: any) {
-                  showNotification(err.message || "Erreur de sauvegarde.", "error");
-                } finally {
-                  setSaving(false);
-                }
-              }} saving={saving} />
-            )}
-
-            {/* Condition 2: Profil & Organisation */}
-            {settingsSubTab === "profile" && (
-              <form onSubmit={handleProfileSubmit} className="space-y-8">
-                {/* 0. MODE D'AFFICHAGE & THÈME */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                  <ThemeSelector />
-                </div>
-
-                {/* 1. INFORMATIONS PERSONNELLES DU COMPTE */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                  <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                        1. Informations Personnelles du Gestionnaire
-                      </h2>
-                      <p className="text-xs text-slate-500">
-                        Votre photo de profil personnelle et vos coordonnées de compte utilisateur.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Avatar personnel */}
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">
-                        Photo de profil personnelle (Avatar)
-                      </label>
-                      <CloudinaryUpload
-                        folder="starryhealth/avatars"
-                        cropAspect="1:1"
-                        onUpload={(url) => setAvatarUrl(url)}
-                        currentUrl={avatarUrl}
-                        label="Uploader ma photo de profil"
-                        primaryColor={user.primaryColor || "#0f766e"}
-                      />
-                      <input type="hidden" name="avatar" value={avatarUrl} />
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Nom complet</label>
-                        <input
-                          type="text"
-                          name="name"
-                          defaultValue={user.name || ""}
-                          placeholder="Ex: Dr. Martin Dupont"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Adresse Email de connexion</label>
-                        <input
-                          type="email"
-                          name="email"
-                          defaultValue={user.email || ""}
-                          placeholder="votre.email@exemple.com"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Téléphone personnel</label>
-                        <input
-                          type="text"
-                          name="contactPhone"
-                          defaultValue={user.contactPhone || ""}
-                          placeholder="+243 990 000 000"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="text-xs font-semibold block mb-1">Biographie / À propos de vous</label>
-                      <textarea
-                        name="bio"
-                        rows={2}
-                        defaultValue={user.bio || ""}
-                        placeholder="Présentez brièvement votre parcours ou votre rôle..."
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. ORGANISATION COMMERCIALE & VITRINE (TENANT) */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                  <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 flex items-center justify-center">
-                      <Building className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                        2. Organisation Commerciale & Vitrine Publique
-                      </h2>
-                      <p className="text-xs text-slate-500">
-                        Le logo officiel de votre boutique et les coordonnées affichées sur votre sous-domaine.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Logo d'organisation */}
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">
-                        Logo officiel de l'Organisation / Boutique
-                      </label>
-                      <CloudinaryUpload
-                        folder="starryhealth/logos"
-                        cropAspect="4:3"
-                        onUpload={(url) => {
-                          setOrgLogoUrl(url);
-                          if (!faviconUrl && typeof window !== "undefined" && url) {
-                            window.dispatchEvent(new CustomEvent("tenant-favicon-change", { detail: url }));
-                          }
-                        }}
-                        currentUrl={orgLogoUrl}
-                        label="Uploader et rogner le logo de la boutique"
-                        primaryColor={user.primaryColor || "#0f766e"}
-                      />
-                      <input type="hidden" name="orgLogo" value={orgLogoUrl} />
-                    </div>
-
-                    {/* Favicon personnalisé d'onglet */}
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">
-                        Favicon personnalisé (Onglet navigateur)
-                      </label>
-                      <CloudinaryUpload
-                        folder="starryhealth/favicons"
-                        cropAspect="1:1"
-                        onUpload={(url) => {
-                          setFaviconUrl(url);
-                          if (typeof window !== "undefined" && url) {
-                            window.dispatchEvent(new CustomEvent("tenant-favicon-change", { detail: url }));
-                          }
-                        }}
-                        currentUrl={faviconUrl}
-                        label="Uploader le favicon d'onglet (Carré 1:1)"
-                        primaryColor={user.primaryColor || "#0f766e"}
-                      />
-                      <input type="hidden" name="favicon" value={faviconUrl} />
-                      <p className="text-[11px] text-slate-500 mt-1">
-                        Icône affichée dans l'onglet du navigateur pour votre vitrine / sous-domaine (fallback automatique sur StarryHealth si vide).
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Nom de l'organisation / Boutique</label>
-                        <input
-                          type="text"
-                          name="orgName"
-                          defaultValue={user.tenantConfig?.orgName || ""}
-                          placeholder="Cabinet Santé, Espace Nutrition..."
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">WhatsApp de Commande Client</label>
-                        <input
-                          type="text"
-                          name="whatsapp"
-                          defaultValue={user.whatsapp || ""}
-                          placeholder="+243990000000"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold block mb-1">Email professionnel pour la vitrine</label>
-                        <input
-                          type="email"
-                          name="contactEmail"
-                          defaultValue={user.contactEmail || ""}
-                          placeholder="contact@mondomaine.com"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="text-xs font-semibold block mb-1">Présentation de la boutique / Activité</label>
-                      <textarea
-                        name="orgDescription"
-                        rows={2}
-                        defaultValue={user.tenantConfig?.orgDescription || ""}
-                        placeholder="Présentez l'activité de votre boutique aux visiteurs..."
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Adresse physique / Ville</label>
-                      <input
-                        type="text"
-                        name="contactAddress"
-                        defaultValue={user.contactAddress || ""}
-                        placeholder="Av. du Commerce, Goma / Kinshasa"
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Site Web externe (optionnel)</label>
-                      <input
-                        type="url"
-                        name="contactWebsite"
-                        defaultValue={user.contactWebsite || ""}
-                        placeholder="https://monsite.com"
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="text-xs font-semibold block mb-1">Mention légale & Copyright</label>
-                      <input
-                        type="text"
-                        name="copyright"
-                        defaultValue={user.copyright || ""}
-                        placeholder="© 2026 Mon Entreprise. Tous droits réservés."
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. RÉSEAUX SOCIAUX DE L'ORGANISATION */}
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <h2 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3">
-                    Réseaux Sociaux de la Vitrine
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Facebook</label>
-                      <input type="url" name="facebook" defaultValue={user.facebook || ""} placeholder="https://facebook.com/..." className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">LinkedIn</label>
-                      <input type="url" name="linkedin" defaultValue={user.linkedin || ""} placeholder="https://linkedin.com/in/..." className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">TikTok</label>
-                      <input type="url" name="tiktok" defaultValue={user.tiktok || ""} placeholder="https://tiktok.com/@..." className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold block mb-1">Instagram</label>
-                      <input type="url" name="instagram" defaultValue={user.instagram || ""} placeholder="https://instagram.com/..." className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="px-6 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md flex items-center gap-2 cursor-pointer transition-transform hover:scale-102"
-                  >
-                    <Save className="w-4 h-4" />
-                    {saving ? "Enregistrement..." : "Enregistrer toutes les modifications"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+          <SettingsTab
+            user={user}
+            onNotify={showToast}
+            onUpdateProfile={(formData) => updateUserProfile(user.id, formData)}
+          />
         )}
-        {/* ─────────────────────────────────────────────
-            TAB: GESTION DU TENANT / USERNAME
-            ───────────────────────────────────────────── */}
+
+        {/* TAB: GESTION DU TENANT / USERNAME */}
         {activeTab === "tenant-requests" && (
-          <div className="space-y-6">
-            {isSuperAdmin ? (
-              <>
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
-                      <Globe className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                        Demandes de Changement de Tenant / Username
-                      </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Validez ou rejetez les demandes de modification de nom de domaine / tenant soumises par les distributeurs.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                  <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                    <h3 className="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">
-                      Liste des demandes ({tenantChangeRequests.length})
-                    </h3>
-                  </div>
-
-                  {tenantChangeRequests.length === 0 ? (
-                    <div className="p-12 text-center text-slate-400">
-                      <Globe className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                      <p className="text-xs">Aucune demande de changement de tenant enregistrée.</p>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-800">
-                          <tr>
-                            <th className="p-4">Utilisateur</th>
-                            <th className="p-4">Ancien Tenant (Username)</th>
-                            <th className="p-4">Nouveau Tenant Demandé</th>
-                            <th className="p-4">Date de la demande</th>
-                            <th className="p-4">Statut</th>
-                            <th className="p-4 text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                          {tenantChangeRequests.map((req: any) => (
-                            <tr key={req.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                              <td className="p-4 font-bold text-slate-900 dark:text-white">
-                                {req.user?.name || req.user?.email}
-                                <span className="block text-[11px] font-normal text-slate-400 font-mono">
-                                  {req.user?.email}
-                                </span>
-                              </td>
-                              <td className="p-4">
-                                <span className="font-mono font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-                                  {req.oldUsername}
-                                </span>
-                              </td>
-                              <td className="p-4">
-                                <span className="font-mono font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
-                                  {req.newUsername}
-                                </span>
-                              </td>
-                              <td className="p-4 text-slate-500">
-                                {new Date(req.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                              </td>
-                              <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${req.status === "APPROVED"
-                                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                  : req.status === "REJECTED"
-                                    ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
-                                    : "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
-                                  }`}>
-                                  {req.status === "APPROVED" ? "Approuvé" : req.status === "REJECTED" ? "Rejeté" : "En attente"}
-                                </span>
-                                {req.adminNote && (
-                                  <span className="block text-[10px] text-slate-400 mt-1 italic">
-                                    Note: {req.adminNote}
-                                  </span>
-                                )}
-                              </td>
-                              <td className="p-4 text-right space-x-2">
-                                {req.status === "PENDING" ? (
-                                  <>
-                                    <button
-                                      onClick={() => handleApproveUsernameChange(req.id)}
-                                      disabled={saving}
-                                      className="px-3 py-1.5 rounded-lg font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors text-[11px]"
-                                    >
-                                      Approuver
-                                    </button>
-                                    <button
-                                      onClick={() => handleRejectUsernameChange(req.id)}
-                                      disabled={saving}
-                                      className="px-3 py-1.5 rounded-lg font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-sm transition-colors text-[11px]"
-                                    >
-                                      Rejeter
-                                    </button>
-                                  </>
-                                ) : (
-                                  <span className="text-slate-400 text-[11px] italic">Traité</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              /* User view */
-              <>
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
-                      <Globe className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                        Gestion de mon Tenant (Identifiant de vitrine)
-                      </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Votre nom d'utilisateur (username) définit l'adresse unique de votre vitrine en ligne.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Current Tenant Card */}
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">Tenant Actuel</h3>
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                      <p className="text-xs text-slate-400 mb-1">Identifiant unique</p>
-                      <p className="text-lg font-extrabold font-mono text-emerald-600">
-                        @{user.username || user.slug}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-2">Lien vers votre vitrine :</p>
-                      <a
-                        href={`/?tenant=${user.slug}`}
-                        target="_blank"
-                        className="text-xs text-emerald-600 font-semibold hover:underline font-mono block mt-0.5"
-                      >
-                        {user.slug}.sboxx.site
-                      </a>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 text-xs text-amber-800 dark:text-amber-300 space-y-1">
-                      <p className="font-bold">Important :</p>
-                      <p className="text-[11px] leading-relaxed">
-                        Pour préserver la cohérence des liens et des données de vos clients, chaque changement de tenant doit être validé par l'administrateur avant d'être actif.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Request Form */}
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-4">Demander un nouveau tenant</h3>
-                    <form onSubmit={handleRequestUsernameChange} className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                          Nouveau nom d'utilisateur souhaité
-                        </label>
-                        <input
-                          type="text"
-                          name="newUsername"
-                          placeholder="mon_nouveau_tenant"
-                          required
-                          pattern="^[a-z0-9_]{3,30}$"
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-mono placeholder-slate-400 focus:outline-none focus:border-emerald-500"
-                        />
-                        <p className="text-[10px] text-slate-400 mt-1.5">
-                          3 à 30 caractères : lettres minuscules, chiffres et tirets bas (_) uniquement.
-                        </p>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={saving}
-                        className="w-full py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <Send className="w-4 h-4" />
-                        {saving ? "Envoi en cours..." : "Soumettre la demande à l'administrateur"}
-                      </button>
-                    </form>
-                  </div>
-                </div>
-
-                {/* History of user requests */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                  <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-                    <h3 className="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">
-                      Historique de vos demandes
-                    </h3>
-                  </div>
-
-                  {tenantChangeRequests.length === 0 ? (
-                    <div className="p-8 text-center text-slate-400 text-xs">
-                      Vous n'avez soumis aucune demande de changement de tenant.
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {tenantChangeRequests.map((req: any) => (
-                        <div key={req.id} className="p-4 flex items-center justify-between text-xs">
-                          <div>
-                            <span className="font-mono font-bold text-slate-900 dark:text-white">
-                              {req.oldUsername} → {req.newUsername}
-                            </span>
-                            <span className="block text-[10px] text-slate-400 mt-0.5">
-                              Demandé le {new Date(req.createdAt).toLocaleDateString("fr-FR")}
-                            </span>
-                            {req.adminNote && (
-                              <span className="block text-[10px] text-rose-500 mt-0.5">
-                                Note admin : {req.adminNote}
-                              </span>
-                            )}
-                          </div>
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${req.status === "APPROVED"
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                            : req.status === "REJECTED"
-                              ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
-                              : "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
-                            }`}>
-                            {req.status === "APPROVED" ? "Approuvé" : req.status === "REJECTED" ? "Rejeté" : "En attente"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+          <TenantRequestsTab
+            user={user}
+            isSuperAdmin={isSuperAdmin}
+            tenantChangeRequests={tenantChangeRequests}
+            onNotify={showToast}
+            onRequestUsernameChange={(newUsername) => requestUsernameChange(user.id, newUsername)}
+            onApproveUsernameChange={(requestId) => adminApproveUsernameChange(requestId)}
+            onRejectUsernameChange={(requestId, note) => adminRejectUsernameChange(requestId, note)}
+          />
         )}
-
       </main>
     </div>
   );

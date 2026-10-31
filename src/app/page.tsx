@@ -11,6 +11,7 @@ import { SuggestionBox } from "@/components/suggestion-box";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
 import { Sparkles, ArrowRight, ShieldCheck, HeartPulse } from "lucide-react";
 import Link from "next/link";
+import { TenantVisitTracker } from "@/components/tenant-visit-tracker";
 
 interface PageProps {
   searchParams?: Promise<{ tenant?: string }>;
@@ -39,6 +40,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-20 pb-20">
+      {tenant?.slug && <TenantVisitTracker tenantSlug={tenant.slug} />}
       {/* 1. Hero Carousel - Full Width */}
       <section className="w-full">
         <HeroCarousel

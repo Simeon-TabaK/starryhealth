@@ -5,7 +5,7 @@ import {
   Shield, Zap, Crown, Check, AlertCircle, Clock, Calendar, CheckCircle2,
   XCircle, PauseCircle, PlayCircle, PlusCircle, RefreshCw, Filter,
   Search, ArrowRight, User as UserIcon, AlertTriangle, FileText,
-  History, Sparkles, ChevronRight, X
+  History, Sparkles, ChevronRight, ChevronDown, ChevronUp, Info, Percent, X
 } from "lucide-react";
 import {
   requestUserSubscription,
@@ -49,7 +49,68 @@ export function SubscriptionManagement({
   const [selectedDurationForRequest, setSelectedDurationForRequest] = useState<number>(1);
   const [requestNotes, setRequestNotes] = useState("");
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showPriceDetails, setShowPriceDetails] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Helper de calcul dynamique du montant selon le forfait et la durée
+  const calculatePricing = (planName: "STANDARD" | "SMART" | "PREMIUM", durationMonths: number) => {
+    const customPricing = planPricings?.find((p: any) => {
+      const matchPlan = p.plan === planName;
+      let matchPeriod = false;
+      if (durationMonths === 1) matchPeriod = p.billingPeriod === "MONTHLY";
+      else if (durationMonths === 3) matchPeriod = p.billingPeriod === "QUARTERLY";
+      else if (durationMonths === 6) matchPeriod = p.billingPeriod === "SEMI_ANNUAL";
+      else if (durationMonths === 12) matchPeriod = p.billingPeriod === "ANNUAL";
+      return matchPlan && matchPeriod;
+    });
+
+    const baseMonthlyMap: Record<string, number> = {
+      STANDARD: 2.99,
+      SMART: 4.19,
+      PREMIUM: 5.99,
+    };
+
+    const unitPrice = baseMonthlyMap[planName] || 2.99;
+    const grossTotal = unitPrice * durationMonths;
+
+    if (customPricing && customPricing.totalBilled) {
+      const finalTotal = customPricing.totalBilled;
+      const discountAmount = Math.max(0, grossTotal - finalTotal);
+      const discountRate = grossTotal > 0 ? discountAmount / grossTotal : 0;
+      return {
+        unitPrice,
+        durationMonths,
+        grossTotal,
+        discountRate,
+        discountAmount,
+        taxRate: 0,
+        taxAmount: 0,
+        finalTotal,
+        effectiveMonthly: finalTotal / durationMonths,
+      };
+    }
+
+    let discountRate = 0;
+    if (durationMonths === 3) discountRate = 0.05;
+    else if (durationMonths === 6) discountRate = 0.10;
+    else if (durationMonths === 12) discountRate = 0.17;
+
+    const discountAmount = grossTotal * discountRate;
+    const finalTotal = grossTotal - discountAmount;
+    const effectiveMonthly = finalTotal / durationMonths;
+
+    return {
+      unitPrice,
+      durationMonths,
+      grossTotal,
+      discountRate,
+      discountAmount,
+      taxRate: 0,
+      taxAmount: 0,
+      finalTotal,
+      effectiveMonthly,
+    };
+  };
 
   // Admin filter states
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -1289,6 +1350,82 @@ export function SubscriptionManagement({
                   ))}
                 </div>
               </div>
+
+              {/* Dynamic Price Calculation & Details */}
+              {(() => {
+                const pricing = calculatePricing(selectedPlanForRequest, selectedDurationForRequest);
+                return (
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          Montant Total Calculé
+                        </span>
+                        <div className="flex items-baseline gap-2 mt-0.5">
+                          <span className="text-xl font-extrabold text-slate-900 dark:text-white">
+                            ${pricing.finalTotal.toFixed(2)}
+                          </span>
+                          <span className="text-[11px] text-slate-500">
+                            (soit ${pricing.effectiveMonthly.toFixed(2)}/mois)
+                          </span>
+                        </div>
+                      </div>
+
+                      {pricing.discountAmount > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                          -{(pricing.discountRate * 100).toFixed(0)}% de remise
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPriceDetails(!showPriceDetails)}
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline pt-1 cursor-pointer"
+                    >
+                      <span>{showPriceDetails ? "Masquer les détails" : "Voir plus de détails"}</span>
+                      {showPriceDetails ? (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+
+                    {showPriceDetails && (
+                      <div className="pt-3 border-t border-slate-200 dark:border-slate-700/60 space-y-2 text-[11px] animate-in fade-in duration-150">
+                        <div className="flex justify-between text-slate-600 dark:text-slate-300">
+                          <span>Prix unitaire :</span>
+                          <span className="font-semibold">${pricing.unitPrice.toFixed(2)} / mois</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600 dark:text-slate-300">
+                          <span>Durée choisie :</span>
+                          <span className="font-semibold">{pricing.durationMonths} mois</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600 dark:text-slate-300">
+                          <span>Sous-total brut ({pricing.unitPrice.toFixed(2)} × {pricing.durationMonths}) :</span>
+                          <span className="font-semibold">${pricing.grossTotal.toFixed(2)}</span>
+                        </div>
+                        {pricing.discountAmount > 0 && (
+                          <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
+                            <span>Remise durée :</span>
+                            <span>-${pricing.discountAmount.toFixed(2)} ({(pricing.discountRate * 100).toFixed(0)}%)</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                          <span>Taxes éventuelles (TVA / Taxe 0%) :</span>
+                          <span>$0.00</span>
+                        </div>
+                        <div className="pt-2 border-t border-dashed border-slate-200 dark:border-slate-700 flex justify-between font-bold text-slate-900 dark:text-white text-xs">
+                          <span>Total calculé :</span>
+                          <span className="text-emerald-600 dark:text-emerald-400">
+                            ${pricing.finalTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Notes */}
               <div>

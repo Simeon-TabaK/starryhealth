@@ -1,10 +1,11 @@
 /**
  * Starry Vitrine – Globals CSS
  * Palette officielle Starry Digital
- *   Primary:   #142986  → Bleu Starry profond
- *   Gold-1:    #d2b102  → Or primaire
- *   Gold-2:    #e9c490  → Or clair / sable
- *   Gold-dark: #8c6b0c  → Or foncé / brun
+ *   Primary:   #1A1A8B  → Bleu Starry profond
+ *   Secondary: #835C00  → Or foncé / brun
+ *   Accent:    #CCAB00  → Or Starry doré
+ *   Dark Mode: #010101  → Fond principal pour tout
+ *   Dark Card: #0f0f01  → Surfaces secondaires et cartes
  */
 
 @import "tailwindcss";
@@ -14,32 +15,37 @@
 /* ─── Tokens globaux ─────────────────────────────────────────── */
 @theme {
   /* Bleu Starry */
-  --color-primary:       #142986;
-  --color-primary-hover: #0e1d5e;
-  --color-primary-light: #3b52b4;
+  --color-primary: #1A1A8B;
+  --color-primary-hover: #121268;
+  --color-primary-light: #3232B8;
 
   /* Or Starry */
-  --color-secondary:     #d2b102;
-  --color-secondary-hover: #8c6b0c;
-  --color-secondary-light: #e9c490;
+  --color-secondary: #835C00;
+  --color-secondary-hover: #614400;
+  --color-secondary-light: #A77700;
+
+  /* Accent Starry (doré) */
+  --color-accent: #CCAB00;
+  --color-accent-hover: #B29500;
+  --color-accent-light: #E6C82E;
 
   --color-background-light: #f5f6fb;
-  --color-background-dark:  #080c1c;
+  --color-background-dark:  #010101;
 }
 
 /* ─── Variables CSS tenant (overridables par API) ────────────── */
 @layer base {
   :root {
     /* Couleurs principales — Light par défaut */
-    --tenant-primary:       #142986;
-    --tenant-primary-hover: #0e1d5e;
+    --tenant-primary: #1A1A8B;
+    --tenant-primary-hover: #121268;
     --tenant-primary-light: #dde3f8;
-    --tenant-primary-ring:  rgba(20, 41, 134, 0.22);
+    --tenant-primary-ring: rgba(26, 26, 139, 0.22);
 
     /* Or Starry */
-    --tenant-accent:        #d2b102;
-    --tenant-accent-hover:  #8c6b0c;
-    --tenant-accent-light:  #e9c490;
+    --tenant-accent: #CCAB00;
+    --tenant-accent-hover: #B29500;
+    --tenant-accent-light: #F7E580;
 
     /* Surfaces */
     --tenant-surface:       #ffffff;
@@ -49,7 +55,7 @@
     --tenant-text-muted:    #4a5280;
   }
 
-  /* Dark mode tokens */
+  /* Dark mode tokens: #010101 pour tout et #0f0f01 pour les surfaces */
   :is(.dark) :root,
   .dark {
     --tenant-primary:       #3b52b4;
@@ -57,15 +63,15 @@
     --tenant-primary-light: #0e1d5e;
     --tenant-primary-ring:  rgba(59, 82, 180, 0.30);
 
-    --tenant-accent:        #d2b102;
+    --tenant-accent: #CCAB00;
     --tenant-accent-hover:  #e9c490;
     --tenant-accent-light:  #8c6b0c;
 
-    --tenant-surface:       #0d1230;
-    --tenant-surface-2:     #141a3d;
-    --tenant-border:        rgba(59, 82, 180, 0.20);
-    --tenant-text:          #eef0fb;
-    --tenant-text-muted:    #8891c4;
+    --tenant-surface:       #010101;
+    --tenant-surface-2:     #0f0f01;
+    --tenant-border:        rgba(255, 255, 255, 0.08);
+    --tenant-text:          #f3f4f6;
+    --tenant-text-muted:    #9ca3af;
   }
 
   body {
@@ -75,6 +81,38 @@
     color: var(--tenant-text);
     transition: background-color 0.2s ease, color 0.2s ease;
   }
+}
+
+/* ─── Mode Sombre Global (#010101 pour tout & #0f0f01 pour surfaces) ─── */
+.dark body {
+  background-color: #010101 !important;
+}
+
+.dark .bg-white {
+  background-color: #010101 !important;
+}
+
+.dark .bg-slate-900,
+.dark .bg-slate-950,
+.dark .dark\:bg-slate-900,
+.dark .dark\:bg-slate-950 {
+  background-color: #010101 !important;
+}
+
+.dark .bg-slate-800,
+.dark .dark\:bg-slate-800,
+.dark .dark\:bg-slate-800\/40,
+.dark .dark\:bg-slate-800\/50,
+.dark .dark\:bg-slate-800\/60,
+.dark .dark\:bg-slate-800\/80 {
+  background-color: #0f0f01 !important;
+}
+
+.dark .border-slate-800,
+.dark .dark\:border-slate-800,
+.dark .dark\:border-slate-700,
+.dark .border-slate-700 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* ─── Glassmorphism ──────────────────────────────────────────── */
@@ -87,9 +125,9 @@
 }
 
 :is(.dark) .glass-card {
-  background: rgba(13, 18, 48, 0.80);
-  border: 1px solid rgba(59, 82, 180, 0.15);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.40);
+  background: rgba(15, 15, 1, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.60);
 }
 
 .glass-card-hover {
@@ -101,8 +139,8 @@
   box-shadow: 0 12px 40px 0 rgba(20, 41, 134, 0.12);
 }
 :is(.dark) .glass-card-hover:hover {
-  border-color: rgba(59, 82, 180, 0.30);
-  box-shadow: 0 12px 40px 0 rgba(59, 82, 180, 0.20);
+  border-color: rgba(204, 171, 0, 0.30);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.60);
 }
 
 /* ─── Classes tenant ─────────────────────────────────────────── */
@@ -150,9 +188,9 @@
 /* ─── Scrollbar Starry ───────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 8px; }
 ::-webkit-scrollbar-track    { background: #f0f2fc; }
-::-webkit-scrollbar-thumb    { background: #142986; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #d2b102; }
+::-webkit-scrollbar-thumb    { background: #1A1A8B; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #CCAB00; }
 
-:is(.dark) ::-webkit-scrollbar-track { background: #0d1230; }
-:is(.dark) ::-webkit-scrollbar-thumb { background: #3b52b4; }
-:is(.dark) ::-webkit-scrollbar-thumb:hover { background: #d2b102; }
+:is(.dark) ::-webkit-scrollbar-track { background: #010101; }
+:is(.dark) ::-webkit-scrollbar-thumb { background: #835C00; }
+:is(.dark) ::-webkit-scrollbar-thumb:hover { background: #CCAB00; }

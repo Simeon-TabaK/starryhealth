@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardClient } from "./dashboard-client";
+import { getTenantAnalyticsSummary } from "@/lib/analytics";
 
 interface DashboardPageProps {
   searchParams?: Promise<{ tab?: string }>;
@@ -197,6 +198,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       : Promise.resolve([])),
   ]);
 
+  const tenantSlug = currentUser.slug || currentUser.username || undefined;
+  const tenantAnalytics = tenantSlug ? await getTenantAnalyticsSummary(tenantSlug, currentUser.id) : null;
+
   return (
     <DashboardClient
       user={currentUser}
@@ -222,6 +226,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       allSubscriptionHistory={allSubscriptionHistory}
       categories={categories}
       initialTab={initialTab}
+      tenantAnalytics={tenantAnalytics}
     />
   );
 }

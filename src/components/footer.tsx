@@ -17,7 +17,9 @@ export function Footer({ tenant, services = [] }: FooterProps) {
   if (
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/dashboard") ||
-    pathname === "/auth/signin"
+    pathname === "/auth/signin" ||
+    pathname === "/auth/register" ||
+    pathname?.startsWith("/auth/complete-profile")
   ) {
     return null;
   }

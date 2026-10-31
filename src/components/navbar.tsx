@@ -42,7 +42,8 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/dashboard") ||
     pathname === "/auth/signin" ||
-    pathname === "/auth/register"
+    pathname === "/auth/register" ||
+    pathname?.startsWith("/auth/complete-profile")
   ) {
     return null;
   }

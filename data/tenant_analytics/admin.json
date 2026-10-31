@@ -1,0 +1,38 @@
+[
+  {
+    "deviceId": "dev_mvw70lkx_dl89zd",
+    "tenantSlug": "admin",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-10-31T09:22:45.860Z"
+  },
+  {
+    "deviceId": "dev_mvw70lkx_dl89zd",
+    "tenantSlug": "admin",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-10-31T09:22:45.872Z"
+  },
+  {
+    "deviceId": "dev_mvw70lkx_dl89zd",
+    "tenantSlug": "admin",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-10-31T09:31:21.681Z"
+  },
+  {
+    "deviceId": "dev_mvw70lkx_dl89zd",
+    "tenantSlug": "admin",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-10-31T09:31:21.791Z"
+  }
+]

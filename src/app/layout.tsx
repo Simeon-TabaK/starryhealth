@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/lib/i18n/context";
 import { SessionProvider } from "@/components/session-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -153,20 +154,22 @@ export default async function RootLayout({
       </head>
       <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
         <ThemeProvider>
-          <SessionProvider>
-            <TenantFavicon faviconUrl={customFavicon} />
-            <ThemeUserSync />
-            <Navbar tenant={tenant} primaryColor={primaryColor} />
-            <main className="flex-1">{children}</main>
-            <Footer tenant={tenant} services={services} />
-            <ScrollToTop />
-            {/* Cart drawer — available on all pages, opened via NavbarCartButton */}
-            <Cart
-              whatsapp={tenant?.user?.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138"}
-              primaryColor={primaryColor}
-              vendorName={tenant?.config?.orgName || tenant?.user?.name || "Starry Health"}
-            />
-          </SessionProvider>
+          <LanguageProvider>
+            <SessionProvider>
+              <TenantFavicon faviconUrl={customFavicon} />
+              <ThemeUserSync />
+              <Navbar tenant={tenant} primaryColor={primaryColor} />
+              <main className="flex-1">{children}</main>
+              <Footer tenant={tenant} services={services} />
+              <ScrollToTop />
+              {/* Cart drawer — available on all pages, opened via NavbarCartButton */}
+              <Cart
+                whatsapp={tenant?.user?.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "+243969131138"}
+                primaryColor={primaryColor}
+                vendorName={tenant?.config?.orgName || tenant?.user?.name || "Starry Health"}
+              />
+            </SessionProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

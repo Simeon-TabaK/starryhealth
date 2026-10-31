@@ -19,14 +19,14 @@ interface ColorField {
 }
 
 const COLOR_FIELDS: ColorField[] = [
-  { name: "primaryColor", label: "Couleur Principale", description: "Couleur dominante de votre marque", defaultValue: "#0f766e", group: "identity" },
-  { name: "secondaryColor", label: "Couleur Secondaire", description: "Complément de la couleur principale", defaultValue: "#134e4a", group: "identity", requiresPlan: "SMART" },
-  { name: "accentColor", label: "Couleur d'Accentuation", description: "Mise en valeur et call-to-action", defaultValue: "#10b981", group: "identity", requiresPlan: "SMART" },
-  { name: "buttonColor", label: "Couleur des Boutons", description: "Boutons principaux et actions rapides", defaultValue: "#0f766e", group: "identity", requiresPlan: "SMART" },
+  { name: "primaryColor", label: "Couleur Principale", description: "Couleur dominante de votre marque (officielle #1A1A8B)", defaultValue: "#1A1A8B", group: "identity" },
+  { name: "secondaryColor", label: "Couleur Secondaire", description: "Complément et nuances de marque (#835C00)", defaultValue: "#835C00", group: "identity", requiresPlan: "SMART" },
+  { name: "accentColor", label: "Couleur d'Accentuation", description: "Mise en valeur et call-to-action (#CCAB00)", defaultValue: "#CCAB00", group: "identity", requiresPlan: "SMART" },
+  { name: "buttonColor", label: "Couleur des Boutons", description: "Boutons principaux et actions rapides", defaultValue: "#1A1A8B", group: "identity", requiresPlan: "SMART" },
   { name: "headerColor", label: "Couleur de l'En-tête (Header)", description: "Arrière-plan de la barre supérieure", defaultValue: "#ffffff", group: "layout", requiresPlan: "SMART" },
   { name: "sidebarBgColor", label: "Arrière-plan du Menu (Sidebar)", description: "Couleur de fond du menu latéral", defaultValue: "#ffffff", group: "layout", requiresPlan: "SMART" },
   { name: "sidebarTextColor", label: "Texte du Menu Latéral", description: "Couleur des liens et labels du menu", defaultValue: "#1e293b", group: "layout", requiresPlan: "SMART" },
-  { name: "footerColor", label: "Couleur du Pied de Page (Footer)", description: "Arrière-plan du bas de page", defaultValue: "#0f172a", group: "layout", requiresPlan: "SMART" },
+  { name: "footerColor", label: "Couleur du Pied de Page (Footer)", description: "Arrière-plan du bas de page", defaultValue: "#0d1230", group: "layout", requiresPlan: "SMART" },
   { name: "dashboardBgColor", label: "Arrière-plan Dashboard", description: "Fond principal du tableau de bord", defaultValue: "#f8fafc", group: "layout", requiresPlan: "SMART" },
 ];
 
