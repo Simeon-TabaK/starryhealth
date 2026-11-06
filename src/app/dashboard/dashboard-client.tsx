@@ -239,6 +239,7 @@ export function DashboardClient({
     const newAvatar = (formData.get("avatar") as string) || localUser.avatar;
     const newPrimaryColor = (formData.get("primaryColor") as string) || localUser.primaryColor;
 
+    // Synchronisation complète de localUser (y compris toutes les propriétés du thème)
     setLocalUser((prev: any) => ({
       ...prev,
       name: newName,
@@ -249,11 +250,28 @@ export function DashboardClient({
       contactEmail: (formData.get("contactEmail") as string) ?? prev.contactEmail,
       contactAddress: (formData.get("contactAddress") as string) ?? prev.contactAddress,
       contactWebsite: (formData.get("contactWebsite") as string) ?? prev.contactWebsite,
+      whatsapp: (formData.get("whatsapp") as string) ?? prev.whatsapp,
+      facebook: (formData.get("facebook") as string) ?? prev.facebook,
+      instagram: (formData.get("instagram") as string) ?? prev.instagram,
+      linkedin: (formData.get("linkedin") as string) ?? prev.linkedin,
+      tiktok: (formData.get("tiktok") as string) ?? prev.tiktok,
+      copyright: (formData.get("copyright") as string) ?? prev.copyright,
       tenantConfig: {
         ...(prev.tenantConfig || {}),
         orgName: (formData.get("orgName") as string) ?? prev.tenantConfig?.orgName,
+        orgDescription: (formData.get("orgDescription") as string) ?? prev.tenantConfig?.orgDescription,
         orgLogo: (formData.get("orgLogo") as string) ?? prev.tenantConfig?.orgLogo,
+        favicon: (formData.get("favicon") as string) ?? prev.tenantConfig?.favicon,
         primaryColor: newPrimaryColor,
+        secondaryColor: (formData.get("secondaryColor") as string) ?? prev.tenantConfig?.secondaryColor,
+        accentColor: (formData.get("accentColor") as string) ?? prev.tenantConfig?.accentColor,
+        buttonColor: (formData.get("buttonColor") as string) ?? prev.tenantConfig?.buttonColor,
+        headerColor: (formData.get("headerColor") as string) ?? prev.tenantConfig?.headerColor,
+        footerColor: (formData.get("footerColor") as string) ?? prev.tenantConfig?.footerColor,
+        sidebarBgColor: (formData.get("sidebarBgColor") as string) ?? prev.tenantConfig?.sidebarBgColor,
+        sidebarTextColor: (formData.get("sidebarTextColor") as string) ?? prev.tenantConfig?.sidebarTextColor,
+        dashboardBgColor: (formData.get("dashboardBgColor") as string) ?? prev.tenantConfig?.dashboardBgColor,
+        fontFamily: (formData.get("fontFamily") as string) ?? prev.tenantConfig?.fontFamily,
       },
     }));
 

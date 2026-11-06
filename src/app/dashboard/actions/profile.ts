@@ -45,11 +45,12 @@ export async function updateUserProfile(userId: number, formData: FormData) {
 
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
   const plan = user?.subscriptionPlan;
+  const isActive = user?.subscriptionStatus === "ACTIVE" || isSuperAdmin;
 
-  // Theme color customization requires SMART or PREMIUM (or admin)
-  const canCustomColors = isSuperAdmin || plan === "SMART" || plan === "PREMIUM";
-  // Typography customization requires PREMIUM (or admin)
-  const canCustomFont = isSuperAdmin || plan === "PREMIUM";
+  // Toutes les personnalisations (couleurs, police, branding) sont accessibles à tous les abonnés actifs.
+  // Seules des fonctionnalités avancées supplémentaires pourraient être réservées aux plans supérieurs à l'avenir.
+  const canCustomColors = isActive; // Accessible à tous les abonnés actifs
+  const canCustomFont = isActive;   // Accessible à tous les abonnés actifs
 
   const dataToUpdate: any = {};
   if (name !== null && name !== undefined) dataToUpdate.name = name;
@@ -67,7 +68,7 @@ export async function updateUserProfile(userId: number, formData: FormData) {
   if (instagram !== null && instagram !== undefined) dataToUpdate.instagram = instagram;
   if (copyright !== null && copyright !== undefined) dataToUpdate.copyright = copyright;
   if (theme && ["light", "dark", "system"].includes(theme)) dataToUpdate.theme = theme;
-  if (canCustomColors && primaryColor) dataToUpdate.primaryColor = primaryColor;
+  if (primaryColor) dataToUpdate.primaryColor = primaryColor;
 
   await prisma.user.update({
     where: { id: userId },
@@ -82,15 +83,15 @@ export async function updateUserProfile(userId: number, formData: FormData) {
         orgDescription: orgDescription || undefined,
         orgLogo: orgLogo || undefined,
         favicon: favicon !== null && favicon !== undefined ? (favicon || null) : undefined,
-        secondaryColor: canCustomColors ? secondaryColor : undefined,
-        headerColor: canCustomColors ? headerColor : undefined,
-        accentColor: canCustomColors ? accentColor : undefined,
-        sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
-        sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
-        footerColor: canCustomColors ? footerColor : undefined,
-        dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
-        buttonColor: canCustomColors ? buttonColor : undefined,
-        fontFamily: canCustomFont ? fontFamily : undefined,
+        secondaryColor: canCustomColors ? (secondaryColor || undefined) : undefined,
+        headerColor: canCustomColors ? (headerColor || undefined) : undefined,
+        accentColor: canCustomColors ? (accentColor || undefined) : undefined,
+        sidebarBgColor: canCustomColors ? (sidebarBgColor || undefined) : undefined,
+        sidebarTextColor: canCustomColors ? (sidebarTextColor || undefined) : undefined,
+        footerColor: canCustomColors ? (footerColor || undefined) : undefined,
+        dashboardBgColor: canCustomColors ? (dashboardBgColor || undefined) : undefined,
+        buttonColor: canCustomColors ? (buttonColor || undefined) : undefined,
+        fontFamily: canCustomFont ? (fontFamily || undefined) : undefined,
       },
       create: {
         userId,
@@ -118,15 +119,15 @@ export async function updateUserProfile(userId: number, formData: FormData) {
           orgName: orgName || undefined,
           orgDescription: orgDescription || undefined,
           orgLogo: orgLogo || undefined,
-          secondaryColor: canCustomColors ? secondaryColor : undefined,
-          headerColor: canCustomColors ? headerColor : undefined,
-          accentColor: canCustomColors ? accentColor : undefined,
-          sidebarBgColor: canCustomColors ? sidebarBgColor : undefined,
-          sidebarTextColor: canCustomColors ? sidebarTextColor : undefined,
-          footerColor: canCustomColors ? footerColor : undefined,
-          dashboardBgColor: canCustomColors ? dashboardBgColor : undefined,
-          buttonColor: canCustomColors ? buttonColor : undefined,
-          fontFamily: canCustomFont ? fontFamily : undefined,
+          secondaryColor: canCustomColors ? (secondaryColor || undefined) : undefined,
+          headerColor: canCustomColors ? (headerColor || undefined) : undefined,
+          accentColor: canCustomColors ? (accentColor || undefined) : undefined,
+          sidebarBgColor: canCustomColors ? (sidebarBgColor || undefined) : undefined,
+          sidebarTextColor: canCustomColors ? (sidebarTextColor || undefined) : undefined,
+          footerColor: canCustomColors ? (footerColor || undefined) : undefined,
+          dashboardBgColor: canCustomColors ? (dashboardBgColor || undefined) : undefined,
+          buttonColor: canCustomColors ? (buttonColor || undefined) : undefined,
+          fontFamily: canCustomFont ? (fontFamily || undefined) : undefined,
         },
         create: {
           userId,
@@ -158,14 +159,13 @@ export async function updateUserProfile(userId: number, formData: FormData) {
     }
   }
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/dashboard");
   return { success: true };
 }
 
 
-// --- PRODUCT MANAGEMENT WITH SUBSCRIPTION QUOTA ENFORCEMENT ---
-
+// --- CUSTOM DOMAIN MANAGEMENT ---
 
 export async function setCustomDomain(userId: number, domain: string) {
   const user = await prisma.user.findUnique({
@@ -189,8 +189,7 @@ export async function setCustomDomain(userId: number, domain: string) {
   return { success: true };
 }
 
-// --- ADMIN USER & SUBSCRIPTION MANAGEMENT ---
-
+// --- USER THEME PREFERENCE ---
 
 export async function updateUserTheme(userId: number, theme: "light" | "dark" | "system") {
   if (!["light", "dark", "system"].includes(theme)) {
@@ -203,4 +202,3 @@ export async function updateUserTheme(userId: number, theme: "light" | "dark" | 
   revalidatePath("/dashboard");
   return { success: true, theme };
 }
-

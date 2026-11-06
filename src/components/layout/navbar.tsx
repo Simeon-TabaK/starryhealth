@@ -23,7 +23,6 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
     tenant?.config?.orgName || tenant?.user?.name || tenant?.slug;
   const primaryColor =
     primaryColorProp ||
-    tenant?.config?.headerColor ||
     tenant?.user?.primaryColor ||
     "#0f766e";
 

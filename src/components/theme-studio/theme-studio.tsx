@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Building,
   Palette,
@@ -50,29 +50,17 @@ const STUDIO_SECTIONS: { id: StudioSection; label: string; icon: React.ElementTy
   { id: "advanced", label: "Paramètres & SEO", icon: Search },
 ];
 
-export function ThemeStudio({
-  user,
-  onNotify,
-  onUpdateProfile,
-  onNavigateTab,
-}: ThemeStudioProps) {
+/** Construit l'état du studio depuis les données utilisateur. */
+function buildStateFromUser(user: any): ThemeStudioState {
   const config = user.tenantConfig || {};
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
-  const plan = user.subscriptionPlan as string | null;
-  const canCustomColors = isSuperAdmin || plan === "SMART" || plan === "PREMIUM";
-  const canCustomFont = isSuperAdmin || plan === "PREMIUM";
-  const hasPremiumFeatures = isSuperAdmin || plan === "PREMIUM";
-
-  // Parse header and footer colors (which may contain "bgColor|textColor")
   const parsedHeader = parseColorWithText(config.headerColor, "#ffffff");
   const parsedFooter = parseColorWithText(config.footerColor, "#0d1230");
 
-  // Initialisation de l'état réactif du studio
-  const [state, setState] = useState<ThemeStudioState>({
+  return {
     orgName: config.orgName || user.name || "",
     orgDescription: config.orgDescription || user.bio || "",
     orgLogo: config.orgLogo || "",
-    favicon: (config as any)?.favicon || "",
+    favicon: config.favicon || "",
 
     primaryColor: user.primaryColor || "#1A1A8B",
     secondaryColor: config.secondaryColor || "#835C00",
@@ -110,7 +98,77 @@ export function ThemeStudio({
 
     cardCornerStyle: "rounded-2xl",
     showDiscounts: true,
-  });
+  };
+}
+
+export function ThemeStudio({
+  user,
+  onNotify,
+  onUpdateProfile,
+  onNavigateTab,
+}: ThemeStudioProps) {
+  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const plan = user.subscriptionPlan as string | null;
+  const isActive = user.subscriptionStatus === "ACTIVE" || isSuperAdmin;
+
+  // Toutes les personnalisations sont accessibles à tous les abonnés actifs
+  const canCustomColors = isActive;
+  const canCustomFont = isActive;
+  const hasPremiumFeatures = isSuperAdmin || plan === "PREMIUM";
+
+  // État réactif du studio — initialisé depuis user, re-synchronisé à chaque changement de user (après save)
+  const [state, setState] = useState<ThemeStudioState>(() => buildStateFromUser(user));
+
+  // Clé de version pour tracker les changements de user (après chaque save)
+  const prevUserRef = useRef(user);
+  useEffect(() => {
+    // Comparer les champs clés pour détecter un vrai changement côté serveur
+    const prev = prevUserRef.current;
+    const prevConfig = prev.tenantConfig || {};
+    const currConfig = user.tenantConfig || {};
+    const changed =
+      prev.primaryColor !== user.primaryColor ||
+      prevConfig.orgName !== currConfig.orgName ||
+      prevConfig.orgDescription !== currConfig.orgDescription ||
+      prevConfig.orgLogo !== currConfig.orgLogo ||
+      prevConfig.favicon !== currConfig.favicon ||
+      prevConfig.secondaryColor !== currConfig.secondaryColor ||
+      prevConfig.accentColor !== currConfig.accentColor ||
+      prevConfig.buttonColor !== currConfig.buttonColor ||
+      prevConfig.headerColor !== currConfig.headerColor ||
+      prevConfig.footerColor !== currConfig.footerColor ||
+      prevConfig.sidebarBgColor !== currConfig.sidebarBgColor ||
+      prevConfig.sidebarTextColor !== currConfig.sidebarTextColor ||
+      prevConfig.dashboardBgColor !== currConfig.dashboardBgColor ||
+      prevConfig.fontFamily !== currConfig.fontFamily ||
+      prev.contactEmail !== user.contactEmail ||
+      prev.contactPhone !== user.contactPhone ||
+      prev.contactAddress !== user.contactAddress ||
+      prev.contactWebsite !== user.contactWebsite ||
+      prev.whatsapp !== user.whatsapp ||
+      prev.facebook !== user.facebook ||
+      prev.instagram !== user.instagram ||
+      prev.linkedin !== user.linkedin ||
+      prev.tiktok !== user.tiktok ||
+      prev.copyright !== user.copyright;
+
+    if (changed) {
+      prevUserRef.current = user;
+      // Re-sync le state du studio depuis les nouvelles données utilisateur
+      // Mais préserver les champs non-persistés (heroTitle, heroSubtitle, etc.)
+      setState((prev) => ({
+        ...buildStateFromUser(user),
+        // Préserver les champs UI locaux non-sauvegardés en base
+        heroTitle: prev.heroTitle,
+        heroSubtitle: prev.heroSubtitle,
+        heroBannerUrl: prev.heroBannerUrl,
+        headerStyle: prev.headerStyle,
+        showCartButton: prev.showCartButton,
+        cardCornerStyle: prev.cardCornerStyle,
+        showDiscounts: prev.showDiscounts,
+      }));
+    }
+  }, [user]);
 
   const [activeSection, setActiveSection] = useState<StudioSection>("identity");
   const [saving, setSaving] = useState(false);

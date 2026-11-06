@@ -32,7 +32,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   const tenantUserId = tenant?.user?.id ?? null;
   const primaryColor =
-    tenant?.config?.headerColor || tenant?.user?.primaryColor || "#0f766e";
+    tenant?.user?.primaryColor || "#0f766e";
   const vendorName =
     tenant?.config?.orgName || tenant?.user?.name || "Starry Health";
   const tenantQuery =

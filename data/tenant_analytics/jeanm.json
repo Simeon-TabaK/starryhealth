@@ -322,5 +322,95 @@
     "browser": "Chrome",
     "path": "/",
     "timestamp": "2026-11-06T11:44:04.170Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:47:03.351Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:47:03.364Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:47:48.140Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:47:48.152Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:48:44.581Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:48:44.608Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:49:14.927Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T11:49:14.965Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T12:05:23.647Z"
+  },
+  {
+    "deviceId": "dev_mw4td4bw_ak2plb",
+    "tenantSlug": "jeanm",
+    "deviceType": "desktop",
+    "os": "Windows",
+    "browser": "Chrome",
+    "path": "/",
+    "timestamp": "2026-11-06T12:05:23.671Z"
   }
 ]

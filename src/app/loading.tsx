@@ -13,7 +13,7 @@ export default function RootLoading() {
             Chargement en cours
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Préparation de votre environnement Starry Health...
+            Préparation de votre environnement ...
           </p>
         </div>
       </div>

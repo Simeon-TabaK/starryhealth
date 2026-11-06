@@ -100,14 +100,15 @@ export default async function RootLayout({
 }>) {
   const tenant = await getCurrentTenant();
   const config = tenant?.config as any;
-  const primaryColor =
-    tenant?.user?.primaryColor || config?.headerColor || "#0f766e";
-  const secondaryColor = config?.secondaryColor || "#134e4a";
-  const accentColor = config?.accentColor || "#10b981";
-  const headerColor = config?.headerColor || "#ffffff";
-  const footerColor = config?.footerColor || "#0f172a";
+  const primaryColor = tenant?.user?.primaryColor || "#0f766e";
+  const secondaryColor = config?.secondaryColor || "#835C00";
+  const accentColor = config?.accentColor || "#CCAB00";
+  const rawHeaderColor = config?.headerColor || "#ffffff";
+  const headerColor = rawHeaderColor.split("|")[0];
+  const rawFooterColor = config?.footerColor || "#0f172a";
+  const footerColor = rawFooterColor.split("|")[0];
   const buttonColor = config?.buttonColor || primaryColor;
-  const fontFamily = config?.fontFamily;
+  const fontFamily = config?.fontFamily || "Inter";
   const services = await getServicesForTenant(tenant?.user?.id);
   let customFavicon = config?.favicon?.trim() || config?.orgLogo?.trim() || null;
   if (!customFavicon && tenant?.user?.id) {
@@ -153,7 +154,7 @@ export default async function RootLayout({
             --tenant-button: ${buttonColor};
             ${fontFamily ? `--font-sans: '${fontFamily}', sans-serif;` : ""}
           }
-          ${fontFamily ? `body { font-family: '${fontFamily}', sans-serif !important; }` : ""}
+          ${fontFamily ? `html, body, button, input, select, textarea { font-family: '${fontFamily}', sans-serif !important; }` : ""}
         `}</style>
       </head>
       <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">

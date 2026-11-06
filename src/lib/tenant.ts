@@ -38,6 +38,12 @@ export interface TenantConfig {
   favicon: string | null;
   secondaryColor: string | null;
   headerColor: string | null;
+  accentColor: string | null;
+  footerColor: string | null;
+  buttonColor: string | null;
+  sidebarBgColor: string | null;
+  sidebarTextColor: string | null;
+  dashboardBgColor: string | null;
   fontFamily: string | null;
 }
 
@@ -135,6 +141,12 @@ export async function getTenantContext(
                 favicon: (admin.tenantConfig as any).favicon || admin.tenantConfig.orgLogo || null,
                 secondaryColor: admin.tenantConfig.secondaryColor,
                 headerColor: admin.tenantConfig.headerColor,
+                accentColor: admin.tenantConfig.accentColor,
+                footerColor: admin.tenantConfig.footerColor,
+                buttonColor: admin.tenantConfig.buttonColor,
+                sidebarBgColor: admin.tenantConfig.sidebarBgColor,
+                sidebarTextColor: admin.tenantConfig.sidebarTextColor,
+                dashboardBgColor: admin.tenantConfig.dashboardBgColor,
                 fontFamily: admin.tenantConfig.fontFamily,
               }
             : null,
@@ -194,6 +206,12 @@ export async function getTenantContext(
             favicon: (user.tenantConfig as any).favicon || user.tenantConfig.orgLogo || null,
             secondaryColor: user.tenantConfig.secondaryColor,
             headerColor: user.tenantConfig.headerColor,
+            accentColor: user.tenantConfig.accentColor,
+            footerColor: user.tenantConfig.footerColor,
+            buttonColor: user.tenantConfig.buttonColor,
+            sidebarBgColor: user.tenantConfig.sidebarBgColor,
+            sidebarTextColor: user.tenantConfig.sidebarTextColor,
+            dashboardBgColor: user.tenantConfig.dashboardBgColor,
             fontFamily: user.tenantConfig.fontFamily,
           }
         : null,
