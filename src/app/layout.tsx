@@ -154,6 +154,10 @@ export default async function RootLayout({
             --tenant-button: ${buttonColor};
             ${fontFamily ? `--font-sans: '${fontFamily}', sans-serif;` : ""}
           }
+          .dark {
+            --tenant-header: #0f172a;
+            --tenant-footer: #020617;
+          }
           ${fontFamily ? `html, body, button, input, select, textarea { font-family: '${fontFamily}', sans-serif !important; }` : ""}
         `}</style>
       </head>

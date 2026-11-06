@@ -311,8 +311,14 @@ export function AdminUserManagement({ adminId, users: initialUsers, onNotify }: 
 
               <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-700/60">
                 <div className="flex items-center gap-1.5">
-                  {PLAN_ICONS[user.subscriptionPlan]}
-                  <span>{PLAN_LABELS[user.subscriptionPlan] || "Aucun plan"}</span>
+                  {user.subscriptionPlan ? (
+                    <>
+                      {PLAN_ICONS[user.subscriptionPlan]}
+                      <span>{PLAN_LABELS[user.subscriptionPlan] || user.subscriptionPlan}</span>
+                    </>
+                  ) : (
+                    <span>Aucun plan</span>
+                  )}
                 </div>
                 <button
                   type="button"

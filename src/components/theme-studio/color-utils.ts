@@ -59,9 +59,9 @@ export function parseColorWithText(raw?: string | null, fallbackBg = "#ffffff", 
  * Encodes bg and optional text into composite string
  */
 export function encodeColorWithText(bg: string, text?: string): string {
-  if (!text || text === getOptimalContrastTextColor(bg)) {
-    return bg;
+  if (text) {
+    return `${bg}|${text}`;
   }
-  return `${bg}|${text}`;
+  return bg;
 }
 

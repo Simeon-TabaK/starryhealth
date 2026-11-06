@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, ShieldCheck, Phone, User } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { useTheme } from "@/components/layout/theme-provider";
 import { NavbarCartButton } from "@/components/commerce/cart";
 import { sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 import type { TenantContext } from "@/lib/tenant";
@@ -50,11 +51,18 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
   const logoSrc = tenant?.config?.orgLogo || "/assets/logo.png";
   const displayName = tenant?.config?.orgName || "Starry Health";
 
-  // Header background & text color parsing (with auto-contrast to avoid dark-on-dark)
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const isDark = mounted && resolvedTheme === "dark";
+
+  // Header background & text color parsing (personnalisé uniquement en mode LIGHT, standard en mode DARK)
   const rawHeaderColor = tenant?.config?.headerColor;
   let customHeaderBg: string | undefined = undefined;
   let customHeaderText: string | undefined = undefined;
-  if (rawHeaderColor) {
+  if (!isDark && rawHeaderColor) {
     const parts = rawHeaderColor.split("|");
     customHeaderBg = parts[0];
     if (parts[1]) {
@@ -71,12 +79,33 @@ export function Navbar({ tenant, primaryColor: primaryColorProp }: NavbarProps) 
 
   return (
     <header
+      id="tenant-navbar"
       className="sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 backdrop-blur-xl transition-colors"
       style={{
         backgroundColor: customHeaderBg || undefined,
         color: customHeaderText || undefined,
       }}
     >
+      {customHeaderText && (
+        <style>{`
+          #tenant-navbar,
+          #tenant-navbar a:not(.btn-accent),
+          #tenant-navbar span:not(.badge-accent),
+          #tenant-navbar p,
+          #tenant-navbar button:not(.btn-accent) {
+            color: ${customHeaderText} !important;
+          }
+          #tenant-navbar .nav-link-item {
+            color: ${customHeaderText} !important;
+            opacity: 0.88;
+          }
+          #tenant-navbar .nav-link-item:hover,
+          #tenant-navbar .nav-link-active {
+            opacity: 1;
+            color: ${customHeaderText} !important;
+          }
+        `}</style>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
 

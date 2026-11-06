@@ -465,15 +465,9 @@ export function DashboardClient({
     }
   }, [activeTab]);
 
-  const config = user.tenantConfig;
-  const themeDashboardBg = config?.dashboardBgColor || undefined;
-  const themeSidebarBg = config?.sidebarBgColor || undefined;
-  const themeSidebarText = config?.sidebarTextColor || undefined;
-
   return (
     <div
       className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col md:flex-row"
-      style={{ backgroundColor: themeDashboardBg }}
     >
       {/* ─────────────────────────────────────────────
           MOBILE TOP NAVBAR (Hamburger + Title + Logout)
@@ -510,10 +504,6 @@ export function DashboardClient({
       <aside
         className={`fixed md:sticky top-0 bottom-0 left-0 z-40 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 md:translate-x-0 ${mobileNavOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"
           } h-screen`}
-        style={{
-          backgroundColor: themeSidebarBg,
-          color: themeSidebarText,
-        }}
       >
         {/* Brand Header */}
         <div className="p-6 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
