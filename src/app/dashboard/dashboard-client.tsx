@@ -47,8 +47,8 @@ import {
   Crown,
 } from "lucide-react";
 import Link from "next/link";
-import { ToastContainer, ToastItem, ToastType } from "@/components/toast";
-import { signOut } from "next-auth/react";
+import { ToastContainer, ToastItem, ToastType } from "@/components/ui/toast";
+import { signOut, useSession } from "next-auth/react";
 import {
   updateUserProfile,
   updateCustomProductPrice,
@@ -60,6 +60,8 @@ import {
   addUserFaq,
   deleteUserFaq,
   addUserGalleryImage,
+  addMultipleUserGalleryImages,
+  deleteMultipleUserGalleryImages,
   updateUserGalleryImage,
   deleteUserGalleryImage,
   addUserPartner,
@@ -76,20 +78,21 @@ import {
   adminRejectUsernameChange,
 } from "./actions";
 import { getProductLimit, planHasFeature } from "@/lib/plans";
-import { SubscriptionManagement } from "@/components/subscription-management";
-import { AdminPlanManagement } from "@/components/admin-plan-management";
-import { AdminUserManagement } from "@/components/admin-user-management";
-import { AdminTenantManagement } from "@/components/admin-tenant-management";
-import { CategoryManagement } from "@/components/category-management";
-import { ServicesManagement } from "@/components/services-management";
+import { SubscriptionManagement } from "@/components/admin/subscription-management";
+import { AdminPlanManagement } from "@/components/admin/admin-plan-management";
+import { AdminUserManagement } from "@/components/admin/admin-user-management";
+import { AdminTenantManagement } from "@/components/admin/admin-tenant-management";
+import { CategoryManagement } from "@/components/admin/category-management";
+import { ServicesManagement } from "@/components/admin/services-management";
 import { OverviewTab } from "@/components/dashboard/overview-tab";
 import { ProductsTab } from "@/components/dashboard/products-tab";
 import { GalleryTab } from "@/components/dashboard/gallery-tab";
 import { TestimonialsTab } from "@/components/dashboard/testimonials-tab";
 import { SuggestionsTab } from "@/components/dashboard/suggestions-tab";
 import { SettingsTab } from "@/components/dashboard/settings-tab";
+import { ThemeStudio } from "@/components/theme-studio/theme-studio";
 import { TenantRequestsTab } from "@/components/dashboard/tenant-requests-tab";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 interface DashboardClientProps {
   user: any;
@@ -144,12 +147,25 @@ export function DashboardClient({
   initialTab,
   tenantAnalytics,
 }: DashboardClientProps) {
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
-  const plan = user.subscriptionPlan as "STANDARD" | "SMART" | "PREMIUM" | null;
-  const isSubscribed = user.subscriptionStatus === "ACTIVE";
+  const { update: updateSession } = useSession();
+  const [localUser, setLocalUser] = useState(user);
 
-  // Sidebar navigation state (initialisé avec l'onglet demandé ou vue d'ensemble)
-  const [activeTab, setActiveTab] = useState<string>(initialTab || "overview");
+  useEffect(() => {
+    setLocalUser(user);
+  }, [user]);
+
+  const isSuperAdmin = localUser.role === "SUPER_ADMIN";
+  const plan = localUser.subscriptionPlan as "STANDARD" | "SMART" | "PREMIUM" | null;
+  const isSubscribed = localUser.subscriptionStatus === "ACTIVE";
+
+  // Sidebar navigation state (initialisé avec l'URL, l'onglet demandé ou vue d'ensemble)
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const urlTab = new URLSearchParams(window.location.search).get("tab");
+      if (urlTab) return urlTab;
+    }
+    return initialTab || "overview";
+  });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -176,7 +192,31 @@ export function DashboardClient({
     if (groupLabel) {
       setOpenGroups((prev) => ({ ...prev, [groupLabel]: true }));
     }
+
+    // Gestion du routage : synchroniser l'URL dans le navigateur sans rechargement
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (itemId === "overview") {
+        url.searchParams.delete("tab");
+      } else {
+        url.searchParams.set("tab", itemId);
+      }
+      window.history.pushState({ tab: itemId }, "", url.toString());
+    }
   };
+
+  // Synchronisation lors de l'utilisation des boutons Précédent / Suivant du navigateur
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window !== "undefined") {
+        const urlTab = new URLSearchParams(window.location.search).get("tab") || "overview";
+        setActiveTab(urlTab);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
   
   // Toast notifications system (top-right)
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -190,6 +230,47 @@ export function DashboardClient({
   // Fallback alias for showNotification
   const showNotification = (text: string, type: "success" | "error" = "success") => {
     showToast(text, type);
+  };
+
+  // Mise à jour réactive du profil et synchronisation de session
+  const handleUpdateProfile = async (formData: FormData) => {
+    const res = await updateUserProfile(localUser.id, formData);
+    const newName = (formData.get("name") as string) || localUser.name;
+    const newAvatar = (formData.get("avatar") as string) || localUser.avatar;
+    const newPrimaryColor = (formData.get("primaryColor") as string) || localUser.primaryColor;
+
+    setLocalUser((prev: any) => ({
+      ...prev,
+      name: newName,
+      avatar: newAvatar,
+      primaryColor: newPrimaryColor,
+      bio: (formData.get("bio") as string) ?? prev.bio,
+      contactPhone: (formData.get("contactPhone") as string) ?? prev.contactPhone,
+      contactEmail: (formData.get("contactEmail") as string) ?? prev.contactEmail,
+      contactAddress: (formData.get("contactAddress") as string) ?? prev.contactAddress,
+      contactWebsite: (formData.get("contactWebsite") as string) ?? prev.contactWebsite,
+      tenantConfig: {
+        ...(prev.tenantConfig || {}),
+        orgName: (formData.get("orgName") as string) ?? prev.tenantConfig?.orgName,
+        orgLogo: (formData.get("orgLogo") as string) ?? prev.tenantConfig?.orgLogo,
+        primaryColor: newPrimaryColor,
+      },
+    }));
+
+    if (updateSession) {
+      try {
+        await updateSession();
+      } catch {}
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("user-profile-updated", {
+          detail: { name: newName, avatar: newAvatar },
+        })
+      );
+    }
+    return res;
   };
 
   // Quotas
@@ -280,9 +361,16 @@ export function DashboardClient({
       label: "Paramètres & Vitrine",
       items: [
         {
-          id: "settings",
-          label: "Profil & Apparence",
-          icon: Settings,
+          id: "profile",
+          label: "Profil & Organisation",
+          icon: User,
+          badge: null,
+          locked: false,
+        },
+        {
+          id: "theme",
+          label: "Thème & Apparence",
+          icon: Palette,
           badge: null,
           locked: false,
         },
@@ -348,6 +436,16 @@ export function DashboardClient({
         },
       ]),
   ];
+
+  // Dérouler automatiquement le groupe contenant le menu actif
+  useEffect(() => {
+    for (const group of navGroups) {
+      if (group.items.some((item) => item.id === activeTab)) {
+        setOpenGroups((prev) => ({ ...prev, [group.label]: true }));
+        break;
+      }
+    }
+  }, [activeTab]);
 
   const config = user.tenantConfig;
   const themeDashboardBg = config?.dashboardBgColor || undefined;
@@ -425,18 +523,18 @@ export function DashboardClient({
         {/* User Mini Profile Card */}
         <div className="p-4 mx-4 my-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm"
-            style={{ backgroundColor: user.primaryColor || "#0f766e" }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm overflow-hidden"
+            style={{ backgroundColor: localUser.primaryColor || "#0f766e" }}
           >
-            {user.avatar ? (
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-xl" />
+            {localUser.avatar ? (
+              <img src={localUser.avatar} alt="Avatar" className="w-full h-full object-cover rounded-xl" />
             ) : (
-              (user.name || user.username || "U").charAt(0).toUpperCase()
+              (localUser.name || localUser.username || "U").charAt(0).toUpperCase()
             )}
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-bold text-xs text-slate-900 dark:text-white truncate">
-              {user.name || user.username}
+              {localUser.name || localUser.username}
             </p>
             <span
               className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase mt-0.5 ${isSuperAdmin
@@ -702,7 +800,7 @@ export function DashboardClient({
             canManageServices={hasPremiumFeatures}
             initialServices={services}
             onNotify={showToast}
-            onUpgradeClick={() => setActiveTab("users")}
+            onUpgradeClick={() => handleSelectTab("users")}
           />
         )}
 
@@ -717,7 +815,7 @@ export function DashboardClient({
             products={products}
             categories={categories}
             customPrices={customPrices}
-            onNavigateTab={setActiveTab}
+            onNavigateTab={handleSelectTab}
             onNotify={showToast}
             onCreateProduct={(formData) => createUserProduct(user.id, formData)}
             onUpdateProduct={(productId, formData) => updateUserProduct(productId, user.id, formData)}
@@ -729,14 +827,16 @@ export function DashboardClient({
         {/* TAB 4: GALERIE (NOTRE UNIVERS EN IMAGES) */}
         {activeTab === "gallery" && (
           <GalleryTab
-            user={user}
+            user={localUser}
             hasPremiumFeatures={hasPremiumFeatures}
             gallery={gallery}
-            onNavigateTab={setActiveTab}
+            onNavigateTab={handleSelectTab}
             onNotify={showToast}
-            onAddGalleryImage={(formData) => addUserGalleryImage(user.id, formData)}
-            onUpdateGalleryImage={(imageId, formData) => updateUserGalleryImage(imageId, user.id, formData)}
-            onDeleteGalleryImage={(imageId) => deleteUserGalleryImage(imageId, user.id)}
+            onAddGalleryImage={(formData) => addUserGalleryImage(localUser.id, formData)}
+            onAddMultipleGalleryImages={(imgs) => addMultipleUserGalleryImages(localUser.id, imgs)}
+            onUpdateGalleryImage={(imageId, formData) => updateUserGalleryImage(imageId, localUser.id, formData)}
+            onDeleteGalleryImage={(imageId) => deleteUserGalleryImage(imageId, localUser.id)}
+            onDeleteMultipleGalleryImages={(ids) => deleteMultipleUserGalleryImages(ids, localUser.id)}
           />
         )}
 
@@ -752,24 +852,36 @@ export function DashboardClient({
         {/* TAB 5: BOÎTE DE SUGGESTIONS (ADMIN & ABONNÉS) */}
         {activeTab === "suggestions" && (
           <SuggestionsTab
-            user={user}
+            user={localUser}
             isSuperAdmin={isSuperAdmin}
             adminSuggestions={adminSuggestions}
             suggestions={suggestions}
             onNotify={showToast}
-            onSendAdminSuggestion={(formData) => sendAdminSuggestion(user.id, formData)}
+            onSendAdminSuggestion={(formData) => sendAdminSuggestion(localUser.id, formData)}
             onToggleAdminSuggestionRead={(id, currentRead) => toggleAdminSuggestionRead(id, !currentRead)}
             onDeleteAdminSuggestion={(id) => deleteAdminSuggestion(id)}
             onUpdateAdminSuggestionStatus={(id, status, reply) => updateAdminSuggestionStatus(id, status, reply)}
           />
         )}
 
-        {/* TAB 6: PARAMÈTRES / ORGANISATION & VITRINE & THÈME */}
-        {activeTab === "settings" && (
+        {/* TAB: PROFIL & ORGANISATION */}
+        {(activeTab === "profile" || activeTab === "settings") && (
           <SettingsTab
-            user={user}
+            user={localUser}
             onNotify={showToast}
-            onUpdateProfile={(formData) => updateUserProfile(user.id, formData)}
+            onUpdateProfile={handleUpdateProfile}
+            subTab="profile"
+            hideSubTabSelector={true}
+          />
+        )}
+
+        {/* TAB: THÈME & APPARENCE (STUDIO MODERNE AVEC APERÇU EN DIRECT) */}
+        {activeTab === "theme" && (
+          <ThemeStudio
+            user={localUser}
+            onNotify={showToast}
+            onUpdateProfile={handleUpdateProfile}
+            onNavigateTab={handleSelectTab}
           />
         )}
 

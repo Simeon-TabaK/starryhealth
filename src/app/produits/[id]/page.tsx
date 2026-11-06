@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, ShieldCheck, Tag, Phone, Percent } from "lucide-react";
-import { ScrollReveal } from "@/components/scroll-reveal";
-import { AddToCartButton } from "@/components/add-to-cart-button";
-import { Cart } from "@/components/cart";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { AddToCartButton } from "@/components/commerce/add-to-cart-button";
+import { Cart } from "@/components/commerce/cart";
 import { sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 
 interface PageProps {

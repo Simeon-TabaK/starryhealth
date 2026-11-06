@@ -1,17 +1,17 @@
 import { getHomePageDataOptimized } from "@/lib/tenant";
-import { HeroCarousel } from "@/components/hero-carousel";
-import { StatsSection } from "@/components/stats-section";
-import { PartnerScroll } from "@/components/partner-scroll";
-import { ProductCard } from "@/components/product-card";
-import { TestimonialCard } from "@/components/testimonial-card";
-import { ServicesSection } from "@/components/services-section";
-import { FaqSection } from "@/components/faq-section";
-import { GallerySection } from "@/components/gallery-section";
-import { SuggestionBox } from "@/components/suggestion-box";
-import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
+import { HeroCarousel } from "@/components/marketing/hero-carousel";
+import { StatsSection } from "@/components/marketing/stats-section";
+import { PartnerScroll } from "@/components/marketing/partner-scroll";
+import { ProductCard } from "@/components/marketing/product-card";
+import { TestimonialCard } from "@/components/marketing/testimonial-card";
+import { ServicesSection } from "@/components/marketing/services-section";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { GallerySection } from "@/components/marketing/gallery-section";
+import { SuggestionBox } from "@/components/marketing/suggestion-box";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { Sparkles, ArrowRight, ShieldCheck, HeartPulse } from "lucide-react";
 import Link from "next/link";
-import { TenantVisitTracker } from "@/components/tenant-visit-tracker";
+import { TenantVisitTracker } from "@/components/marketing/tenant-visit-tracker";
 
 interface PageProps {
   searchParams?: Promise<{ tenant?: string }>;

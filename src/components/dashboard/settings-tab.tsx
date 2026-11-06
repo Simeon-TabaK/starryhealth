@@ -1,24 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Building, Palette, Save } from "lucide-react";
-import { CloudinaryUpload } from "@/components/cloudinary-upload";
-import { ThemeModule } from "@/components/theme-module";
-import { ThemeSelector } from "@/components/theme-selector";
+import { CloudinaryUpload } from "@/components/media/cloudinary-upload";
+import { ThemeModule } from "@/components/theme/theme-module";
+import { ThemeSelector } from "@/components/theme/theme-selector";
 
 interface SettingsTabProps {
   user: any;
   onNotify: (message: string, type?: "success" | "error", description?: string) => void;
   onUpdateProfile: (formData: FormData) => Promise<any>;
+  subTab?: "profile" | "theme";
+  hideSubTabSelector?: boolean;
 }
 
 export function SettingsTab({
   user,
   onNotify,
   onUpdateProfile,
+  subTab = "profile",
+  hideSubTabSelector = false,
 }: SettingsTabProps) {
-  const [settingsSubTab, setSettingsSubTab] = useState<"profile" | "theme">("profile");
+  const [settingsSubTab, setSettingsSubTab] = useState<"profile" | "theme">(subTab);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (subTab) {
+      setSettingsSubTab(subTab);
+    }
+  }, [subTab]);
 
   const [orgLogoUrl, setOrgLogoUrl] = useState<string>(user.tenantConfig?.orgLogo || "");
   const [faviconUrl, setFaviconUrl] = useState<string>((user.tenantConfig as any)?.favicon || "");
@@ -47,30 +57,32 @@ export function SettingsTab({
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* Sub-tabs Selector */}
-      <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl w-fit">
-        <button
-          type="button"
-          onClick={() => setSettingsSubTab("profile")}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${settingsSubTab === "profile"
-            ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
-            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-            }`}
-        >
-          Profil & Organisation
-        </button>
-        <button
-          type="button"
-          onClick={() => setSettingsSubTab("theme")}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${settingsSubTab === "theme"
-            ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
-            : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-            }`}
-        >
-          <Palette className="w-3.5 h-3.5" />
-          Thème & Apparence
-        </button>
-      </div>
+      {/* Sub-tabs Selector (affiché si non masqué) */}
+      {!hideSubTabSelector && (
+        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl w-fit">
+          <button
+            type="button"
+            onClick={() => setSettingsSubTab("profile")}
+            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${settingsSubTab === "profile"
+              ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
+              : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              }`}
+          >
+            Profil & Organisation
+          </button>
+          <button
+            type="button"
+            onClick={() => setSettingsSubTab("theme")}
+            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${settingsSubTab === "theme"
+              ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-sm"
+              : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              }`}
+          >
+            <Palette className="w-3.5 h-3.5" />
+            Thème & Apparence
+          </button>
+        </div>
+      )}
 
       {/* Condition 1: Thème & Apparence */}
       {settingsSubTab === "theme" && (

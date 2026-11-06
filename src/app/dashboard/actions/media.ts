@@ -34,6 +34,59 @@ export async function addUserGalleryImage(userId: number, formData: FormData) {
 }
 
 
+export async function addMultipleUserGalleryImages(
+  userId: number,
+  images: Array<{ imageUrl: string; caption?: string }>
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { subscriptionPlan: true, role: true },
+  });
+
+  if (user?.role !== "SUPER_ADMIN" && user?.subscriptionPlan !== "PREMIUM") {
+    throw new Error("La galerie d'images est une fonctionnalité exclusive du plan PREMIUM.");
+  }
+
+  const created = [];
+  for (const img of images) {
+    if (!img.imageUrl) continue;
+    const item = await prisma.galleryImage.create({
+      data: {
+        userId,
+        imageUrl: img.imageUrl,
+        caption: img.caption || null,
+        order: 0,
+      },
+    });
+    created.push(item);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/dashboard");
+  return { success: true, count: created.length, images: created };
+}
+
+export async function deleteMultipleUserGalleryImages(imageIds: number[], userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  if (user?.role === "SUPER_ADMIN") {
+    await prisma.galleryImage.deleteMany({
+      where: { id: { in: imageIds } },
+    });
+  } else {
+    await prisma.galleryImage.deleteMany({
+      where: { id: { in: imageIds }, userId },
+    });
+  }
+
+  revalidatePath("/");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
 export async function deleteUserGalleryImage(imageId: number, userId: number) {
   const img = await prisma.galleryImage.findUnique({ where: { id: imageId } });
   if (!img || img.userId !== userId) throw new Error("Action non autorisée.");

@@ -1,7 +1,7 @@
 import { getCurrentTenant } from "@/lib/get-current-tenant";
 import { getTestimonialsForTenant } from "@/lib/tenant";
-import { TestimonialCard } from "@/components/testimonial-card";
-import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
+import { TestimonialCard } from "@/components/marketing/testimonial-card";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { Sparkles, ShieldCheck } from "lucide-react";
 
 interface PageProps {

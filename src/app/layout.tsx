@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import { LanguageProvider } from "@/lib/i18n/context";
-import { SessionProvider } from "@/components/session-provider";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
-import { Cart } from "@/components/cart";
+import { SessionProvider } from "@/components/layout/session-provider";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import { Cart } from "@/components/commerce/cart";
 import { getCurrentTenant, getServicesForTenant } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
-import { ScrollToTop } from "@/components/scroll-to-top";
-import { TenantFavicon } from "@/components/tenant-favicon";
-import { ThemeUserSync } from "@/components/theme-user-sync";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { TenantFavicon } from "@/components/tenant/tenant-favicon";
+import { ThemeUserSync } from "@/components/theme/theme-user-sync";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getCurrentTenant();
@@ -139,6 +139,10 @@ export default async function RootLayout({
         <link rel="icon" href={versionedFavicon} type="image/png" sizes="any" />
         <link rel="shortcut icon" href={versionedFavicon} />
         <link rel="apple-touch-icon" href={versionedFavicon} />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;600;700;800&family=Outfit:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Roboto:wght@400;500;700&display=swap"
+        />
         <style>{`
           :root {
             --tenant-primary: ${primaryColor};

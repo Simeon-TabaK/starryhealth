@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   AlertCircle,
   Plus,
@@ -14,7 +14,7 @@ import {
   EyeOff,
   Trash2,
 } from "lucide-react";
-import { CloudinaryUpload } from "@/components/cloudinary-upload";
+import { CloudinaryUpload } from "@/components/media/cloudinary-upload";
 import { getProductLimit } from "@/lib/plans";
 
 interface ProductsTabProps {
@@ -50,6 +50,13 @@ export function ProductsTab({
   onDeleteProduct,
   onUpdateCustomPrice,
 }: ProductsTabProps) {
+  // ── State local pour affichage immédiat (optimistic UI) ──
+  const [localProducts, setLocalProducts] = useState<any[]>(products);
+
+  useEffect(() => {
+    setLocalProducts(products);
+  }, [products]);
+
   // Pagination
   const [productPage, setProductPage] = useState(1);
   const PRODUCTS_PER_PAGE = 6;
@@ -72,7 +79,7 @@ export function ProductsTab({
 
   // Quotas
   const productQuota = getProductLimit(plan);
-  const ownProductsCount = products.filter((p) => p.userId === user.id).length;
+  const ownProductsCount = localProducts.filter((p) => p.userId === user.id).length;
   const canAddMoreProducts = isSuperAdmin || ownProductsCount < productQuota;
 
   const handleCreateProductSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -85,7 +92,20 @@ export function ProductsTab({
     const formData = new FormData(e.currentTarget);
     formData.set("images", createProductImageUrl);
     try {
-      await onCreateProduct(formData);
+      const result = await onCreateProduct(formData);
+      // Ajout optimiste : construire un objet temporaire depuis le formulaire
+      const tempProduct = {
+        id: result?.id || Date.now(),
+        userId: isSuperAdmin ? null : user.id,
+        name: (formData.get("name") as string) || "Nouveau produit",
+        description: (formData.get("description") as string) || "",
+        defaultPrice: parseFloat((formData.get("defaultPrice") as string) || "0"),
+        images: createProductImageUrl,
+        isVisible: formData.get("isVisible") !== "false",
+        category: (formData.get("category") as string) || "Santé & Bien-être",
+        createdAt: new Date().toISOString(),
+      };
+      setLocalProducts((prev) => [tempProduct, ...prev]);
       onNotify("Produit créé avec succès !", "success", "Votre nouveau produit est enregistré dans le catalogue.");
       setShowAddProduct(false);
       setCreateProductImageUrl("");
@@ -107,6 +127,21 @@ export function ProductsTab({
     }
     try {
       await onUpdateProduct(editingProduct.id, formData);
+      // Mise à jour optimiste locale
+      setLocalProducts((prev) =>
+        prev.map((p) =>
+          p.id === editingProduct.id
+            ? {
+                ...p,
+                name: (formData.get("name") as string) || p.name,
+                description: (formData.get("description") as string) || p.description,
+                defaultPrice: parseFloat((formData.get("defaultPrice") as string) || String(p.defaultPrice)),
+                images: editProductImageUrl || p.images,
+                isVisible: formData.get("isVisible") !== "false",
+              }
+            : p
+        )
+      );
       onNotify("Produit modifié avec succès !");
       setEditingProduct(null);
     } catch (err: any) {
@@ -121,6 +156,8 @@ export function ProductsTab({
     setSaving(true);
     try {
       await onDeleteProduct(productId);
+      // Suppression immédiate dans l'état local
+      setLocalProducts((prev) => prev.filter((p) => p.id !== productId));
       onNotify("Produit supprimé !");
     } catch (err: any) {
       onNotify(err.message || "Erreur de suppression.", "error");
@@ -495,7 +532,7 @@ export function ProductsTab({
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products
+        {localProducts
           .slice((productPage - 1) * PRODUCTS_PER_PAGE, productPage * PRODUCTS_PER_PAGE)
           .map((p) => {
             const isOwn = p.userId === user.id;
@@ -602,10 +639,10 @@ export function ProductsTab({
       </div>
 
       {/* Pagination Controls */}
-      {products.length > PRODUCTS_PER_PAGE && (
+      {localProducts.length > PRODUCTS_PER_PAGE && (
         <div className="flex items-center justify-between bg-white dark:bg-slate-900 px-6 py-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="text-xs text-slate-500">
-            Affichage de {((productPage - 1) * PRODUCTS_PER_PAGE) + 1} à {Math.min(productPage * PRODUCTS_PER_PAGE, products.length)} sur {products.length} produits
+            Affichage de {((productPage - 1) * PRODUCTS_PER_PAGE) + 1} à {Math.min(productPage * PRODUCTS_PER_PAGE, localProducts.length)} sur {localProducts.length} produits
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -617,12 +654,12 @@ export function ProductsTab({
               Précédent
             </button>
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300 px-2">
-              {productPage} / {Math.ceil(products.length / PRODUCTS_PER_PAGE)}
+              {productPage} / {Math.ceil(localProducts.length / PRODUCTS_PER_PAGE)}
             </span>
             <button
               type="button"
-              disabled={productPage >= Math.ceil(products.length / PRODUCTS_PER_PAGE)}
-              onClick={() => setProductPage((p) => Math.min(p + 1, Math.ceil(products.length / PRODUCTS_PER_PAGE)))}
+              disabled={productPage >= Math.ceil(localProducts.length / PRODUCTS_PER_PAGE)}
+              onClick={() => setProductPage((p) => Math.min(p + 1, Math.ceil(localProducts.length / PRODUCTS_PER_PAGE)))}
               className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Suivant

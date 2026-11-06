@@ -1,6 +1,6 @@
 import { getCurrentTenant } from "@/lib/get-current-tenant";
 import { Phone, Mail, MapPin, Send, MessageSquare, ShieldCheck, Sparkles } from "lucide-react";
-import { ScrollReveal } from "@/components/scroll-reveal";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { sanitizePhone, sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 
 interface PageProps {

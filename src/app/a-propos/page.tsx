@@ -1,6 +1,6 @@
 import { getCurrentTenant } from "@/lib/get-current-tenant";
 import { Sparkles, Layers, Globe, CheckCircle2, UserCheck, Heart } from "lucide-react";
-import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { sanitizePhone, sanitizeWhatsApp, formatWhatsAppUrl } from "@/lib/constants";
 
 interface PageProps {

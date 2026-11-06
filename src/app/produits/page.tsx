@@ -1,8 +1,8 @@
 import { getCurrentTenant } from "@/lib/get-current-tenant";
 import { getProductsForTenant } from "@/lib/tenant";
-import { ProductCard } from "@/components/product-card";
-import { Cart } from "@/components/cart";
-import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/scroll-reveal";
+import { ProductCard } from "@/components/marketing/product-card";
+import { Cart } from "@/components/commerce/cart";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { Sparkles, ShieldCheck, Tag } from "lucide-react";
 
 interface PageProps {

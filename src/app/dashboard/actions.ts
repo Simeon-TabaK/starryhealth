@@ -22,6 +22,8 @@ export {
 
 export {
   addUserGalleryImage,
+  addMultipleUserGalleryImages,
+  deleteMultipleUserGalleryImages,
   deleteUserGalleryImage,
   updateUserGalleryImage,
   addUserCarouselItem,

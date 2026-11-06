@@ -69,7 +69,7 @@ export async function createUserProduct(userId: number, formData: FormData) {
   const categoryIdRaw = formData.get("categoryId") as string;
   const categoryId = categoryIdRaw ? parseInt(categoryIdRaw) : null;
 
-  await prisma.product.create({
+  const newProduct = await prisma.product.create({
     data: {
       userId: isSuperAdmin ? null : userId,
       name,
